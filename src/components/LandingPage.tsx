@@ -27,7 +27,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ isDarkMode, setIsDarkM
       {/* NAVBAR */}
       <nav className="flex justify-between items-center px-[60px] py-[25px] bg-card/80 backdrop-blur-md border-b border-theme sticky top-0 z-50">
         <div className="flex items-center gap-2 text-2xl font-black tracking-tighter cursor-pointer text-primary" onClick={() => navigate('/')}>
-          CAL<span className="text-blue-600">HUB</span>
+          Smart<span className="text-blue-600">calpro</span>
         </div>
 
         <div className="flex items-center gap-8">
@@ -76,7 +76,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ isDarkMode, setIsDarkM
             transition={{ delay: 0.1 }}
             className="text-[64px] font-black leading-[1.1] tracking-tight uppercase px-0 text-primary"
           >
-            CalHub – All-in-One <br />
+            Smartcalpro – All-in-One <br />
             <span className="gradient-text italic">Smart Calculator</span> <br />
             Platform
           </motion.h1>
@@ -209,7 +209,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ isDarkMode, setIsDarkM
       {/* FOOTER BAR */}
       <footer className="mt-20 py-8 border-t border-theme text-center">
          <p className="text-[10px] font-black uppercase tracking-[0.3em] footer-text">
-           &copy; 2026 CALHUB PLATFORM V2.4 • ALL RIGHTS RESERVED
+           &copy; 2026 SMARTCALPRO PLATFORM V2.4 • ALL RIGHTS RESERVED
          </p>
       </footer>
     </div>

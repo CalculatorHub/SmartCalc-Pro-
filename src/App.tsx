@@ -28,10 +28,10 @@ const LAST_UPDATED = "14-04-2026 09:30";
 const IS_MAINTENANCE = false; // Set to true to show maintenance banner
 
 const CALCULATOR_PROTOCOLS = [
-  { id: 'finance', title: 'Finance', icon: IndianRupee, desc: 'Yield & Fiscal Matrix', color: 'from-blue-500 via-indigo-600 to-purple-700', shadow: 'shadow-blue-500/30', delay: 0.1, category: 'finance' },
-  { id: 'gold-silver', title: 'Metals', icon: Coins, desc: 'Bullion Appraisal Suite', color: 'from-amber-400 via-orange-500 to-yellow-600', shadow: 'shadow-orange-500/30', delay: 0.15, category: 'metals' },
-  { id: 'vehicle', title: 'Vehicle', icon: Navigation, desc: 'Logistics & Fuel Logic', color: 'from-emerald-400 via-teal-500 to-cyan-600', shadow: 'shadow-emerald-500/30', delay: 0.2, category: 'vehicle' },
-  { id: 'land', title: 'Estate', icon: MapIcon, desc: 'Spatial Valuation Matrix', color: 'from-rose-400 via-pink-500 to-purple-600', shadow: 'shadow-pink-500/30', delay: 0.3, category: 'estate' },
+  { id: 'finance', title: 'FINANCE', emoji: '₹', desc: 'YIELD & FISCAL MATRIX', color: 'finance', shadow: 'shadow-blue-500/30', delay: 0.1, category: 'finance' },
+  { id: 'gold', title: 'METALS', emoji: '🪙', desc: 'BULLION APPRAISAL SUITE', color: 'metals', shadow: 'shadow-orange-500/30', delay: 0.15, category: 'metals' },
+  { id: 'vehicle', title: 'VEHICLE', emoji: '🚗', desc: 'LOGISTICS & FUEL LOGIC', color: 'vehicle', shadow: 'shadow-emerald-500/30', delay: 0.2, category: 'vehicle' },
+  { id: 'land', title: 'ESTATE', emoji: '🗺️', desc: 'SPATIAL VALUATION MATRIX', color: 'estate', shadow: 'shadow-pink-500/30', delay: 0.3, category: 'estate' },
 ];
 
 const CATEGORY_FILTERS = [
@@ -50,8 +50,8 @@ const AboutSection = () => (
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
           SMART CALCULATION HUB
         </p>
-        <h1 className="text-xl font-bold text-foreground m-0">
-          CalHub
+        <h1 className="text-xl font-bold text-foreground m-0 text-center sm:text-left">
+          Smartcalpro
         </h1>
       </div>
       <p className="text-sm text-foreground leading-relaxed">
@@ -83,7 +83,7 @@ const HomePage = () => {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-20">
       <AboutSection />
-      <div className="calculator-grid pt-12">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6 pt-12">
         <AnimatePresence mode="popLayout">
           {filteredCalcs.map((item) => (
             <motion.div
@@ -95,48 +95,23 @@ const HomePage = () => {
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
               className="h-full"
             >
-              <Card 
-                className={`calculator-card cursor-pointer h-full border-none relative overflow-hidden group p-0`}
+              <div 
+                className="protocol-card group cursor-pointer"
                 onClick={() => navigate(`/${item.id}`)}
               >
-                <div className={`absolute top-0 left-0 w-full h-[6px] bg-gradient-to-r ${item.color} z-20`} />
-                
-                <div className="p-6 sm:p-8 space-y-6 sm:space-y-10">
-                  <div className="flex items-center justify-between">
-                    <div className="relative inline-block">
-                      <div className={`absolute inset-0 bg-gradient-to-br ${item.color} blur-[40px] opacity-10 group-hover:opacity-30 transition-opacity rounded-full`} />
-                      <div className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-muted border-2 border-border flex items-center justify-center text-foreground shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
-                        <item.icon className="h-8 w-8 sm:h-10 sm:w-10" />
-                      </div>
-                    </div>
-                    <div className="px-3 py-1 rounded-full bg-muted border border-border text-[8px] font-black uppercase tracking-widest text-muted-foreground">
-                      {item.category}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 sm:space-y-3">
-                    <h2 className="text-2xl sm:text-3xl font-black tracking-tighter uppercase italic leading-none text-foreground">
-                      {item.title}
-                    </h2>
-                    <p className="text-[9px] sm:text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
-                      {item.desc}
-                    </p>
-                  </div>
+                <div className={`protocol-icon ${item.color}`}>
+                  {item.emoji}
                 </div>
-
-                <div className="px-6 sm:px-8 pb-8 sm:pb-10 flex items-center justify-between mt-auto">
-                  <div className="inline-flex items-center text-[8px] sm:text-[9px] font-black uppercase tracking-[0.4em] text-muted-foreground group-hover:text-primary transition-all">
-                    Initialize <ArrowRight className="h-4 w-4 ml-2 sm:ml-3 group-hover:translate-x-2 transition-transform" />
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="rounded-xl font-black text-[8px] uppercase tracking-widest px-3 sm:px-4 border border-border text-foreground bg-card hover:bg-muted transition-colors duration-200"
-                  >
-                    Open Protocol
-                  </Button>
+                <div className="flex-1 space-y-1">
+                  <h2 className="text-xl font-black tracking-tighter uppercase leading-none text-foreground group-hover:text-primary transition-colors">
+                    {item.title}
+                  </h2>
+                  <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.1em]">
+                    {item.desc}
+                  </p>
                 </div>
-              </Card>
+                <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-2 transition-all opacity-0 group-hover:opacity-100 hidden sm:block" />
+              </div>
             </motion.div>
           ))}
         </AnimatePresence>
@@ -157,6 +132,12 @@ const MainApp = () => {
   const location = useLocation();
   const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
   const [isLaunching, setIsLaunching] = useState(true);
+  const [activeTab, setActiveTab] = useState(() => {
+    const saved = localStorage.getItem('smartcalpro_active_tab');
+    if (saved) return saved;
+    const path = location.pathname.substring(1);
+    return ['finance', 'gold', 'vehicle', 'land', 'feedback', 'admin'].includes(path) ? path : 'home';
+  });
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
   const isOnline = useOfflineStatus();
@@ -222,12 +203,21 @@ const MainApp = () => {
     }
   }, [isDarkMode]);
 
-  const getActiveTab = () => {
-    const path = location.pathname.substring(1);
-    return ['finance', 'gold-silver', 'vehicle', 'land', 'feedback', 'admin'].includes(path) ? path : 'home';
-  };
+  useEffect(() => {
+    localStorage.setItem('smartcalpro_active_tab', activeTab);
+    const path = activeTab === 'home' ? '/' : `/${activeTab}`;
+    if (location.pathname !== path) {
+      navigate(path);
+    }
+  }, [activeTab]);
 
-  const activeTab = getActiveTab();
+  useEffect(() => {
+    const path = location.pathname.substring(1) || 'home';
+    const normalizedPath = path === '/' ? 'home' : path;
+    if (normalizedPath !== activeTab) {
+      setActiveTab(normalizedPath);
+    }
+  }, [location.pathname]);
 
   if (!isLaunching && isDesktop && location.pathname === '/') {
     return <LandingPage isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />;
@@ -294,17 +284,17 @@ const MainApp = () => {
                   <LayoutGrid className="h-5 w-5" />
                 </div>
                 <h2 className="text-lg font-black tracking-tighter leading-none text-foreground italic m-0">
-                  CAL<span className="text-blue-600">HUB</span>
+                  Smart<span className="text-blue-600">calpro</span>
                 </h2>
               </div>
 
               {/* Desktop Nav */}
               <nav className="hidden md:flex items-center gap-2">
-                <button onClick={() => navigate('/')} className={`nav-link ${activeTab === 'home' ? 'active' : ''}`}>Home</button>
-                <button onClick={() => navigate('/finance')} className={`nav-link ${activeTab === 'finance' ? 'active' : ''}`}>Finance</button>
-                <button onClick={() => navigate('/gold-silver')} className={`nav-link ${activeTab === 'gold-silver' ? 'active' : ''}`}>Gold</button>
-                <button onClick={() => navigate('/vehicle')} className={`nav-link ${activeTab === 'vehicle' ? 'active' : ''}`}>Vehicle</button>
-                <button onClick={() => navigate('/land')} className={`nav-link ${activeTab === 'land' ? 'active' : ''}`}>Land</button>
+                <button onClick={() => setActiveTab('home')} className={`nav-link ${activeTab === 'home' ? 'active' : ''}`}>Home</button>
+                <button onClick={() => setActiveTab('finance')} className={`nav-link ${activeTab === 'finance' ? 'active' : ''}`}>Finance</button>
+                <button onClick={() => setActiveTab('gold')} className={`nav-link ${activeTab === 'gold' ? 'active' : ''}`}>Gold</button>
+                <button onClick={() => setActiveTab('vehicle')} className={`nav-link ${activeTab === 'vehicle' ? 'active' : ''}`}>Vehicle</button>
+                <button onClick={() => setActiveTab('land')} className={`nav-link ${activeTab === 'land' ? 'active' : ''}`}>Land</button>
               </nav>
 
               <div className="flex items-center gap-2 sm:gap-4">
@@ -330,27 +320,33 @@ const MainApp = () => {
 
 
           {/* Mobile Bottom Navigation */}
-          <nav className="navbar fixed bottom-0 left-0 right-0 z-[100] md:hidden pb-safe transition-all duration-300 bg-card border-t border-border">
-            <div className="flex items-center justify-around h-16 px-4 w-full">
-              {[
-                { id: 'home', icon: Home, path: '/', label: 'Home' },
-                { id: 'finance', icon: IndianRupee, path: '/finance', label: 'Finance' },
-                { id: 'gold-silver', icon: Coins, path: '/gold-silver', label: 'Gold' },
-                { id: 'vehicle', icon: Navigation, path: '/vehicle', label: 'Vehicle' },
-                { id: 'land', icon: MapIcon, path: '/land', label: 'Land' },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => navigate(item.path)}
-                  className={`flex flex-col items-center justify-center min-w-[60px] h-14 rounded-xl transition-all p-0 bg-transparent border-none outline-none ${
-                    activeTab === item.id ? 'text-primary scale-110 font-bold' : 'text-muted-foreground hover:text-primary'
-                  }`}
-                >
-                  <item.icon className={`h-5 w-5 mb-1 ${activeTab === item.id ? 'stroke-[2.5px]' : 'stroke-2'}`} />
-                  <span className={`text-[9px] uppercase tracking-wider`}>{item.label}</span>
-                </button>
-              ))}
-            </div>
+          <nav className="fixed bottom-0 left-0 right-0 z-[110] md:hidden pb-safe flex justify-around py-2.5 bg-black/80 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-white/10 shadow-[0_-8px_30px_rgb(0,0,0,0.12)] transition-all duration-300">
+            {[
+              { id: 'home', emoji: '🏠', label: 'Home' },
+              { id: 'finance', emoji: '💰', label: 'Finance' },
+              { id: 'gold', emoji: '🪙', label: 'Gold' },
+              { id: 'vehicle', emoji: '🚗', label: 'Vehicle' },
+              { id: 'land', emoji: '🏠', label: 'Land' },
+            ].map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`nav-item flex flex-col items-center justify-center p-0 transition-all duration-300 !bg-transparent !shadow-none border-none outline-none flex-1 gap-0.5 ${
+                  activeTab === item.id 
+                    ? 'text-white scale-[1.15] opacity-100' 
+                    : 'text-zinc-500 opacity-70 hover:opacity-100'
+                }`}
+              >
+                <span className="text-xl leading-none">{item.emoji}</span>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${
+                  activeTab === item.id 
+                    ? 'text-white font-bold' 
+                    : 'text-zinc-500'
+                }`}>
+                  {item.label}
+                </span>
+              </button>
+            ))}
           </nav>
 
           {/* Main Content */}
@@ -391,7 +387,7 @@ const MainApp = () => {
                     </div>
                   </div>
                 )}
-                {activeTab === 'gold-silver' && (
+                {activeTab === 'gold' && (
                   <div className="animate-in fade-in zoom-in-95 duration-700">
                     <GoldSilverHub />
                   </div>
@@ -467,7 +463,7 @@ const MainApp = () => {
                 <div className="bg-blue-600 text-white p-2 rounded-xl">
                   <LayoutGrid className="h-5 w-5" />
                 </div>
-                <h3 className="text-xl font-black tracking-tighter text-foreground italic">CAL<span className="text-blue-500">HUB</span></h3>
+                <h3 className="text-xl font-black tracking-tighter text-foreground italic text-center sm:text-left">Smart<span className="text-blue-500">calpro</span></h3>
               </div>
               <p className="text-muted-foreground text-xs font-medium leading-relaxed max-w-xs">
                 The world's most advanced utility matrix for professional-grade calculations. Built for speed, precision, and privacy.
@@ -523,7 +519,7 @@ const MainApp = () => {
           </div>
 
           <div className="pt-8 border-border flex flex-col sm:flex-row justify-between items-center gap-4 text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground">
-            <div>&copy; 2026 CALHUB - All Protocols Reserved</div>
+            <div>&copy; 2026 SMARTCALPRO - All Protocols Reserved</div>
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-3 w-3" />
               <span>AES-256 Encrypted Matrix</span>
@@ -545,7 +541,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<MainApp />} />
         <Route path="/finance" element={<MainApp />} />
-        <Route path="/gold-silver" element={<MainApp />} />
+        <Route path="/gold" element={<MainApp />} />
+        <Route path="/gold-silver" element={<Navigate to="/gold" replace />} />
         <Route path="/vehicle" element={<MainApp />} />
         <Route path="/land" element={<MainApp />} />
         <Route path="/feedback" element={<MainApp />} />

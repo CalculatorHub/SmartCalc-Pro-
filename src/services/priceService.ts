@@ -1,7 +1,7 @@
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-const PRICES_CACHE_KEY = 'calhub_prices_cache';
+const PRICES_CACHE_KEY = 'smartcalpro_prices_cache';
 const STATS_DOC_PATH = 'system/price_health';
 
 export interface LivePrices {
@@ -38,12 +38,33 @@ const FALLBACK_PRICES: LivePrices = {
   fuelSyncStatus: 'static'
 };
 
+const fetchFromProxy = async (): Promise<Partial<LivePrices> | null> => {
+  try {
+    const response = await fetch('/api/prices/metals');
+    if (!response.ok) return null;
+    const result = await response.json();
+    if (result.success && result.data) {
+      return result.data;
+    }
+    return null;
+  } catch (error) {
+    console.error('Proxy Fetch Error:', error);
+    return null;
+  }
+};
+
 export const fetchAllPrices = async (city: string = 'Andhra Pradesh'): Promise<LivePrices> => {
   try {
-    // 1. Fetch Global Metal Prices
+    // 0. Try fetching from Backend Proxy First (Secure Pattern)
+    const proxyData = await fetchFromProxy();
+
+    // 1. Fetch Global Metal Prices from Firestore
     const metalsRef = doc(db, 'metadata', 'prices');
     const metalsSnap = await getDoc(metalsRef);
     const metalsData = metalsSnap.exists() ? metalsSnap.data() : null;
+
+    // Use proxy data to override if available
+    const finalMetalsData = proxyData ? { ...metalsData, ...proxyData } : metalsData;
 
     // 2. Fetch City Fuel Prices
     const METRO_CITIES = ['delhi', 'mumbai', 'chennai', 'kolkata', 'bengaluru', 'hyderabad', 'vijayawada', 'visakhapatnam', 'andhra_pradesh'];
@@ -63,24 +84,24 @@ export const fetchAllPrices = async (city: string = 'Andhra Pradesh'): Promise<L
       finalFuelData = genericSnap.exists() ? genericSnap.data() : null;
     }
 
-    const lastUpdatedDate = metalsData?.updatedAt ? new Date(metalsData.updatedAt) : new Date();
+    const lastUpdatedDate = finalMetalsData?.updatedAt ? new Date(finalMetalsData.updatedAt) : new Date();
     // 6 hours for stale check
     const isStale = (new Date().getTime() - lastUpdatedDate.getTime()) > (6 * 60 * 60 * 1000);
 
     const liveData: LivePrices = {
-      gold24: metalsData?.gold24 || FALLBACK_PRICES.gold24,
-      gold24Prev: metalsData?.gold24Prev,
-      gold22: metalsData?.gold22 || FALLBACK_PRICES.gold22,
-      gold22Prev: metalsData?.gold22Prev,
-      silver: metalsData?.silver || FALLBACK_PRICES.silver,
-      silverPrev: metalsData?.silverPrev,
+      gold24: finalMetalsData?.gold24 || FALLBACK_PRICES.gold24,
+      gold24Prev: finalMetalsData?.gold24Prev,
+      gold22: finalMetalsData?.gold22 || FALLBACK_PRICES.gold22,
+      gold22Prev: finalMetalsData?.gold22Prev,
+      silver: finalMetalsData?.silver || FALLBACK_PRICES.silver,
+      silverPrev: finalMetalsData?.silverPrev,
       petrol: finalFuelData?.petrol || FALLBACK_PRICES.petrol,
       petrolPrev: finalFuelData?.petrolPrev,
       diesel: finalFuelData?.diesel || FALLBACK_PRICES.diesel,
       dieselPrev: finalFuelData?.dieselPrev,
       lastUpdated: lastUpdatedDate.toISOString(),
-      source: 'firestore',
-      metalsSynced: !!metalsData,
+      source: proxyData ? 'api' : 'firestore',
+      metalsSynced: !!finalMetalsData,
       fuelSynced: !!finalFuelData,
       fuelSyncStatus: !!finalFuelData ? 'live' : 'static',
       isStale

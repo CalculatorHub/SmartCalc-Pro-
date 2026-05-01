@@ -44,7 +44,7 @@ export const WelcomePage = ({ onStart }: WelcomePageProps) => {
             <LayoutGrid className="h-12 w-12" />
           </div>
           <h1 className="text-5xl sm:text-7xl font-black tracking-tighter text-foreground uppercase">
-            CAL<span className="text-primary">HUB</span>
+            Smart<span className="text-primary">calpro</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-medium">
             The ultimate utility toolkit for India. Finance, Vehicle, and Land calculations made easy.

@@ -11,7 +11,7 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onComplete();
-    }, 3000); // 3 seconds duration
+    }, 1500); // 1.5 seconds duration
     return () => clearTimeout(timer);
   }, [onComplete]);
 
@@ -64,9 +64,9 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="text-4xl sm:text-5xl font-black tracking-tighter uppercase text-foreground"
+            className="text-3xl sm:text-4xl font-black tracking-tighter uppercase text-foreground"
           >
-            Cal<span className="text-primary">Hub</span>
+            Smart<span className="text-primary">calpro</span>
           </motion.h1>
           
           <motion.p
@@ -85,7 +85,7 @@ export const SplashScreen = ({ onComplete }: SplashScreenProps) => {
         <motion.div
           initial={{ x: "-100%" }}
           animate={{ x: "0%" }}
-          transition={{ duration: 2.8, ease: "linear" }}
+          transition={{ duration: 1.3, ease: "linear" }}
           className="w-full h-full bg-primary"
         />
       </div>

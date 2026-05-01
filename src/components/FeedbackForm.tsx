@@ -123,7 +123,7 @@ export const FeedbackForm = () => {
             <CardTitle className="text-2xl sm:text-3xl font-black tracking-tighter uppercase italic text-foreground dark:text-zinc-100">Feedback Hub</CardTitle>
           </div>
           <CardDescription className="text-xs sm:text-sm font-medium text-muted-foreground">
-            Help us calibrate the future of CalHub. Share your neural feedback or report system anomalies.
+            Help us calibrate the future of Smartcalpro. Share your neural feedback or report system anomalies.
           </CardDescription>
         </CardHeader>
         <CardContent className="px-6 sm:px-10 pb-8 sm:pb-10 space-y-6 sm:space-y-8">

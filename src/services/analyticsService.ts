@@ -6,15 +6,15 @@ const STATS_DOC_PATH = 'stats/visitors';
 export const trackVisitor = async (userName?: string) => {
   try {
     // 1. Generate / Get Unique User ID
-    let userId = localStorage.getItem('calhub_user_id');
+    let userId = localStorage.getItem('smartcalpro_user_id');
     if (!userId) {
       userId = 'user_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
-      localStorage.setItem('calhub_user_id', userId);
+      localStorage.setItem('smartcalpro_user_id', userId);
     }
 
     // 2. Check Last Visit Date to avoid duplicate counting per day
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    const lastVisitDate = localStorage.getItem('calhub_last_visit');
+    const lastVisitDate = localStorage.getItem('smartcalpro_last_visit');
 
     // We still update the visitor_list if name is provided, even if already counted for stats
     if (userName) {
@@ -68,7 +68,7 @@ export const trackVisitor = async (userName?: string) => {
     }
 
     // 4. Update Local Storage ONLY AFTER SUCCESSFUL DB UPDATE
-    localStorage.setItem('calhub_last_visit', today);
+    localStorage.setItem('smartcalpro_last_visit', today);
     console.log('Visitor tracked successfully');
     return true;
   } catch (error) {

@@ -17,7 +17,7 @@ export const downloadAsPDF = (data: ExportData) => {
   // Header
   doc.setFontSize(22);
   doc.setTextColor(124, 58, 237); // Primary purple color
-  doc.text('CalHub', 14, 20);
+  doc.text('Smartcalpro', 14, 20);
   
   doc.setFontSize(16);
   doc.setTextColor(0, 0, 0);
@@ -58,17 +58,17 @@ export const downloadAsPDF = (data: ExportData) => {
     doc.setPage(i);
     doc.setFontSize(10);
     doc.setTextColor(150, 150, 150);
-    doc.text('Thank you for using CalHub - Your Smart Calculation Hub', 14, 285);
+    doc.text('Thank you for using Smartcalpro - Your Smart Calculation Hub', 14, 285);
   }
 
-  doc.save(`CalHub_${data.title.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
+  doc.save(`Smartcalpro_${data.title.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
 };
 
 /**
  * Formats the calculation data into a plain text string
  */
 export const formatResultText = (data: ExportData): string => {
-  let text = `*CalHub Result: ${data.title}*\n\n`;
+  let text = `*Smartcalpro Result: ${data.title}*\n\n`;
   text += `--- Inputs ---\n`;
   data.inputs.forEach(i => {
     text += `${i.label}: ${i.value}\n`;
