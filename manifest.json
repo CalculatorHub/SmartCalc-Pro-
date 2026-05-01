@@ -1,7 +1,7 @@
 {
-  "name": "CalHub",
-  "short_name": "CalHub",
-  "description": "CalHub - Precision calculators for finance, gold & silver rates, travel, and land.",
+  "name": "Smartcalpro",
+  "short_name": "Smartcalpro",
+  "description": "Smartcalpro - Precision calculators for finance, gold & silver rates, travel, and land.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
