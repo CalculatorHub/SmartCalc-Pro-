@@ -1,0 +1,119 @@
+{
+  "entities": {
+    "PriceData": {
+      "title": "Market Prices",
+      "description": "Manual pricing for metals",
+      "type": "object",
+      "properties": {
+        "gold24": { "type": "number" },
+        "gold24Prev": { "type": "number" },
+        "gold22": { "type": "number" },
+        "gold22Prev": { "type": "number" },
+        "silver": { "type": "number" },
+        "silverPrev": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["gold24", "gold22", "silver", "updatedAt"]
+    },
+    "CityFuelPrice": {
+      "title": "City Fuel Rate",
+      "description": "Manual pricing for fuel by city",
+      "type": "object",
+      "properties": {
+        "city": { "type": "string" },
+        "petrol": { "type": "number" },
+        "petrolPrev": { "type": "number" },
+        "diesel": { "type": "number" },
+        "dieselPrev": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["city", "petrol", "diesel", "updatedAt"]
+    },
+    "Feedback": {
+      "title": "User Feedback",
+      "description": "Suggestions and bug reports from users",
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "The feedback message content"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["Suggestion", "Bug", "Improvement"],
+          "description": "The category of feedback"
+        },
+        "rating": {
+          "type": "integer",
+          "description": "Star rating from 1 to 5"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the user (optional)"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the feedback was submitted"
+        }
+      },
+      "required": ["message", "type", "createdAt"]
+    },
+    "Visitor": {
+      "title": "Visitor Log",
+      "description": "Information about a specific user visit",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "timestamp"]
+    },
+    "AppStats": {
+      "title": "Application Statistics",
+      "description": "Aggregated stats like visitor counts",
+      "type": "object",
+      "properties": {
+        "totalCount": {
+          "type": "integer",
+          "description": "Total unique visitor count across all time"
+        },
+        "dailyCount": {
+          "type": "integer",
+          "description": "Unique visitor count for a specific day"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  },
+  "firestore": {
+    "/feedback/{feedbackId}": {
+      "schema": "Feedback",
+      "description": "Collection of all user feedback"
+    },
+    "/stats/visitors": {
+      "schema": "AppStats",
+      "description": "Global visitor statistics"
+    },
+    "/stats/daily/{dateStr}": {
+      "schema": "AppStats",
+      "description": "Daily visitor statistics"
+    },
+    "visitor_list/{visitorDocId}": {
+      "schema": "Visitor",
+      "description": "List of recent visitor names and IDs"
+    },
+    "metadata/prices": {
+      "schema": "PriceData",
+      "description": "Global gold and silver market prices"
+    },
+    "fuel_rates/{cityId}": {
+      "schema": "CityFuelPrice",
+      "description": "City-specific petrol and diesel rates"
+    }
+  }
+}
