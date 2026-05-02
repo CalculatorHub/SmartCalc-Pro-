@@ -225,7 +225,7 @@ export const AdminDashboard = () => {
                         setPassword(e.target.value);
                         setLoginError(false);
                       }}
-                      className={`pl-12 h-16 bg-bg border-2 transition-all duration-500 font-black text-lg text-primary uppercase tracking-[0.3em] rounded-2xl outline-none ${
+                      className={`pl-12 h-16 bg-bg border-2 transition-all duration-500 font-black text-lg text-primary tracking-[0.3em] rounded-2xl outline-none ${
                         loginError ? 'border-red-500 focus:ring-red-500/20' : 'border-theme focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10'
                       }`}
                       autoFocus
