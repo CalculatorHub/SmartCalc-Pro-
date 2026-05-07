@@ -278,24 +278,38 @@ const MainApp = () => {
           </AnimatePresence>
 
           {/* Header */}
-          <header className={`sticky top-0 z-[100] bg-background/80 backdrop-blur-3xl transition-all duration-500 border-b border-border ${showScrollTop ? 'shadow-lg py-1' : 'py-3'}`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between">
-              <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigate('/')}>
-                <div className="bg-blue-600 text-white p-1.5 rounded-lg shadow-xl shadow-blue-500/20 group-hover:rotate-12 transition-transform duration-500">
-                  <LayoutGrid className="h-5 w-5" />
+          <header className={`sticky top-0 z-[100] bg-background/60 backdrop-blur-3xl transition-all duration-500 border-b border-border ${showScrollTop ? 'shadow-2xl py-1 dark:bg-[#09090b]/80' : 'py-4'}`}>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
+              <div className="flex items-center gap-4 cursor-pointer group" onClick={() => navigate('/')}>
+                <div className="bg-blue-600 text-white p-2 rounded-xl shadow-[0_10px_30px_rgba(37,99,235,0.3)] group-hover:rotate-12 transition-transform duration-500">
+                  <LayoutGrid className="h-6 w-6" />
                 </div>
-                <h2 className="text-lg font-black tracking-tighter leading-none text-foreground italic m-0">
+                <h2 className="text-xl font-black tracking-tighter leading-none text-foreground italic m-0">
                   Smart<span className="text-blue-600">calpro</span>
                 </h2>
               </div>
 
               {/* Desktop Nav */}
-              <nav className="hidden md:flex items-center gap-2">
-                <button onClick={() => setActiveTab('home')} className={`nav-link ${activeTab === 'home' ? 'active' : ''}`}>Home</button>
-                <button onClick={() => setActiveTab('finance')} className={`nav-link ${activeTab === 'finance' ? 'active' : ''}`}>Finance</button>
-                <button onClick={() => setActiveTab('gold')} className={`nav-link ${activeTab === 'gold' ? 'active' : ''}`}>Gold</button>
-                <button onClick={() => setActiveTab('vehicle')} className={`nav-link ${activeTab === 'vehicle' ? 'active' : ''}`}>Vehicle</button>
-                <button onClick={() => setActiveTab('land')} className={`nav-link ${activeTab === 'land' ? 'active' : ''}`}>Land</button>
+              <nav className="hidden md:flex items-center gap-1 bg-muted/40 p-1.5 rounded-2xl border border-border">
+                {[
+                  { id: 'home', label: 'Dashboard' },
+                  { id: 'finance', label: 'Finance' },
+                  { id: 'gold', label: 'Metals' },
+                  { id: 'vehicle', label: 'Vehicle' },
+                  { id: 'land', label: 'Spatial' },
+                ].map((tab) => (
+                  <button 
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)} 
+                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                      activeTab === tab.id 
+                        ? 'bg-blue-600 text-white shadow-xl shadow-blue-500/20' 
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </nav>
 
               <div className="flex items-center gap-2 sm:gap-4">
@@ -305,15 +319,14 @@ const MainApp = () => {
                     variant="outline"
                     size="sm"
                     onClick={installApp}
-                    className="rounded-xl font-bold uppercase tracking-widest text-[8px] gap-2 px-3 h-9 border border-border text-foreground hover:bg-muted hidden sm:flex transition-all duration-200"
+                    className="rounded-xl font-black uppercase tracking-widest text-[9px] gap-2 px-5 h-11 border-2 border-border text-foreground hover:border-primary active:scale-95 transition-all hidden sm:flex"
                   >
-                    <Download className="h-3.5 w-3.5" />
-                    <span>Install</span>
+                    <Download className="h-4 w-4" />
+                    <span>Download App</span>
                   </Button>
                 )}
-
-                {/* Dark mode button placeholder to maintain header layout while the real one is fixed */}
-                <div className="w-10 h-10 hidden sm:block" />
+                
+                <div className="w-12 h-12 hidden sm:block" />
               </div>
             </div>
           </header>

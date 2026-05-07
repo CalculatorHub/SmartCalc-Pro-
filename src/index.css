@@ -94,12 +94,12 @@
   }
 
   .dark {
-    --bg: #020617;
-    --card: #0F172A;
-    --text-primary: #F8FAFC;
-    --text-secondary: #CBD5F5;
-    --muted: #64748B;
-    --border: #1E293B;
+    --bg: #09090b;
+    --card: #121214;
+    --text-primary: #fafafa;
+    --text-secondary: #a1a1aa;
+    --muted: #27272a;
+    --border: #1e1e20;
 
     --bg-primary: var(--bg);
     --bg-secondary: var(--card);
@@ -107,8 +107,8 @@
     --text-secondary-val: var(--text-secondary);
     --muted-foreground: var(--muted);
     --border-color: var(--border);
-    --input-bg: var(--border);
-    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    --input-bg: #18181b;
+    --card-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
 
     --background: var(--bg-primary);
     --foreground: var(--text-primary);
@@ -118,11 +118,11 @@
     --popover-foreground: var(--text-primary);
     --primary: #3B82F6;
     --primary-foreground: #FFFFFF;
-    --secondary: #0F172A;
+    --secondary: #121214;
     --secondary-foreground: #FFFFFF;
-    --muted-bg: #0F172A;
+    --muted-bg: #18181b;
     --muted-foreground-val: var(--muted-foreground);
-    --accent: #0F172A;
+    --accent: #121214;
     --accent-foreground: #FFFFFF;
     --border-val: var(--border-color);
     --input: var(--border-color);
@@ -445,26 +445,56 @@
     align-items: center;
     gap: 20px;
     padding: 24px;
-    border-radius: 24px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 28px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid transparent;
   }
 
   .light .protocol-card {
-    background: #f8fafc;
-    box-shadow: 10px 10px 25px rgba(0,0,0,0.06),
-                -10px -10px 25px rgba(255,255,255,1);
+    background: #ffffff;
+    box-shadow: 12px 12px 30px rgba(0,0,0,0.04),
+                -12px -12px 30px rgba(255,255,255,1);
+    border: 1px solid #f1f5f9;
   }
 
   .dark .protocol-card {
-    background: #0f172a;
-    box-shadow: 10px 10px 25px rgba(0,0,0,0.3),
-                -10px -10px 25px rgba(255,255,255,0.02);
-    border-color: rgba(255,255,255,0.03);
+    background: linear-gradient(145deg, #121214, #0d0d0f);
+    box-shadow: 15px 15px 35px rgba(0,0,0,0.4),
+                -8px -8px 25px rgba(255,255,255,0.02);
+    border-color: rgba(255,255,255,0.04);
   }
 
   .protocol-card:hover {
-    transform: translateY(-6px) scale(1.02);
+    transform: translateY(-8px) scale(1.01);
+    border-color: #3B82F6;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-xl bg-white/70 dark:bg-zinc-900/60 border border-white/20 dark:border-white/10;
+  }
+
+  .neumorphic-button {
+    @apply transition-all duration-300 active:scale-95;
+  }
+
+  .light .neumorphic-button {
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.08),
+                -5px -5px 15px rgba(255,255,255,0.9);
+  }
+
+  .dark .neumorphic-button {
+    box-shadow: 8px 8px 18px rgba(0,0,0,0.5),
+                -4px -4px 12px rgba(255,255,255,0.03);
+  }
+
+  .neumorphic-button:active {
+    box-shadow: inset 3px 3px 6px rgba(0,0,0,0.1),
+                inset -3px -3px 6px rgba(255,255,255,0.5);
+  }
+
+  .dark .neumorphic-button:active {
+    box-shadow: inset 4px 4px 8px rgba(0,0,0,0.6),
+                inset -2px -2px 6px rgba(255,255,255,0.05);
   }
 
   .protocol-icon {
