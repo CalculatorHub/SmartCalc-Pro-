@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { IndianRupee, Percent, RotateCcw, TrendingDown, Gift, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { formatNumber, vibrate } from '@/lib/utils';
+import { CopyButton } from '../ui/CopyButton';
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-IN', {
@@ -45,6 +47,7 @@ export function DiscountCalculator() {
   }, [originalPrice, discountPercent]);
 
   const handleReset = () => {
+    vibrate(15);
     setOriginalPrice('');
     setDiscountPercent('');
     setErrors({});
@@ -81,22 +84,22 @@ export function DiscountCalculator() {
   const hasAnyError = Object.keys(errors).length > 0;
 
   return (
-    <Card className="w-full h-full border-none shadow-xl bg-card rounded-[2rem] overflow-hidden group transition-all duration-500 hover:shadow-2xl">
+    <Card className="w-full h-full border-none shadow-xl bg-card rounded-[2rem] overflow-hidden group transition-all duration-500 hover:shadow-2xl border border-theme">
       <div className="absolute top-0 left-0 w-full h-[6px] bg-gradient-to-r from-blue-500 via-indigo-600 to-purple-700 z-20" />
       
       <CardHeader className="p-8 pb-4">
         <div className="flex items-center justify-between">
-          <div className="bg-blue-500/10 p-3 rounded-2xl">
+          <div className="bg-blue-500/10 p-3 rounded-2xl border border-blue-500/20">
             <TrendingDown className="h-6 w-6 text-blue-600 dark:text-blue-400" />
           </div>
           <div className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400">
             FISCAL_REDUCTION
           </div>
         </div>
-        <CardTitle className="text-3xl font-black mt-6 tracking-tighter uppercase italic text-foreground text-foreground">
+        <CardTitle className="text-3xl font-black mt-6 tracking-tighter uppercase italic text-primary">
           Discount <span className="text-blue-600">Calculator</span>
         </CardTitle>
-        <CardDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+        <CardDescription className="text-[10px] font-black uppercase tracking-[0.2em] text-secondary">
           Neural Net Pricing Optimizer
         </CardDescription>
       </CardHeader>
@@ -105,80 +108,109 @@ export function DiscountCalculator() {
         {/* Original Price */}
         <div className="space-y-3">
           <div className="flex justify-between items-center px-1">
-            <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-2">
+            <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary flex items-center gap-2">
               <IndianRupee className="h-3 w-3 text-blue-500" /> Original Price
             </Label>
           </div>
-          <div className="relative">
+          <motion.div 
+            animate={errors.price ? { x: [0, -4, 4, -4, 4, 0] } : {}}
+            transition={{ duration: 0.4 }}
+            className="relative"
+          >
             <Input
               type="number"
-              placeholder="Enter amount (₹)"
+              placeholder="0.00"
               value={originalPrice}
               onChange={(e) => setOriginalPrice(e.target.value)}
-              className={`h-14 bg-muted/20 border-2 rounded-2xl pl-10 pr-6 font-bold text-lg transition-all text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-blue-500/20 ${
-                errors.price ? 'border-red-500/50 focus:border-red-500' : 'border-border focus:border-blue-500/50'
+              className={`h-14 bg-bg border-2 rounded-2xl pl-10 pr-6 font-black text-lg transition-all text-primary placeholder:text-muted-foreground/30 focus:ring-4 ${
+                errors.price 
+                  ? 'border-red-500 ring-red-500/20 bg-red-50/50 dark:bg-red-950/20 shadow-[0_0_20px_rgba(239,68,68,0.15)]' 
+                  : 'border-theme focus:border-blue-500 focus:ring-blue-500/10'
               }`}
             />
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
-              <span className="font-bold text-sm">₹</span>
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary">
+              <span className="font-black text-sm">₹</span>
             </div>
-          </div>
-          {errors.price && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="text-[10px] font-bold text-red-500 flex items-center gap-1.5 px-2"
-            >
-              <AlertCircle className="h-3 w-3" /> {errors.price}
-            </motion.div>
-          )}
+          </motion.div>
+          <AnimatePresence>
+            {errors.price && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="bg-red-500/10 border-2 border-red-500/20 rounded-2xl p-4 flex items-center gap-3 shadow-sm"
+              >
+                <div className="bg-red-600 p-1.5 rounded-lg shadow-lg shadow-red-500/40">
+                  <AlertCircle className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-[11px] font-black uppercase tracking-widest text-red-700 dark:text-red-400">
+                  {errors.price}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Discount Percentage */}
         <div className="space-y-4">
           <div className="flex justify-between items-center px-1">
-            <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-2">
+            <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-secondary flex items-center gap-2">
               <Percent className="h-3 w-3 text-blue-500" /> Discount Rate
             </Label>
           </div>
-          <div className="relative">
+          <motion.div 
+            animate={errors.discount ? { x: [0, -4, 4, -4, 4, 0] } : {}}
+            transition={{ duration: 0.4 }}
+            className="relative"
+          >
             <Input
               type="number"
-              placeholder="Enter percentage (%)"
+              placeholder="0"
               value={discountPercent}
               onChange={(e) => setDiscountPercent(e.target.value)}
-              className={`h-14 bg-muted/20 border-2 rounded-2xl pl-12 pr-6 font-bold text-lg transition-all text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-blue-500/20 ${
-                errors.discount ? 'border-red-500/50 focus:border-red-500' : 'border-border focus:border-blue-500/50'
+              className={`h-14 bg-bg border-2 rounded-2xl pl-12 pr-6 font-black text-lg transition-all text-primary placeholder:text-muted-foreground/30 focus:ring-4 ${
+                errors.discount 
+                  ? 'border-red-500 ring-red-500/20 bg-red-50/50 dark:bg-red-950/20 shadow-[0_0_20px_rgba(239,68,68,0.15)]' 
+                  : 'border-theme focus:border-blue-500 focus:ring-blue-500/10'
               }`}
             />
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary">
               <Percent className="h-4 w-4" />
             </div>
-          </div>
-          {errors.discount && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="text-[10px] font-bold text-red-500 flex items-center gap-1.5 px-2"
-            >
-              <AlertCircle className="h-3 w-3" /> {errors.discount}
-            </motion.div>
-          )}
+          </motion.div>
+          <AnimatePresence>
+            {errors.discount && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="bg-red-500/10 border-2 border-red-500/20 rounded-2xl p-4 flex items-center gap-3 shadow-sm"
+              >
+                <div className="bg-red-600 p-1.5 rounded-lg shadow-lg shadow-red-500/40">
+                  <AlertCircle className="h-4 w-4 text-white" />
+                </div>
+                <span className="text-[11px] font-black uppercase tracking-widest text-red-700 dark:text-red-400">
+                  {errors.discount}
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <div className="grid grid-cols-3 gap-3">
             {[10, 20, 50].map((val) => (
-              <Button
+              <button
                 key={val}
-                variant="outline"
-                size="sm"
-                onClick={() => setDiscountPercent(val.toString())}
-                className={`rounded-xl font-bold text-[10px] uppercase tracking-widest h-10 border transition-all ${
+                onClick={() => {
+                  setDiscountPercent(val.toString());
+                  vibrate(5);
+                }}
+                className={`rounded-2xl font-black text-[10px] uppercase tracking-widest h-12 border-2 transition-all shadow-sm ${
                   discountPercent === val.toString() 
-                    ? 'border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400' 
-                    : 'border-border text-muted-foreground'
+                    ? 'border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-blue-500/10' 
+                    : 'border-theme text-secondary hover:bg-muted/50'
                 }`}
               >
                 {val}%
-              </Button>
+              </button>
             ))}
           </div>
         </div>
@@ -192,25 +224,28 @@ export function DiscountCalculator() {
               className="pt-6 space-y-6"
             >
               <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-center">
+                <div className="p-5 rounded-[2rem] bg-emerald-500/10 border-2 border-emerald-500/20 text-center shadow-lg shadow-emerald-500/5">
                   <p className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-1">Savings</p>
-                  <p className="text-lg font-black text-emerald-600 dark:text-emerald-400">{formatCurrency(calculations.totalSavings)}</p>
+                  <p className="text-xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums">₹{formatNumber(calculations.totalSavings, 0)}</p>
                 </div>
-                <div className="p-4 rounded-2xl bg-muted rounded-2xl border border-border text-center">
-                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mb-1">Off %</p>
-                  <p className="text-lg font-black text-foreground">{discountPercent}%</p>
+                <div className="p-5 rounded-[2rem] bg-muted/30 dark:bg-muted/10 border-2 border-theme text-center shadow-lg">
+                  <p className="text-[9px] font-black text-secondary uppercase tracking-widest mb-1">Off %</p>
+                  <p className="text-xl font-black text-primary tabular-nums">{discountPercent}%</p>
                 </div>
               </div>
 
-              <div className="p-6 rounded-[2rem] bg-emerald-600 dark:bg-emerald-500 text-white shadow-2xl shadow-emerald-500/30 group-hover:scale-[1.02] transition-transform duration-500">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em]">Settlement Price</p>
-                  <Gift className="h-4 w-4" />
+              <div className="relative p-8 rounded-[2.5rem] bg-emerald-600 dark:bg-emerald-500 text-white shadow-2xl shadow-emerald-500/30 group-hover:scale-[1.02] transition-transform duration-500 border border-white/10">
+                <div className="absolute top-6 right-6">
+                  <CopyButton value={calculations.finalPrice} className="text-white hover:bg-white/20" label="Copy Final Price" />
                 </div>
-                <p className="text-3xl sm:text-4xl font-black tracking-tighter mb-2">{formatCurrency(calculations.finalPrice)}</p>
-                <div className="bg-white/20 backdrop-blur-md rounded-xl py-2 px-4 inline-block text-center w-full">
-                  <p className="text-[10px] font-black uppercase tracking-widest">
-                    You Saved {formatCurrency(calculations.totalSavings)} 🎉
+                <div className="flex items-center gap-3 mb-3">
+                  <Gift className="h-5 w-5 opacity-80" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-80">Settlement Price</p>
+                </div>
+                <p className="text-4xl sm:text-5xl font-black tracking-tighter mb-4 tabular-nums italic">₹{formatNumber(calculations.finalPrice, 0)}</p>
+                <div className="bg-white/20 backdrop-blur-md rounded-2xl py-3 px-6 text-center w-full border border-white/10">
+                  <p className="text-[11px] font-black uppercase tracking-widest">
+                    You Saved ₹{formatNumber(calculations.totalSavings, 0)} 🎉
                   </p>
                 </div>
               </div>
@@ -219,13 +254,12 @@ export function DiscountCalculator() {
         </AnimatePresence>
 
         {/* Reset Button */}
-        <Button
-          variant="ghost"
+        <button
           onClick={handleReset}
-          className="w-full h-12 rounded-xl text-muted-foreground hover:text-blue-600 hover:bg-blue-500/10 text-[10px] font-black uppercase tracking-widest gap-2 transition-all p-0"
+          className="w-full h-14 rounded-2xl text-secondary hover:text-blue-600 hover:bg-blue-500/10 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all border-2 border-transparent hover:border-blue-500/20"
         >
-          <RotateCcw className="h-3 w-3" /> Purge Matrix Cache
-        </Button>
+          <RotateCcw className="h-4 w-4" /> Purge Matrix Cache
+        </button>
       </CardContent>
     </Card>
   );

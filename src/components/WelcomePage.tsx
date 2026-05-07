@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
-import { Calculator, TrendingUp, Map as MapIcon, Percent, ArrowRight, Fuel, Gauge, LayoutGrid, IndianRupee, Navigation } from 'lucide-react';
+import { Calculator, TrendingUp, Map as MapIcon, Percent, ArrowRight, Fuel, Gauge, LayoutGrid, IndianRupee, Navigation, Zap } from 'lucide-react';
 
 interface WelcomePageProps {
   onStart: () => void;
@@ -38,16 +38,23 @@ export const WelcomePage = ({ onStart }: WelcomePageProps) => {
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="space-y-6"
+          className="space-y-8"
         >
-          <div className="inline-flex items-center justify-center p-4 bg-primary text-primary-foreground rounded-3xl shadow-2xl mb-4">
-            <LayoutGrid className="h-12 w-12" />
+          <div className="relative inline-block">
+            <div className="absolute inset-0 bg-primary blur-2xl opacity-20" />
+            <div className="relative inline-flex items-center justify-center w-24 h-24 bg-primary text-primary-foreground rounded-[2rem] shadow-[0_20px_50px_rgba(var(--primary-rgb),0.3)] rotate-12 hover:rotate-0 transition-transform duration-700 ease-out">
+              <Zap className="h-12 w-12 fill-current" />
+            </div>
           </div>
-          <h1 className="text-5xl sm:text-7xl font-black tracking-tighter text-foreground uppercase">
-            Smart<span className="text-primary">calpro</span>
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto font-medium">
-            The ultimate utility toolkit for India. Finance, Vehicle, and Land calculations made easy.
+          <div className="space-y-2">
+            <h1 className="text-6xl sm:text-8xl font-black tracking-tighter text-foreground uppercase italic">
+              Smart<span className="text-primary">alpro</span>
+            </h1>
+            <div className="h-1.5 w-24 bg-primary mx-auto rounded-full" />
+          </div>
+          <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto font-medium tracking-tight leading-relaxed">
+            Revolutionizing Indian utility tools. <br/>
+            <span className="text-foreground font-black italic">Finance. Vehicles. Land.</span>
           </p>
         </motion.div>
 
@@ -59,16 +66,16 @@ export const WelcomePage = ({ onStart }: WelcomePageProps) => {
           className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-5xl mx-auto"
         >
           {[
-            { icon: IndianRupee, title: "Finance", desc: "Rate Converter & Interest Planner", color: "text-purple-500", bg: "bg-purple-500/10" },
-            { icon: Navigation, title: "Vehicle", desc: "Fuel, Mileage & Travel Cost", color: "text-blue-500", bg: "bg-blue-500/10" },
-            { icon: MapIcon, title: "Land", desc: "Indian Units & Costing", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+            { icon: IndianRupee, title: "Finance", desc: "Neuro-Fiscal Projections", color: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/20" },
+            { icon: Navigation, title: "Vehicle", desc: "Logistics & Economy Matrix", color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+            { icon: MapIcon, title: "Land", desc: "Spatial Valuation Engine", color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20" },
           ].map((feature, i) => (
-            <div key={i} className="p-6 rounded-2xl bg-muted/50 border border-border/50 backdrop-blur-sm hover:border-primary/20 transition-colors duration-500 group">
-              <div className={`w-12 h-12 rounded-xl ${feature.bg} ${feature.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500`}>
-                <feature.icon className="h-6 w-6" />
+            <div key={i} className={`p-8 rounded-[2rem] bg-muted/30 border-2 ${feature.border} backdrop-blur-xl hover:border-primary transition-all duration-500 group shadow-lg hover:shadow-2xl hover:-translate-y-2`}>
+              <div className={`w-14 h-14 rounded-2xl ${feature.bg} ${feature.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500 shadow-inner`}>
+                <feature.icon className="h-7 w-7" />
               </div>
-              <h3 className="font-bold text-lg mb-2 text-foreground">{feature.title}</h3>
-              <p className="text-sm text-muted-foreground">{feature.desc}</p>
+              <h3 className="font-black text-xl mb-3 text-foreground uppercase tracking-tight italic">{feature.title}</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed uppercase tracking-widest font-bold opacity-70 group-hover:opacity-100 transition-opacity">{feature.desc}</p>
             </div>
           ))}
         </motion.div>

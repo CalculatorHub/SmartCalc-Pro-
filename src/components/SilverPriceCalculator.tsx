@@ -14,6 +14,8 @@ import {
   CircleDot
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { formatNumber, vibrate } from '@/lib/utils';
+import { CopyButton } from './ui/CopyButton';
 
 type Unit = 'g' | 'kg';
 
@@ -22,7 +24,7 @@ interface SilverPriceCalculatorProps {
   onSave?: (data: { weight: string; unit: string; rate: number; totalPrice: number; gstPrice: number }) => void;
 }
 
-export const SilverPriceCalculator: React.FC<SilverPriceCalculatorProps> = ({ initialRate = 100, onSave }) => {
+export const SilverPriceCalculator: React.FC<SilverPriceCalculatorProps> = ({ initialRate = 0, onSave }) => {
   const [weight, setWeight] = useState<string>('');
   const [unit, setUnit] = useState<Unit>('g');
   const [rate, setRate] = useState<string>('');
@@ -30,7 +32,7 @@ export const SilverPriceCalculator: React.FC<SilverPriceCalculatorProps> = ({ in
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (initialRate) {
+    if (initialRate && initialRate > 0) {
       setRate(initialRate.toString());
     }
   }, [initialRate]);
@@ -80,113 +82,117 @@ export const SilverPriceCalculator: React.FC<SilverPriceCalculatorProps> = ({ in
   };
 
   return (
-    <div className="max-w-md mx-auto px-4 pb-24 pt-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 space-y-4">
+    <div className="max-w-xl mx-auto px-4 pb-24 pt-4">
+      <div className="bg-card rounded-3xl shadow-xl border border-theme p-6 sm:p-8 space-y-6">
         {/* Header */}
         <div className="space-y-1">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Metallic Evaluation Hub</p>
-          <h2 className="text-2xl font-bold text-foreground italic">Silver Valuation</h2>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-secondary">Metallic Evaluation Hub</p>
+          <h2 className="text-3xl font-black text-primary tracking-tighter uppercase italic leading-none">Silver Valuation</h2>
         </div>
 
-        {/* Weight Toggle */}
-        <div className="flex bg-muted rounded-xl p-1">
-          {(['g', 'kg'] as Unit[]).map((u) => (
-            <button
-              key={u}
-              onClick={() => setUnit(u)}
-              className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all duration-500 ${
-                unit === u 
-                  ? 'bg-card shadow text-foreground' 
-                  : 'text-muted-foreground'
-              }`}
-            >
-              {u === 'g' ? 'Grams' : 'Kilograms'}
-            </button>
-          ))}
-        </div>
-
-        {/* Input Fields */}
         <div className="space-y-3">
+          <Label className="text-[10px] font-black uppercase tracking-widest text-secondary block ml-1">Weight Unit</Label>
+          <div className="grid grid-cols-2 gap-3">
+            {(['g', 'kg'] as Unit[]).map((u) => {
+              const active = unit === u;
+              return (
+                <button
+                  key={u}
+                  onClick={() => {
+                    setUnit(u);
+                  }}
+                  className={`h-12 rounded-2xl border-2 transition-all duration-500 text-[11px] font-black uppercase tracking-widest ${
+                    active 
+                      ? 'bg-zinc-600 border-zinc-500 text-white shadow-lg shadow-zinc-600/20' 
+                      : 'border-theme text-secondary bg-bg hover:bg-muted/50'
+                  }`}
+                >
+                  {u === 'g' ? 'Grams' : 'Kilograms'}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="space-y-4">
           <div className="relative">
-            <Label htmlFor="silver-weight" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1 block">Weight</Label>
+            <Label htmlFor="silver-weight" className="text-[10px] font-black uppercase tracking-widest text-secondary mb-1.5 block ml-1">Weight</Label>
             <Input
               id="silver-weight"
               type="number"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
-              className="h-12 px-4 rounded-xl border-border bg-card text-foreground focus:ring-2 focus:ring-zinc-400 outline-none transition-all duration-500 font-black placeholder:text-muted-foreground"
-              placeholder="Enter weight"
+              className="h-14 px-6 rounded-2xl border-2 border-theme bg-bg text-primary focus:border-zinc-500 font-black text-lg transition-all duration-500 placeholder:text-muted-foreground/30"
+              placeholder="0.00"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div className="relative">
-              <Label htmlFor="silver-rate" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1 block">Rate (₹/g)</Label>
+              <Label htmlFor="silver-rate" className="text-[10px] font-black uppercase tracking-widest text-secondary mb-1.5 block ml-1">Rate (₹/g)</Label>
               <Input
                 id="silver-rate"
                 type="number"
                 value={rate}
                 onChange={(e) => setRate(e.target.value)}
-                placeholder="Enter rate (₹)"
-                className="h-12 px-4 rounded-xl border-border bg-card text-foreground focus:ring-2 focus:ring-zinc-400 outline-none transition-all duration-500 font-black placeholder:text-muted-foreground"
+                placeholder="0"
+                className="h-14 px-6 rounded-2xl border-2 border-theme bg-bg text-primary focus:border-zinc-500 font-black text-lg transition-all duration-500 placeholder:text-muted-foreground/30"
               />
             </div>
             <div className="relative">
-              <Label htmlFor="silver-making" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1 block">Making (%)</Label>
+              <Label htmlFor="silver-making" className="text-[10px] font-black uppercase tracking-widest text-secondary mb-1.5 block ml-1">Making (%)</Label>
               <Input
                 id="silver-making"
                 type="number"
                 value={makingPercent}
                 onChange={(e) => setMakingPercent(e.target.value)}
-                placeholder="Enter %"
-                className="h-12 px-4 rounded-xl border-border bg-card text-foreground focus:ring-2 focus:ring-zinc-400 outline-none transition-all duration-500 font-black placeholder:text-muted-foreground"
+                placeholder="0"
+                className="h-14 px-6 rounded-2xl border-2 border-theme bg-bg text-primary focus:border-zinc-500 font-black text-lg transition-all duration-500 placeholder:text-muted-foreground/30"
               />
             </div>
           </div>
         </div>
 
-        {/* Result Section */}
         <AnimatePresence mode="wait">
           {results.isValid ? (
             <motion.div 
               key={results.totalPrice}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-muted rounded-2xl p-4 text-center border border-border"
+              className="relative bg-muted/30 dark:bg-muted/10 rounded-3xl p-8 text-center border-2 border-theme overflow-hidden"
             >
-              <p className="text-xs text-muted-foreground mb-1 font-medium">Total Asset Value</p>
-              <h2 className="text-3xl font-bold text-foreground tabular-nums">
-                {formatCurrency(results.totalPrice)}
+              <p className="text-[10px] font-black uppercase tracking-widest text-secondary mb-2">Total Asset Value</p>
+              <h2 className="text-4xl font-black text-primary tabular-nums tracking-tighter leading-none mb-4">
+                ₹{formatNumber(results.totalPrice, 0)}
               </h2>
-              <div className="flex justify-center gap-4 mt-2 text-[10px] text-muted-foreground font-medium">
-                <span>Base: {formatCurrency(results.basePrice)}</span>
-                <span>GST: {formatCurrency(results.gstPrice)}</span>
+              <div className="flex justify-center gap-6 text-[10px] text-secondary font-black uppercase tracking-widest">
+                <span>Base: ₹{formatNumber(results.basePrice, 0)}</span>
+                <span>GST: ₹{formatNumber(results.gstPrice, 0)}</span>
               </div>
             </motion.div>
           ) : (
-            <div className="bg-muted rounded-2xl p-8 text-center border border-dashed border-border">
-               <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Enter values to calculate</p>
+            <div className="bg-muted/20 dark:bg-muted/5 rounded-3xl p-10 text-center border-2 border-dashed border-theme">
+               <p className="text-[10px] font-black uppercase tracking-widest text-secondary">Enter evaluation parameters</p>
             </div>
           )}
         </AnimatePresence>
 
-        {/* Buttons */}
-        <div className="space-y-2 pt-2">
+        <div className="space-y-3 pt-4">
           <button 
             onClick={copyToClipboard}
             disabled={!results.isValid}
-            className="w-full h-12 rounded-xl bg-foreground text-background font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-black uppercase text-[12px] tracking-widest active:scale-95 transition-all duration-500 disabled:opacity-50 flex items-center justify-center gap-3 shadow-xl shadow-primary/20"
           >
-            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            {copied ? 'Copied' : 'Export Data'}
+            {copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+            {copied ? 'Captured' : 'Export Synthesis'}
           </button>
           
           <button 
             onClick={reset}
-            className="w-full h-12 rounded-xl border border-border text-muted-foreground font-black uppercase text-[11px] tracking-widest active:scale-95 transition-all duration-500 flex items-center justify-center gap-2"
+            className="w-full h-14 rounded-2xl border-2 border-theme text-secondary font-black uppercase text-[12px] tracking-widest active:scale-95 transition-all duration-500 flex items-center justify-center gap-3 bg-bg hover:bg-muted/50"
           >
-            <RefreshCcw className="h-4 w-4" />
-            Reset
+            <RefreshCcw className="h-5 w-5" />
+            Reset Matrix
           </button>
 
           {onSave && (

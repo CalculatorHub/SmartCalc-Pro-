@@ -39,6 +39,21 @@
 }
 
 @layer base {
+  * {
+    @apply border-border outline-none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "tnum" 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  button:focus-visible, a:focus-visible {
+    @apply ring-2 ring-blue-500 ring-offset-2 ring-offset-background;
+  }
+
   :root {
     --bg: #F8FAFC;
     --card: #FFFFFF;

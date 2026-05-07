@@ -21,6 +21,8 @@ import { format, differenceInDays, addYears, isAfter } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { CalculationHistory, HistoryItem } from './CalculationHistory';
 import { ExportActions } from './ExportActions';
+import { formatNumber, copyToClipboard, vibrate } from '@/lib/utils';
+import { CopyButton } from './ui/CopyButton';
 
 // Hook for number count up animation
 const useCountUp = (end: number, duration: number = 500) => {
@@ -162,7 +164,9 @@ export const InterestCalculator = () => {
               <div className="space-y-4">
                 <div className="flex justify-between items-end px-1">
                   <Label htmlFor="principal-cap" className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground">Principal Capital</Label>
-                  <div className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">₹{parseFloat(principal) || 0}</div>
+                  <div className="text-[11px] font-black text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 shadow-sm">
+                    ₹{formatNumber(parseFloat(principal) || 0, 0)}
+                  </div>
                 </div>
                 <div className="relative group">
                   <div className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl sm:text-3xl font-black text-muted-foreground group-focus-within:text-purple-600 dark:group-focus-within:text-purple-500 transition-colors duration-500 z-10">₹</div>
@@ -262,22 +266,25 @@ export const InterestCalculator = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   className="space-y-4"
                 >
-                  <div className="relative p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] bg-muted overflow-hidden border-2 border-purple-500/20 shadow-xl group/result text-center">
+                  <div className="relative group p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] bg-muted overflow-hidden border-2 border-purple-500/20 shadow-xl group/result text-center">
+                    <div className="absolute top-4 right-4 z-10">
+                      <CopyButton value={Math.round(results.ciTotal)} label="Copy Maturity Amount" />
+                    </div>
                     <div className="space-y-1">
-                       <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground">Maturity Projection</span>
-                       <h2 className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground via-emerald-600 dark:via-emerald-400 to-emerald-800 tracking-tighter italic">
-                         ₹{Math.round(results.ciTotal).toLocaleString()}
+                       <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground group-hover/result:text-purple-500 transition-colors">Maturity Projection</span>
+                       <h2 className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-foreground via-emerald-600 dark:via-emerald-400 to-emerald-800 tracking-tighter italic tabular-nums">
+                         ₹{formatNumber(results.ciTotal, 0)}
                        </h2>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4 mt-6 pt-6">
+                    <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-border/50">
                       <div className="space-y-0.5">
                         <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Growth</p>
-                        <p className="text-xl font-black text-emerald-600 leading-none">+{Math.round(results.ciInterest).toLocaleString()}</p>
+                        <p className="text-xl font-black text-emerald-600 leading-none tabular-nums">+{formatNumber(results.ciInterest, 0)}</p>
                       </div>
                       <div className="space-y-0.5">
                         <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Timeline</p>
-                        <p className="text-xl font-black text-foreground leading-none">{results.totalDays}D</p>
+                        <p className="text-xl font-black text-foreground leading-none tabular-nums">{results.totalDays}D</p>
                       </div>
                     </div>
                   </div>

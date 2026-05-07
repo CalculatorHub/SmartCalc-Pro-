@@ -55,10 +55,10 @@ export const ExportActions = ({ title, inputs, results, disabled }: ExportAction
         variant="outline"
         onClick={handlePDF}
         disabled={disabled || loading}
-        className="font-bold uppercase tracking-widest text-[10px] gap-2 h-9 border-2 border-border hover:bg-muted text-foreground transition-all duration-300"
+        className="font-black uppercase tracking-widest text-[10px] gap-2 h-10 border-2 border-theme bg-bg hover:bg-muted text-primary transition-all duration-300 rounded-xl"
       >
-        <FileText className="h-4 w-4" />
-        {loading ? 'Generating...' : 'Download PDF'}
+        <FileText className="h-4 w-4 text-blue-600" />
+        {loading ? 'Signal Generating...' : 'Download Report'}
       </Button>
 
       <DropdownMenu>
@@ -66,18 +66,20 @@ export const ExportActions = ({ title, inputs, results, disabled }: ExportAction
           disabled={disabled}
           className={cn(
             buttonVariants({ variant: "outline" }),
-            "font-bold uppercase tracking-widest text-[10px] gap-2 h-9 border-2 border-border hover:bg-muted text-foreground transition-all duration-300"
+            "font-black uppercase tracking-widest text-[10px] gap-2 h-10 border-2 border-theme bg-bg hover:bg-muted text-primary transition-all duration-300 rounded-xl"
           )}
         >
-          <Share2 className="h-4 w-4" />
-          Share Result
+          <Share2 className="h-4 w-4 text-emerald-600" />
+          Transmit Data
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48 font-bold uppercase tracking-widest text-[10px] bg-card border-border">
-          <DropdownMenuItem onClick={handleWhatsApp} className="gap-2 cursor-pointer hover:bg-muted text-foreground">
-            <MessageSquare className="h-4 w-4 text-green-500" />
-            WhatsApp
+        <DropdownMenuContent align="end" className="w-56 font-black uppercase tracking-widest text-[10px] bg-card border-theme rounded-2xl shadow-2xl p-2">
+          <DropdownMenuItem onClick={handleWhatsApp} className="gap-3 cursor-pointer hover:bg-muted text-primary p-3 rounded-xl">
+            <div className="p-1.5 bg-green-500/10 rounded-lg">
+              <MessageSquare className="h-4 w-4 text-green-500" />
+            </div>
+            WhatsApp Sync
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={handleCopy} className="gap-2 cursor-pointer hover:bg-muted text-foreground">
+          <DropdownMenuItem onClick={handleCopy} className="gap-3 cursor-pointer hover:bg-muted text-primary p-3 rounded-xl">
             <AnimatePresence mode="wait">
               {copied ? (
                 <motion.div
@@ -85,10 +87,12 @@ export const ExportActions = ({ title, inputs, results, disabled }: ExportAction
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   exit={{ scale: 0 }}
-                  className="flex items-center gap-2 text-green-600"
+                  className="flex items-center gap-3 text-emerald-600"
                 >
-                  <Check className="h-4 w-4" />
-                  <span>Copied!</span>
+                  <div className="p-1.5 bg-emerald-500/10 rounded-lg">
+                    <Check className="h-4 w-4" />
+                  </div>
+                  <span>Linked!</span>
                 </motion.div>
               ) : (
                 <motion.div
@@ -96,10 +100,12 @@ export const ExportActions = ({ title, inputs, results, disabled }: ExportAction
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   exit={{ scale: 0 }}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-3"
                 >
-                  <Copy className="h-4 w-4" />
-                  <span>Copy Text</span>
+                  <div className="p-1.5 bg-blue-500/10 rounded-lg">
+                    <Copy className="h-4 w-4 text-blue-500" />
+                  </div>
+                  <span>Copy Signal</span>
                 </motion.div>
               )}
             </AnimatePresence>

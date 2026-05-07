@@ -172,7 +172,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ isDarkMode, setIsDarkM
                 <h4 className="label-text">System Status</h4>
                 <div className="flex gap-4">
                    <div className="status-badge flex-1 flex flex-col gap-1 items-start">
-                      <div className="flex items-center gap-2 font-black uppercase tracking-tighter">
+                      <div className="flex items-center gap-2 font-black uppercase tracking-tighter text-primary">
                          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                          ✅ Operational
                       </div>
@@ -204,6 +204,79 @@ export const LandingPage: React.FC<LandingPageProps> = ({ isDarkMode, setIsDarkM
              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 -translate-y-1/2 translate-x-1/2 rounded-full blur-2xl" />
           </div>
         </motion.div>
+      </section>
+
+      {/* STATS BAR */}
+      <div className="border-y border-theme py-16 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-8 grid grid-cols-2 lg:grid-cols-4 gap-12">
+          {[
+            { label: 'Calculations Processed', value: '1.2M+', color: 'text-blue-600' },
+            { label: 'Active Monthly Users', value: '50K+', color: 'text-purple-600' },
+            { label: 'Precision Accuracy', value: '99.9%', color: 'text-emerald-600' },
+            { label: 'Indian States Covered', value: '28+', color: 'text-amber-600' },
+          ].map((stat, i) => (
+            <motion.div 
+              key={i}
+              whileHover={{ y: -5 }}
+              className="text-center space-y-2"
+            >
+              <div className={`text-4xl font-black ${stat.color} tracking-tighter italic`}>{stat.value}</div>
+              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-secondary">{stat.label}</div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* FEATURED PROTOCOLS */}
+      <section className="py-24 px-8 max-w-7xl mx-auto space-y-16">
+        <div className="text-center space-y-4">
+          <h2 className="text-4xl font-black uppercase tracking-tighter italic text-primary">Advanced Protocols</h2>
+          <p className="text-secondary uppercase tracking-[0.3em] text-[10px] font-black">Professional-Grade Calculation Engines</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[
+            { title: 'Neural Finance', desc: 'EMI, FD, and Interest projections with inflation-adjusted logic.', icon: '📈', color: 'bg-blue-500/10' },
+            { title: 'Bullion Appraisal', desc: 'Real-time gold and silver valuation with purity and making charges.', icon: '⚖️', color: 'bg-amber-500/10' },
+            { title: 'Logistics Matrix', desc: 'Fuel requirement and travel cost analysis for precise budgeting.', icon: '🚛', color: 'bg-emerald-500/10' },
+            { title: 'Spatial Valuation', desc: 'Land area conversion and cost estimation based on local units.', icon: '🗺️', color: 'bg-purple-500/10' },
+            { title: 'Data Export', desc: 'Generate professional PDF reports and share results instantly.', icon: '📄', color: 'bg-rose-500/10' },
+            { title: 'Secure Vault', desc: 'Privacy-focused calculations with local encryption and PWA support.', icon: '🔒', color: 'bg-zinc-500/10' },
+          ].map((protocol, i) => (
+            <div key={i} className="p-10 rounded-[2.5rem] bg-card border-2 border-theme hover:border-primary transition-all duration-500 space-y-6 group shadow-lg hover:shadow-2xl">
+              <div className={`w-16 h-16 rounded-[1.5rem] ${protocol.color} flex items-center justify-center text-3xl shadow-inner group-hover:scale-110 transition-transform`}>
+                {protocol.icon}
+              </div>
+              <h3 className="text-2xl font-black tracking-tight text-primary uppercase italic">{protocol.title}</h3>
+              <p className="text-secondary text-sm font-medium leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity">{protocol.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA SECTION */}
+      <section className="px-8 pb-24 max-w-7xl mx-auto">
+        <div className="relative rounded-[4rem] bg-zinc-950 p-16 sm:p-24 overflow-hidden text-center space-y-10 group">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-600/10 to-transparent -z-10" />
+          <div className="absolute -top-24 -left-24 w-64 h-64 bg-blue-500/20 blur-[120px] group-hover:opacity-50 transition-opacity" />
+          
+          <h2 className="text-5xl sm:text-7xl font-black text-white tracking-tighter uppercase italic leading-none max-w-4xl mx-auto">
+            Ready to upgrade your <br/> <span className="text-blue-500">calculation work?</span>
+          </h2>
+          
+          <p className="text-zinc-400 max-w-xl mx-auto uppercase tracking-widest text-[10px] font-black opacity-80">
+            Join thousands of professionals using Smartcalpro daily.
+          </p>
+
+          <Button 
+            onClick={() => navigate('/finance')}
+            size="lg"
+            className="h-20 px-16 text-xl font-black rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-2xl shadow-blue-500/40 hover:scale-105 transition-all group"
+          >
+            Launch System Now 
+            <ArrowRight size={24} className="ml-4 group-hover:translate-x-2 transition-transform" />
+          </Button>
+        </div>
       </section>
 
       {/* FOOTER BAR */}

@@ -30,23 +30,23 @@ export const CalculationHistory = ({ history, onClear, onReuse, title = "Previou
     >
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-3">
-          <div className="bg-muted p-2 rounded-xl border border-border">
-            <History className="h-5 w-5 text-foreground" />
+          <div className="bg-muted/30 dark:bg-muted/10 p-2 rounded-xl border border-theme">
+            <History className="h-5 w-5 text-primary" />
           </div>
-          <h3 className="text-xl font-black tracking-tighter uppercase text-foreground">{title}</h3>
+          <h3 className="text-xl font-black tracking-tighter uppercase text-primary">{title}</h3>
         </div>
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={onClear}
-          className="text-destructive hover:text-white hover:bg-destructive font-black text-[9px] uppercase tracking-widest h-9 rounded-xl px-3"
+          className="text-red-500 hover:text-white hover:bg-red-500 font-black text-[9px] uppercase tracking-widest h-9 rounded-xl px-4 border border-transparent hover:border-red-600 transition-all"
         >
           <Trash2 className="h-3 w-3 mr-2" />
-          Clear All
+          Purge Log
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence mode="popLayout">
           {history.map((item) => (
             <motion.div
@@ -57,15 +57,15 @@ export const CalculationHistory = ({ history, onClear, onReuse, title = "Previou
               exit={{ opacity: 0, scale: 0.9 }}
               whileHover={{ y: -4 }}
             >
-              <Card className="border border-border shadow-lg hover:shadow-xl transition-all bg-card relative overflow-hidden rounded-[2rem] group">
+              <Card className="border border-theme shadow-lg hover:shadow-2xl transition-all bg-card relative overflow-hidden rounded-[2rem] group">
                 <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500 group-hover:opacity-100 transition-opacity" />
-                <CardHeader className="p-5 pb-2 flex flex-row items-center justify-between space-y-0 text-foreground">
+                <CardHeader className="p-6 pb-2 flex flex-row items-center justify-between space-y-0 text-primary">
                   <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-muted rounded-lg">
-                      <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                    <div className="p-2 bg-muted/40 rounded-xl border border-theme">
+                      <Clock className="h-3.5 w-3.5 text-secondary" />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                      <span className="text-[9px] font-black uppercase tracking-widest text-secondary opacity-70">
                         {new Date(item.timestamp).toLocaleDateString()}
                       </span>
                     </div>
@@ -73,26 +73,26 @@ export const CalculationHistory = ({ history, onClear, onReuse, title = "Previou
                   <Button 
                     variant="secondary" 
                     size="icon" 
-                    className="h-8 w-8 rounded-lg shadow-sm hover:scale-110 transition-transform bg-muted hover:bg-emphasis text-muted-foreground"
+                    className="h-10 w-10 rounded-2xl shadow-sm hover:scale-110 transition-all bg-bg hover:bg-emerald-500 hover:text-white text-secondary border border-theme"
                     onClick={() => onReuse(item)}
                   >
-                    <RotateCcw className="h-3.5 w-3.5" />
+                    <RotateCcw className="h-4 w-4" />
                   </Button>
                 </CardHeader>
-                <CardContent className="p-5 pt-3 space-y-3">
-                  <div className="space-y-1.5">
-                    <div className="flex flex-wrap gap-1.5">
+                <CardContent className="p-6 pt-3 space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
                       {Object.entries(item.inputs).map(([key, value]) => (
-                        <div key={key} className="px-2 py-0.5 bg-muted rounded-lg text-[8px] font-black border border-border text-muted-foreground">
-                          <span className="mr-1 uppercase tracking-tighter">{key.replace(/([A-Z])/g, ' $1')}:</span>
+                        <div key={key} className="px-3 py-1 bg-muted/20 rounded-xl text-[8px] font-black border border-theme text-secondary uppercase tracking-tighter">
+                          <span className="mr-1 opacity-60">{key.replace(/([A-Z])/g, ' $1')}:</span>
                           {value}
                         </div>
                       ))}
                     </div>
                   </div>
-                  <div className="pt-3">
-                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground mb-1">Result</p>
-                    <p className="text-xl font-black text-foreground tracking-tight truncate italic">
+                  <div className="pt-4 border-t border-theme">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-secondary mb-1 opacity-60">Audit Result</p>
+                    <p className="text-xl font-black text-primary tracking-tight truncate italic">
                       {typeof item.result === 'object' ? JSON.stringify(item.result) : item.result}
                     </p>
                   </div>

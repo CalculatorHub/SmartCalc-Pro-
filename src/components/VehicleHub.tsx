@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Fuel, Navigation, RefreshCw, Zap, Share2 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { formatNumber, vibrate } from '@/lib/utils';
+import { CopyButton } from './ui/CopyButton';
 import { CalculationHistory, HistoryItem } from './CalculationHistory';
 import { ExportActions } from './ExportActions';
 import { useLocalStorage } from '@/lib/pwa';
@@ -21,7 +23,7 @@ const FALLBACK_FUEL_PRICES = {
 };
 
 export const VehicleHub = () => {
-  const [fuelCity, setFuelCity] = useLocalStorage<string>('vh-fuel-city', 'Hyderabad');
+  const [fuelCity, setFuelCity] = useLocalStorage<string>('vh-fuel-city', '');
   const [fuelType, setFuelType] = useLocalStorage<'petrol' | 'diesel' | null>('vh-fuel-type', null);
   const [fuelDistance, setFuelDistance] = useLocalStorage<string>('vh-fuel-distance', '');
   const [fuelMileage, setFuelMileage] = useLocalStorage<string>('vh-fuel-mileage', '');
@@ -113,6 +115,7 @@ export const VehicleHub = () => {
 
   const clearHistory = () => setHistory([]);
   const reset = () => {
+    vibrate(15);
     setFuelDistance('');
     setFuelMileage('');
     setManualFuelPrice('');
@@ -129,65 +132,67 @@ export const VehicleHub = () => {
           transition={{ duration: 0.8 }}
           className="space-y-8"
         >
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 pb-4">
-            <div className="space-y-4 text-center md:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-500 text-[9px] font-black uppercase tracking-[0.2em]">
-                <Navigation className="h-3 w-3" />
-                Vehicle Hub
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-black tracking-tighter text-foreground uppercase italic leading-none mb-1">
-                Vehicle <span className="text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 to-cyan-600">Hub</span>
-              </h2>
-              <p className="text-muted-foreground text-[10px] font-black uppercase tracking-widest leading-relaxed">Precision vehicle & fuel efficiency matrix. Engineered for accuracy.</p>
-            </div>
-            
-            <div className="flex items-center gap-3 bg-muted p-2 px-4 rounded-xl shadow-lg border border-border">
-               <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white">
-                 <Zap className="h-5 w-5" />
-               </div>
-               <div>
-                 <div className="text-[8px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Status</div>
-                 <div className="text-[10px] font-black text-foreground dark:text-foreground uppercase tracking-tighter leading-none">Operational</div>
-               </div>
-            </div>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-[9px] font-black uppercase tracking-[0.2em]">
+            <Zap className="h-3 w-3 fill-current" />
+            System Live
           </div>
+          <h2 className="text-3xl sm:text-4xl font-black tracking-tighter text-primary uppercase italic leading-none mb-1">
+            Logistics <span className="text-blue-600">Terminal</span>
+          </h2>
+          <p className="text-secondary text-[10px] font-black uppercase tracking-widest leading-relaxed">Precision vehicle & fuel efficiency matrix. Engineered for accuracy.</p>
+        </div>
+        
+        <div className="flex items-center gap-4 bg-muted/30 dark:bg-muted/10 p-4 rounded-3xl border border-theme">
+           <div className="h-10 w-10 rounded-2xl bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+             <Fuel className="h-5 w-5 text-blue-500" />
+           </div>
+           <div>
+             <div className="text-[8px] font-black text-secondary uppercase tracking-widest leading-none mb-1">Status</div>
+             <div className="text-[10px] font-black text-primary uppercase tracking-tighter leading-none">Operational</div>
+           </div>
+        </div>
+      </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             <div className="space-y-6">
-              <Card className="relative border-none shadow-xl bg-card overflow-hidden rounded-[2rem]">
+              <Card className="relative border-none shadow-xl bg-card overflow-hidden rounded-[2rem] border border-theme">
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-blue-600" />
-                <CardHeader className="pb-2 pt-6 px-6">
-                  <CardTitle className="text-sm font-black flex items-center gap-2 text-foreground uppercase tracking-tight">
+                <CardHeader className="pb-4 pt-8 px-8">
+                  <CardTitle className="text-sm font-black flex items-center gap-2 text-primary uppercase tracking-tight">
                     <Fuel className="h-4 w-4 text-blue-600" />
-                    Fuel Logic
+                    Fuel Matrix
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6 pb-6 px-6">
+                <CardContent className="space-y-6 pb-8 px-8">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                       <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Location Node</Label>
+                       <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-secondary ml-1">Location Node</Label>
                         <Input
                           value={fuelCity}
                           onChange={(e) => {
                             setFuelCity(e.target.value);
                             updatePriceByCity(e.target.value, fuelType);
                           }}
-                          className="h-10 bg-muted text-foreground border-2 border-border rounded-xl font-black text-sm outline-none focus:ring-2 focus:ring-blue-500/20"
-                          placeholder="Enter city"
+                          className="h-14 bg-bg text-primary border-2 border-theme rounded-2xl px-6 font-black text-sm outline-none focus:border-blue-500 transition-all placeholder:text-muted-foreground/30"
+                          placeholder="ENTER_CITY"
                         />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Type</Label>
-                      <div className="flex gap-2 h-10">
+                      <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-secondary ml-1">Type</Label>
+                      <div className="flex p-1 bg-bg rounded-2xl border-2 border-theme h-14">
                         {['petrol', 'diesel'].map((f) => (
                           <button
                             key={f}
                             onClick={() => {
                               setFuelType(f as any);
                               updatePriceByCity(fuelCity, f as any);
+                              vibrate(5);
                             }}
-                            className={`flex-1 rounded-xl text-[9px] font-black uppercase border-2 transition-all duration-500 ${
-                              fuelType === f ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-muted border-border text-muted-foreground'
+                            aria-label={`Select ${f} fuel type`}
+                            className={`flex-1 rounded-xl text-[9px] font-black uppercase transition-all duration-500 ${
+                              fuelType === f ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'text-secondary hover:bg-muted/50'
                             }`}
                           >
                             {f}
@@ -198,21 +203,22 @@ export const VehicleHub = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Pump Rate (₹)</Label>
+                    <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-secondary ml-1">Pump Rate (₹)</Label>
                     <div className="relative group">
                       <Input
                          type="number"
                          value={manualFuelPrice}
                          onChange={(e) => setManualFuelPrice(e.target.value)}
-                         placeholder="Enter price (₹)"
-                         className="h-12 bg-muted text-foreground border-2 border-border rounded-xl px-4 text-xl font-black outline-none transition-all focus:ring-2 focus:ring-blue-500/20"
+                         placeholder="0.00"
+                         className="h-14 bg-bg text-primary border-2 border-theme rounded-2xl px-14 text-lg font-black outline-none transition-all focus:border-blue-500 placeholder:text-muted-foreground/30"
                        />
+                       <div className="absolute left-6 top-1/2 -translate-y-1/2 text-primary">₹</div>
                        <Button 
                          variant="ghost" 
                          size="sm" 
                          disabled={loading}
                          onClick={refreshFuelPrices} 
-                         className="absolute right-2 top-1/2 -translate-y-1/2 h-8 px-3 rounded-lg bg-blue-600 text-white font-black uppercase text-[8px] tracking-widest hover:bg-blue-700 disabled:opacity-50"
+                         className="absolute right-2 top-1/2 -translate-y-1/2 h-10 px-4 rounded-xl bg-blue-600 text-white font-black uppercase text-[8px] tracking-widest hover:bg-blue-700 disabled:opacity-50 shadow-lg shadow-blue-600/20"
                        >
                          {loading ? <RefreshCw className="h-3 w-3 animate-spin" /> : 'Sync'}
                        </Button>
@@ -221,76 +227,85 @@ export const VehicleHub = () => {
                 </CardContent>
               </Card>
 
-              <Card className="relative border-none shadow-xl bg-card overflow-hidden rounded-[2rem]">
+              <Card className="relative border-none shadow-xl bg-card overflow-hidden rounded-[2rem] border border-theme">
                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-emerald-600" />
-                <CardContent className="p-6 space-y-6">
+                <CardHeader className="pb-4 pt-8 px-8">
+                  <CardTitle className="text-sm font-black flex items-center gap-2 text-primary uppercase tracking-tight">
+                    <Navigation className="h-4 w-4 text-emerald-600" />
+                    Spatial Metrics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-8 space-y-6 pt-0">
                    <div className="grid grid-cols-2 gap-4">
                      <div className="space-y-2">
-                       <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Distance (KM)</Label>
+                       <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-secondary ml-1">Distance (KM)</Label>
                        <Input
                          type="number"
                          value={fuelDistance}
                          onChange={(e) => setFuelDistance(e.target.value)}
-                         className="h-12 bg-muted text-foreground border-2 border-border rounded-xl font-black text-xl outline-none focus:ring-2 focus:ring-emerald-500/20"
-                         placeholder="Enter distance (km)"
+                         className="h-14 bg-bg text-primary border-2 border-theme rounded-2xl px-6 font-black text-lg outline-none focus:border-emerald-500 transition-all placeholder:text-muted-foreground/30"
+                         placeholder="0"
                        />
                      </div>
                      <div className="space-y-2">
-                       <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground ml-1">Economy (KMPL)</Label>
+                       <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-secondary ml-1">Economy (KMPL)</Label>
                        <Input
                          type="number"
                          value={fuelMileage}
                          onChange={(e) => setFuelMileage(e.target.value)}
-                         className="h-12 bg-muted text-foreground border-2 border-border rounded-xl font-black text-xl outline-none focus:ring-2 focus:ring-emerald-500/20"
-                         placeholder="Enter mileage"
+                         className="h-14 bg-bg text-primary border-2 border-theme rounded-2xl px-6 font-black text-lg outline-none focus:border-emerald-500 transition-all placeholder:text-muted-foreground/30"
+                         placeholder="0"
                        />
                      </div>
                    </div>
-                   <div className="flex gap-2">
+                   <div className="flex gap-4">
                      <Button 
                        onClick={reset}
-                       variant="ghost" 
-                       className="h-10 flex-1 rounded-xl bg-muted text-muted-foreground text-[9px] font-black uppercase tracking-widest"
+                       variant="outline" 
+                       className="h-12 flex-1 rounded-2xl border-2 border-theme bg-bg text-secondary text-[10px] font-black uppercase tracking-widest hover:bg-muted/50"
                      >Reset</Button>
                      <Button 
                        onClick={handleSaveTrip} 
                        disabled={!results}
-                       className="h-10 flex-1 rounded-xl bg-emerald-600 text-white text-[9px] font-black uppercase tracking-widest"
-                     >Archive</Button>
+                       className="h-12 flex-1 rounded-2xl bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-emerald-700 shadow-xl shadow-emerald-600/20 border-none"
+                     >Archive Data</Button>
                    </div>
                 </CardContent>
               </Card>
             </div>
 
             <div className="space-y-6">
-               <Card className="relative border-none shadow-2xl bg-card overflow-hidden rounded-[2.5rem]">
-                 <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-emerald-500 to-violet-600" />
-                 <CardContent className="p-6 sm:p-8 space-y-6 text-center">
-                    <div className="space-y-2">
-                      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground">Est. Expenditure</span>
-                      <div className="relative">
-                        <div className="absolute inset-0 blur-2xl bg-blue-500/10 rounded-full" />
-                        <h3 className="relative text-5xl sm:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-foreground via-blue-700 to-blue-900 italic leading-none py-2">
-                          ₹{results ? Math.round(results.totalCost).toLocaleString() : '0'}
-                        </h3>
-                      </div>
-                      <div className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">
-                        {results ? results.fuelReq.toFixed(1) : '0.0'} Liters Required
-                      </div>
-                    </div>
+               <Card className="relative border-none shadow-2xl bg-card overflow-hidden rounded-[2.5rem] border border-theme">
+                  <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-emerald-500 to-violet-600" />
+                  <CardContent className="p-8 sm:p-12 space-y-8 text-center">
+                     <div className="space-y-4">
+                       <span className="text-[10px] font-black uppercase tracking-[0.4em] text-secondary">Est. Expenditure</span>
+                       <div className="relative">
+                         <div className="absolute inset-0 blur-3xl bg-blue-500/10 rounded-full" />
+                         <h3 className="relative text-5xl sm:text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-br from-primary via-blue-700 to-blue-900 italic leading-none py-2 tabular-nums">
+                         ₹{results ? formatNumber(results.totalCost, 0) : '0'}
+                       </h3>
+                       <div className="absolute top-4 right-0">
+                         {results && <CopyButton value={Math.round(results.totalCost)} label="Copy Trip Cost" />}
+                       </div>
+                       </div>
+                       <div className="text-[10px] font-black text-secondary uppercase tracking-widest opacity-80">
+                         {results ? results.fuelReq.toFixed(1) : '0.0'} Liters Required
+                       </div>
+                     </div>
 
-                    <div className="grid grid-cols-2 gap-2">
-                        <div className="p-4 rounded-2xl bg-muted border border-border">
-                          <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mb-1">Unit Cost</p>
-                          <p className="text-xl font-black text-foreground">₹{results ? results.costPerKm.toFixed(2) : '0.00'}</p>
-                          <span className="text-[8px] font-bold text-muted-foreground uppercase">Per KM</span>
-                        </div>
-                        <div className="p-4 rounded-2xl bg-muted border border-border">
-                          <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground mb-1">Volume</p>
-                          <p className="text-xl font-black text-foreground">{results ? results.fuelReq.toFixed(1) : '0.0'}L</p>
-                          <span className="text-[8px] font-bold text-muted-foreground uppercase">Total</span>
-                        </div>
-                    </div>
+                     <div className="grid grid-cols-2 gap-4">
+                         <div className="p-6 rounded-[2rem] bg-muted/30 dark:bg-muted/10 border-2 border-theme">
+                           <p className="text-[8px] font-black uppercase tracking-widest text-secondary mb-1">Unit Cost</p>
+                           <p className="text-2xl font-black text-primary leading-none tabular-nums">₹{results ? results.costPerKm.toFixed(2) : '0.00'}</p>
+                           <span className="text-[8px] font-black text-secondary uppercase mt-1 block">Per KM</span>
+                         </div>
+                         <div className="p-6 rounded-[2rem] bg-muted/30 dark:bg-muted/10 border-2 border-theme">
+                           <p className="text-[8px] font-black uppercase tracking-widest text-secondary mb-1">Volume</p>
+                           <p className="text-2xl font-black text-primary leading-none tabular-nums">{results ? results.fuelReq.toFixed(1) : '0.0'}L</p>
+                           <span className="text-[8px] font-black text-secondary uppercase mt-1 block">Total Signal</span>
+                         </div>
+                     </div>
 
                     <div className="pt-4 flex justify-center">
                       {results && fuelType && (

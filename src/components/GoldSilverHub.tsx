@@ -27,6 +27,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CalculationHistory, HistoryItem } from './CalculationHistory';
 import { ExportActions } from './ExportActions';
 import { useLocalStorage } from '@/lib/pwa';
+import { vibrate } from '@/lib/utils';
 import { getCachedPrices, fetchAllPrices, LivePrices } from '@/services/priceService';
 import { GoldPriceCalculator } from './GoldPriceCalculator';
 import { SilverPriceCalculator } from './SilverPriceCalculator';
@@ -106,7 +107,7 @@ export const GoldSilverHub = () => {
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row items-center justify-between gap-4 bg-card p-5 md:p-6 rounded-[2rem] border border-border shadow-xl relative overflow-hidden"
+        className="flex flex-col md:flex-row items-center justify-between gap-6 bg-card p-6 md:p-8 rounded-[2.5rem] border border-border shadow-xl relative overflow-hidden"
       >
         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
         <div className="space-y-1 text-center md:text-left">
@@ -114,19 +115,35 @@ export const GoldSilverHub = () => {
             <Coins className="h-3 w-3 text-amber-600 dark:text-amber-500" />
             <span className="text-[8px] font-black uppercase tracking-[0.4em] text-muted-foreground">Metallic Evaluation Hub</span>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-foreground uppercase italic leading-none">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase italic leading-none">
             Gold & Silver <span className="text-transparent bg-clip-text bg-gradient-to-br from-amber-500 to-orange-600">Hub</span>
           </h1>
-          <p className="text-muted-foreground text-[9px] font-bold uppercase tracking-tight">Precision metallic analysis terminal.</p>
+          <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.1em] mt-2">Precision metallic analysis terminal.</p>
         </div>
 
-        <div className="flex items-center gap-3 bg-muted px-4 py-2 rounded-xl border border-border/50">
-          <div className="flex flex-col items-end">
-            <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500">System Live</span>
-            <span className="text-[10px] font-black uppercase tracking-tighter text-foreground">Encrypted Node</span>
-          </div>
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-            <ShieldCheck className="h-4 w-4 text-emerald-600" />
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <Button
+            onClick={async () => {
+              vibrate(20);
+              const fresh = await fetchAllPrices();
+              setLastUpdated(new Date().toISOString());
+              // Force local storage update to trigger re-memo
+              window.location.reload(); 
+            }}
+            className="rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-[10px] gap-3 bg-amber-600 hover:bg-amber-700 text-white shadow-xl shadow-amber-500/20 active:scale-95 transition-all"
+          >
+            <RefreshCcw className="h-4 w-4" />
+            Sync Market Rates
+          </Button>
+
+          <div className="flex items-center gap-3 bg-muted px-4 py-3 rounded-2xl border border-border/50 h-14">
+            <div className="flex flex-col items-end">
+              <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500">System Live</span>
+              <span className="text-[10px] font-black uppercase tracking-tighter text-foreground">Encrypted Node</span>
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+            </div>
           </div>
         </div>
       </motion.div>
@@ -146,7 +163,7 @@ export const GoldSilverHub = () => {
             transition={{ duration: 0.8 }}
           >
             <GoldPriceCalculator 
-              initialRate={rates.gold24} 
+              initialRate={0} 
               onSave={(data) => {
                 const newItem: HistoryItem = {
                   id: Date.now().toString(),
@@ -173,7 +190,7 @@ export const GoldSilverHub = () => {
             transition={{ delay: 0.2 }}
           >
             <SilverPriceCalculator 
-              initialRate={rates.silver}
+              initialRate={0}
               onSave={(data) => {
                 const newItem: HistoryItem = {
                   id: Date.now().toString(),

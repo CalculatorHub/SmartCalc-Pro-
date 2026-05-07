@@ -21,6 +21,7 @@ import { SplashScreen } from './components/SplashScreen';
 import { LandingPage } from './components/LandingPage';
 import { motion, AnimatePresence } from 'motion/react';
 import { useOfflineStatus, usePWAInstall } from '@/lib/pwa';
+import { vibrate } from '@/lib/utils';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { trackVisitor } from '@/services/analyticsService';
@@ -132,12 +133,7 @@ const MainApp = () => {
   const location = useLocation();
   const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
   const [isLaunching, setIsLaunching] = useState(true);
-  const [activeTab, setActiveTab] = useState(() => {
-    const saved = localStorage.getItem('smartcalpro_active_tab');
-    if (saved) return saved;
-    const path = location.pathname.substring(1);
-    return ['finance', 'gold', 'vehicle', 'land', 'feedback', 'admin'].includes(path) ? path : 'home';
-  });
+  const [activeTab, setActiveTab] = useState('home');
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
   const isOnline = useOfflineStatus();
@@ -204,6 +200,7 @@ const MainApp = () => {
   }, [isDarkMode]);
 
   useEffect(() => {
+    // Only persist if we're not force-resetting to home on start
     localStorage.setItem('smartcalpro_active_tab', activeTab);
     const path = activeTab === 'home' ? '/' : `/${activeTab}`;
     if (location.pathname !== path) {
@@ -240,8 +237,12 @@ const MainApp = () => {
             {/* Theme Toggle */}
             <button 
               id="themeToggle"
-              onClick={() => setIsDarkMode(!isDarkMode)}
+              onClick={() => {
+                setIsDarkMode(!isDarkMode);
+                vibrate(10);
+              }}
               aria-label="Toggle Theme"
+              className="p-2 rounded-full hover:bg-muted transition-colors"
             >
               {isDarkMode ? "☀️" : "🌙"}
             </button>
@@ -330,7 +331,11 @@ const MainApp = () => {
             ].map((item) => (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  vibrate(5);
+                }}
+                aria-label={`Navigate to ${item.label}`}
                 className={`nav-item flex flex-col items-center justify-center p-0 transition-all duration-300 !bg-transparent !shadow-none border-none outline-none flex-1 gap-0.5 ${
                   activeTab === item.id 
                     ? 'text-white scale-[1.15] opacity-100' 
