@@ -1,238 +1,228 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { 
   Coins, 
-  CircleDot, 
-  MapPin, 
-  RefreshCcw, 
-  Info, 
   TrendingUp, 
-  TrendingDown, 
-  Clock, 
-  IndianRupee, 
+  ChevronRight, 
   Calculator, 
-  ShieldCheck,
-  ChevronRight,
-  Scale,
-  Search,
-  Lock,
-  Unlock,
-  Zap
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
-import { CalculationHistory, HistoryItem } from './CalculationHistory';
-import { ExportActions } from './ExportActions';
-import { useLocalStorage } from '@/lib/pwa';
-import { vibrate } from '@/lib/utils';
-import { getCachedPrices, fetchAllPrices, LivePrices } from '@/services/priceService';
-import { GoldPriceCalculator } from './GoldPriceCalculator';
-import { SilverPriceCalculator } from './SilverPriceCalculator';
+  Share2, 
+  Info,
+  Layers,
+  Sparkles
+} from "lucide-react";
 
-// Mock data as fallback and starting point (Updated for Today: April 23, 2026)
-const MOCK_RATES: Record<string, { gold24: number; gold22: number; silver: number }> = {
-  'hyderabad': { gold24: 8650, gold22: 7930, silver: 115 },
-  'mumbai': { gold24: 8670, gold22: 7950, silver: 116 },
-  'delhi': { gold24: 8660, gold22: 7940, silver: 115.5 },
-  'chennai': { gold24: 8680, gold22: 7960, silver: 116.5 },
-  'bangalore': { gold24: 8665, gold22: 7945, silver: 115.8 },
-  'kolkata': { gold24: 8675, gold22: 7955, silver: 116.2 },
-  'pune': { gold24: 8655, gold22: 7935, silver: 115.3 },
-  'ahmedabad': { gold24: 8645, gold22: 7925, silver: 114.8 },
-  'visakhapatnam': { gold24: 8630, gold22: 7910, silver: 114 },
-  'vijayawada': { gold24: 8620, gold22: 7900, silver: 114 },
-  'tirupati': { gold24: 8625, gold22: 7905, silver: 113.8 },
-  'guntur': { gold24: 8615, gold22: 7895, silver: 113.5 },
-  'kurnool': { gold24: 8610, gold22: 7890, silver: 113.2 },
-  'nellore': { gold24: 8622, gold22: 7902, silver: 114.1 },
-  'rajamahendravaram': { gold24: 8628, gold22: 7908, silver: 114.3 },
-  'kakinada': { gold24: 8632, gold22: 7912, silver: 114.4 },
-  'kadapa': { gold24: 8608, gold22: 7888, silver: 113.0 },
-  'anantapur': { gold24: 8605, gold22: 7885, silver: 112.8 },
-  'eluru': { gold24: 8618, gold22: 7898, silver: 113.7 },
-  'vizianagaram': { gold24: 8635, gold22: 7915, silver: 114.5 },
-  'ongole': { gold24: 8612, gold22: 7892, silver: 113.4 },
-  'chittoor': { gold24: 8622, gold22: 7902, silver: 113.6 },
-  'machilipatnam': { gold24: 8624, gold22: 7904, silver: 114.2 },
-  'tenali': { gold24: 8616, gold22: 7896, silver: 113.6 },
-};
+type AssetType = "gold" | "silver";
 
-const DEFAULT_RATES = MOCK_RATES['hyderabad'];
-const GST_RATE = 0.03; // 3% GST
+export default function GoldSilverHub() {
+  const [type, setType] = useState<AssetType>("gold");
+  const [weight, setWeight] = useState<string>("");
+  const [rate, setRate] = useState<string>("");
+  const [makingCharge, setMakingCharge] = useState<string>("");
 
-type WeightUnit = 'g' | 'kg';
-
-export const GoldSilverHub = () => {
-  const [lastUpdated, setLastUpdated] = useLocalStorage<string>('gs-last-updated', new Date().toISOString());
-  const [showGST, setShowGST] = useLocalStorage<boolean>('gs-show-gst', true);
-
-  const [history, setHistory] = useLocalStorage<HistoryItem[]>('gs-history', []);
-
-  // Rates derived from live or mock data
-  const currentData = useMemo(() => getCachedPrices(), [lastUpdated]);
-
-  const rates = useMemo(() => {
-    const live = currentData;
+  const calculateValue = () => {
+    const w = parseFloat(weight) || 0;
+    const r = parseFloat(rate) || 0;
+    const mc = parseFloat(makingCharge) || 0;
     
-    // Always use live or default Hyderabad rates as the global baseline
-    if (live.source === 'api') {
-      return {
-        gold24: live.gold24,
-        gold22: live.gold22,
-        silver: live.silver
-      };
+    if (type === "gold") {
+      return w * r + (w * r * (mc / 100));
     }
-
-    return MOCK_RATES['hyderabad'];
-  }, [currentData]);
-
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(val);
+    return w * r;
   };
 
-  const handleReuse = (item: HistoryItem) => {
-    // Silver and Gold calculators manage their own state
-  };
+  const estimatedValue = calculateValue();
 
   return (
-    <div className="space-y-6 w-full max-w-6xl mx-auto px-4 md:px-6 pb-24">
-      {/* Top Status Bar */}
+    <motion.div 
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      className="p-4 pb-32 max-w-md mx-auto space-y-6"
+      id="gold-silver-hub"
+    >
+      {/* HEADER SECTION */}
       <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row items-center justify-between gap-6 bg-card p-6 md:p-8 rounded-[2.5rem] border border-border shadow-xl relative overflow-hidden"
+        initial={{ y: -20 }}
+        animate={{ y: 0 }}
+        className="rounded-[2rem] p-6 bg-white/60 dark:bg-slate-900/40 backdrop-blur-2xl shadow-2xl border border-white/20 relative overflow-hidden"
       >
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
-        <div className="space-y-1 text-center md:text-left">
-          <div className="flex items-center gap-2 justify-center md:justify-start mb-0.5">
-            <Coins className="h-3 w-3 text-amber-600 dark:text-amber-500" />
-            <span className="text-[8px] font-black uppercase tracking-[0.4em] text-muted-foreground">Metallic Evaluation Hub</span>
+        <div className="flex items-center gap-3 mb-2 text-slate-900 dark:text-white">
+          <div className={`p-2 rounded-xl text-white shadow-lg ${type === 'gold' ? 'bg-gradient-to-br from-yellow-400 to-orange-500' : 'bg-gradient-to-br from-slate-400 to-slate-600'}`}>
+            {type === 'gold' ? <Coins className="w-5 h-5" /> : <Layers className="w-5 h-5" />}
           </div>
-          <h1 className="text-3xl md:text-5xl font-black tracking-tighter text-foreground uppercase italic leading-none">
-            Gold & Silver <span className="text-transparent bg-clip-text bg-gradient-to-br from-amber-500 to-orange-600">Hub</span>
+          <h1 className="text-xl font-black tracking-tight">
+            Gold & Silver <span className="text-blue-500">Hub</span>
           </h1>
-          <p className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.1em] mt-2">Precision metallic analysis terminal.</p>
+        </div>
+        <p className="text-xs font-medium opacity-60 uppercase tracking-widest leading-none dark:text-white/60">
+          Real-time Precise Valuation
+        </p>
+
+        <motion.button 
+          whileTap={{ scale: 0.98 }}
+          className="mt-6 w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-xl shadow-orange-500/20 font-bold flex items-center justify-center gap-2"
+        >
+          <TrendingUp className="w-4 h-4" />
+          View Market Rates
+        </motion.button>
+
+        {/* Decorative elements */}
+        <div className="absolute -top-10 -right-10 w-32 h-32 bg-yellow-500/10 blur-3xl pointer-events-none" />
+      </motion.div>
+
+      {/* ASSET TYPE TOGGLE */}
+      <div className="flex bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-2xl p-1.5 shadow-inner border border-white/10">
+        <button
+          onClick={() => setType("gold")}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 font-bold text-sm ${
+            type === "gold"
+              ? "bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg"
+              : "opacity-60 text-slate-600 dark:text-white"
+          }`}
+        >
+          <Coins className="w-4 h-4" />
+          GOLD
+        </button>
+        <button
+          onClick={() => setType("silver")}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 font-bold text-sm ${
+            type === "silver"
+              ? "bg-gradient-to-r from-slate-400 to-slate-600 text-white shadow-lg"
+              : "opacity-60 text-slate-600 dark:text-white"
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          SILVER
+        </button>
+      </div>
+
+      {/* VALUATION ENGINE */}
+      <motion.div 
+        layout
+        className="rounded-[2rem] p-6 bg-white/60 dark:bg-slate-900/40 backdrop-blur-2xl shadow-xl border border-white/20 space-y-6"
+      >
+        <div className="flex justify-between items-center text-slate-900 dark:text-white">
+          <h2 className="font-black text-lg flex items-center gap-2">
+            {type === "gold" ? "Gold Engine" : "Silver Engine"}
+          </h2>
+          <Info className="w-4 h-4 opacity-40" />
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-4">
-          <Button
-            onClick={async () => {
-              vibrate(20);
-              const fresh = await fetchAllPrices();
-              setLastUpdated(new Date().toISOString());
-              // Force local storage update to trigger re-memo
-              window.location.reload(); 
-            }}
-            className="rounded-2xl h-14 px-8 font-black uppercase tracking-widest text-[10px] gap-3 bg-amber-600 hover:bg-amber-700 text-white shadow-xl shadow-amber-500/20 active:scale-95 transition-all"
-          >
-            <RefreshCcw className="h-4 w-4" />
-            Sync Market Rates
-          </Button>
+        {/* INPUTS GRID */}
+        <div className="grid gap-5">
+          <Input 
+            label="Weight (grams)" 
+            value={weight} 
+            onChange={setWeight} 
+            placeholder="0.00"
+            icon={<Layers className="w-4 h-4" />}
+          />
+          <Input 
+            label="Current Rate (per gram)" 
+            value={rate} 
+            onChange={setRate} 
+            placeholder="₹ 0.00"
+            icon={<Coins className="w-4 h-4" />}
+          />
 
-          <div className="flex items-center gap-3 bg-muted px-4 py-3 rounded-2xl border border-border/50 h-14">
-            <div className="flex flex-col items-end">
-              <span className="text-[8px] font-black uppercase tracking-widest text-emerald-500">System Live</span>
-              <span className="text-[10px] font-black uppercase tracking-tighter text-foreground">Encrypted Node</span>
-            </div>
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-              <ShieldCheck className="h-4 w-4 text-emerald-600" />
-            </div>
+          <AnimatePresence mode="popLayout">
+            {type === "gold" && (
+              <motion.div
+                key="making-charge"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+              >
+                <Input 
+                  label="Making Charge %" 
+                  value={makingCharge} 
+                  onChange={setMakingCharge} 
+                  placeholder="0 %"
+                  icon={<Sparkles className="w-4 h-4" />}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* RESULT PANEL */}
+        <motion.div 
+          layout
+          className="p-5 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 text-white shadow-2xl relative overflow-hidden"
+        >
+          <span className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-1 block">Estimated Value</span>
+          <div className="text-3xl font-black">
+            ₹ {estimatedValue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </div>
+          
+          <div className="absolute top-1/2 -right-4 -translate-y-1/2 opacity-20 rotate-12">
+            <Calculator className="w-24 h-24" />
+          </div>
+        </motion.div>
+
+        {/* ACTION BUTTONS */}
+        <div className="flex gap-3">
+          <motion.button 
+            whileTap={{ scale: 0.95 }}
+            className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl bg-slate-800 text-white font-bold text-sm shadow-lg border border-white/5"
+          >
+            <Share2 className="w-4 h-4" />
+            EXPORT
+          </motion.button>
+          <motion.button 
+            whileTap={{ scale: 0.95 }}
+            className={`flex-1 py-4 rounded-2xl font-bold text-sm shadow-lg text-white ${type === 'gold' ? 'bg-gradient-to-r from-orange-500 to-yellow-500' : 'bg-gradient-to-r from-slate-600 to-slate-800'}`}
+          >
+            CALCULATE
+          </motion.button>
         </div>
       </motion.div>
 
-      <AnimatePresence>
-        {/* Connection logic removed for pure offline-first experience */}
-      </AnimatePresence>
-
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        
-        {/* Premium Gold Calculator Section */}
-        <div className="lg:col-span-2">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <GoldPriceCalculator 
-              initialRate={0} 
-              onSave={(data) => {
-                const newItem: HistoryItem = {
-                  id: Date.now().toString(),
-                  type: 'Finance',
-                  inputs: {
-                    item: 'Gold',
-                    weight: `${data.weight}${data.unit}`,
-                    purity: data.purity,
-                    rate: `₹${data.rate}/g`
-                  },
-                  result: `Total: ${formatCurrency(data.totalPrice)}`,
-                  timestamp: new Date().toISOString()
-                };
-                setHistory([newItem, ...history].slice(0, 10));
-              }}
-            />
-          </motion.div>
+      {/* AI INTELLIGENCE FEED */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="rounded-[1.5rem] p-5 bg-blue-500/10 dark:bg-blue-500/5 backdrop-blur-xl shadow-lg border border-blue-500/20"
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-ping" />
+          <h3 className="font-bold text-xs uppercase tracking-widest text-blue-500">AI Market Feed</h3>
         </div>
+        <p className="text-sm opacity-80 leading-relaxed font-medium text-slate-800 dark:text-slate-200">
+          <span className="text-orange-500 font-bold">Gold:</span> 24k Bullish indicators detected. Resistance at 7,200/g. 
+          <br />
+          <span className="text-slate-400 font-bold">Silver:</span> Industrial demand surging. Periodic growth expected.
+        </p>
+      </motion.div>
+    </motion.div>
+  );
+}
 
-        <div className="lg:col-span-2">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            <SilverPriceCalculator 
-              initialRate={0}
-              onSave={(data) => {
-                const newItem: HistoryItem = {
-                  id: Date.now().toString(),
-                  type: 'Finance',
-                  inputs: {
-                    item: 'Silver',
-                    weight: `${data.weight}${data.unit}`,
-                    rate: `₹${data.rate}/g`
-                  },
-                  result: `Total: ${formatCurrency(data.totalPrice)}`,
-                  timestamp: new Date().toISOString()
-                };
-                setHistory([newItem, ...history].slice(0, 10));
-              }}
-            />
-          </motion.div>
-        </div>
-      </div>
+interface InputProps {
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+  icon?: React.ReactNode;
+}
 
-      <div className="space-y-6">
-         <CalculationHistory 
-           history={history} 
-           onClear={() => setHistory([])} 
-           onReuse={handleReuse} 
-           title="Audit Log: Metallic Transactions"
-         />
-      </div>
-
-      {/* Market Protocol Banner */}
-      <div className="bg-muted border border-border p-5 md:p-6 rounded-[2rem] flex items-center gap-5 relative overflow-hidden shadow-sm group">
-        <div className="bg-amber-500/10 dark:bg-white/5 p-3 rounded-xl shrink-0">
-          <Zap className="h-5 w-5 text-amber-600 dark:text-amber-500" />
+function Input({ label, value, onChange, placeholder, icon }: InputProps) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs font-bold uppercase tracking-widest opacity-50 ml-1 text-slate-900 dark:text-white">{label}</label>
+      <div className="relative group">
+        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-orange-400 transition-colors">
+          {icon}
         </div>
-        <div className="space-y-1">
-          <h3 className="text-xs font-black uppercase tracking-widest text-foreground flex items-center gap-2">
-            Market Intelligence <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          </h3>
-          <p className="text-muted-foreground text-[10px] font-medium leading-relaxed max-w-3xl">
-            Rates are indexed globally. Displays are for informational analysis. Final trade values may vary based on GST, making charges, and local hallmarking protocols.
-          </p>
-        </div>
+        <input
+          type="number"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200 dark:border-white/5 focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all font-semibold text-lg text-slate-950 dark:text-white"
+        />
       </div>
     </div>
   );
-};
+}

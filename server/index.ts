@@ -10,7 +10,6 @@ async function startServer() {
   const PORT = 3000;
 
   // 1. Basic Security & Middleware
-  app.set('trust proxy', 1); // Trust the first proxy (Nginx/Cloud Run)
   app.use(cors());
   app.use(express.json());
 
@@ -20,19 +19,30 @@ async function startServer() {
     limit: 100, // Limit each IP to 100 requests per window
     standardHeaders: 'draft-7',
     legacyHeaders: false,
-    keyGenerator: (req) => {
-      // Use the standard X-Forwarded-For if available, otherwise req.ip
-      const xForwardedFor = req.headers['x-forwarded-for'];
-      if (xForwardedFor) {
-        return (Array.isArray(xForwardedFor) ? xForwardedFor[0] : xForwardedFor.split(',')[0]).trim();
-      }
-      return req.ip || 'unknown-ip';
-    },
     message: { success: false, message: 'Too many requests from this IP, please try again later.' }
   });
   app.use('/api/', limiter);
 
   // 3. SECURE API ROUTES (Backend Proxy)
+  
+  // Finance History Store (In-memory for demo)
+  let financeHistory: any[] = [];
+
+  app.post('/api/finance', (req, res) => {
+    const data = {
+      id: Date.now().toString(),
+      ...req.body,
+      createdAt: new Date().toISOString()
+    };
+    financeHistory.unshift(data);
+    // Keep only last 50 items
+    if (financeHistory.length > 50) financeHistory.pop();
+    res.json(data);
+  });
+
+  app.get('/api/finance', (req, res) => {
+    res.json(financeHistory);
+  });
   
   // Admin Authentication
   app.post('/api/admin/auth', (req, res) => {
