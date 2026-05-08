@@ -1,9 +1,8 @@
 import React from "react";
 import { motion } from "motion/react";
-import { Moon, Sun, TrendingUp, TrendingDown, IndianRupee, Coins, Car, Home } from "lucide-react";
+import { Moon, Sun, TrendingUp, TrendingDown, IndianRupee, Coins, Car, Home, ShieldCheck } from "lucide-react";
 import PremiumCard from "./PremiumCard";
 import InstallPWA from "./InstallPWA";
-import FABMenu from "./FABMenu";
 
 interface DashboardProps {
   toggleDark: () => void;
@@ -46,14 +45,31 @@ export default function Dashboard({ toggleDark, isDark, onNavigate }: DashboardP
             </p>
           </div>
 
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={toggleDark}
-            className="w-10 h-10 flex items-center justify-center bg-slate-900/5 dark:bg-white/5 hover:bg-slate-900/10 dark:hover:bg-white/10 rounded-2xl transition-colors"
-            id="theme-toggle"
-          >
-            {isDark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-slate-700" />}
-          </motion.button>
+          <div className="flex gap-2 flex-shrink-0">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => onNavigate("admin")}
+              className="w-12 h-12 flex items-center justify-center bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-white/10 rounded-2xl transition-all hover:bg-blue-50 dark:hover:bg-blue-900/30 group"
+              id="admin-access"
+              title="Admin Portal"
+            >
+              <ShieldCheck className="w-5 h-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={toggleDark}
+              className="w-12 h-12 flex items-center justify-center bg-white dark:bg-slate-800 shadow-lg border border-slate-200 dark:border-white/10 rounded-2xl transition-all hover:bg-orange-50 dark:hover:bg-yellow-900/20 group"
+              id="theme-toggle"
+              title="Toggle Theme"
+            >
+              {isDark ? (
+                <Sun className="w-5 h-5 text-yellow-500 group-hover:rotate-45 transition-transform" />
+              ) : (
+                <Moon className="w-5 h-5 text-slate-700 group-hover:-rotate-12 transition-transform" />
+              )}
+            </motion.button>
+          </div>
         </div>
 
         <p className="text-sm opacity-70 mt-6 leading-relaxed max-w-[80%]">
@@ -150,7 +166,6 @@ export default function Dashboard({ toggleDark, isDark, onNavigate }: DashboardP
       </motion.div>
 
       <InstallPWA />
-      <FABMenu onNavigate={onNavigate} />
     </div>
   );
 }

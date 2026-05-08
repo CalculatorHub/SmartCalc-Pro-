@@ -1,18 +1,26 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Plus, BarChart3, Camera, History, X } from "lucide-react";
+import { Plus, BarChart3, Camera, History, X, ShieldCheck, Sun, Moon } from "lucide-react";
 
 interface FABMenuProps {
   onNavigate?: (tab: string) => void;
+  toggleDark?: () => void;
+  isDark?: boolean;
 }
 
-export default function FABMenu({ onNavigate }: FABMenuProps) {
+export default function FABMenu({ onNavigate, toggleDark, isDark }: FABMenuProps) {
   const [open, setOpen] = useState(false);
 
   const menuItems = [
-    { icon: <BarChart3 className="w-5 h-5" />, label: "Finance", color: "bg-blue-500", tab: "finance" },
-    { icon: <Camera className="w-5 h-5" />, label: "Scan", color: "bg-purple-500", tab: "scan" },
-    { icon: <History className="w-5 h-5" />, label: "History", color: "bg-indigo-500", tab: "history" },
+    { icon: <BarChart3 className="w-5 h-5" />, label: "Finance", color: "bg-blue-500", action: () => handleItemClick("finance") },
+    { icon: <History className="w-5 h-5" />, label: "History", color: "bg-indigo-500", action: () => handleItemClick("history") },
+    { icon: <ShieldCheck className="w-5 h-5" />, label: "Admin", color: "bg-slate-700 dark:bg-slate-800", action: () => handleItemClick("admin") },
+    { 
+      icon: isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />, 
+      label: isDark ? "Light View" : "Night View", 
+      color: "bg-yellow-500 dark:bg-slate-600", 
+      action: () => { toggleDark?.(); setOpen(false); } 
+    },
   ];
 
   const handleItemClick = (tab: string) => {
@@ -35,7 +43,7 @@ export default function FABMenu({ onNavigate }: FABMenuProps) {
                 key={item.label}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                onClick={() => handleItemClick(item.tab)}
+                onClick={item.action}
                 transition={{ delay: i * 0.05 }}
                 className="flex items-center gap-3 bg-white dark:bg-slate-800 p-2 pr-4 rounded-xl shadow-xl border border-white/10"
                 id={`fab-item-${item.label.toLowerCase()}`}

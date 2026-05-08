@@ -56,6 +56,17 @@ async function startServer() {
     }
   });
 
+  app.post("/api/admin/login", (req, res) => {
+    const { username, password } = req.body;
+    // Simple demo logic - using the same key as password for consistency
+    const adminKey = process.env.ADMIN_ACCESS_KEY || 'Patel@9488';
+    if (username === "admin" && password === adminKey) {
+      res.json({ success: true });
+    } else {
+      res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+  });
+
   // Example: Secure Gold/Silver Price Proxy (Hides API Key from Frontend)
   app.get('/api/prices/metals', async (req, res) => {
     try {

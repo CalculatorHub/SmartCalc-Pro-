@@ -1,13 +1,14 @@
 import React from "react";
 import { motion } from "motion/react";
-import { Home, IndianRupee, Coins, Car, MapPin } from "lucide-react";
+import { Home, IndianRupee, Coins, Car, MapPin, ShieldCheck } from "lucide-react";
 
 interface BottomNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  isAdmin?: boolean;
 }
 
-export default function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
+export default function BottomNav({ activeTab, setActiveTab, isAdmin }: BottomNavProps) {
   return (
     <div className="fixed bottom-0 left-0 right-0 backdrop-blur-2xl bg-white/70 dark:bg-slate-950/80 border-t border-white/20 flex justify-around items-center py-3 px-2 z-40 safe-area-bottom">
       <NavItem 
@@ -40,6 +41,14 @@ export default function BottomNav({ activeTab, setActiveTab }: BottomNavProps) {
         active={activeTab === "land"} 
         onClick={() => setActiveTab("land")}
       />
+      {isAdmin && (
+        <NavItem 
+          label="Admin" 
+          icon={<ShieldCheck className="w-5 h-5" />} 
+          active={activeTab === "admin"} 
+          onClick={() => setActiveTab("admin")}
+        />
+      )}
     </div>
   );
 }

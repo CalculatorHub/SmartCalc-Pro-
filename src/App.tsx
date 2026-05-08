@@ -5,13 +5,16 @@ import GoldSilverHub from "./components/GoldSilverHub";
 import VehicleHub from "./components/VehicleHub";
 import EstateHub from "./components/EstateHub";
 import { motion, AnimatePresence } from "motion/react";
+import FABMenu from "./components/FABMenu";
 
 import FinanceHub from "./components/FinanceHub";
 import FinanceHistory from "./components/FinanceHistory";
+import AdminPanel from "./components/AdminPanel";
 
 export default function App() {
   const [dark, setDark] = useState(true);
   const [activeTab, setActiveTab] = useState("home");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (dark) {
@@ -59,6 +62,12 @@ export default function App() {
             <FinanceHistory />
           </motion.div>
         );
+      case "admin":
+        return (
+          <motion.div key="admin" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <AdminPanel setIsAdmin={setIsAdmin} />
+          </motion.div>
+        );
       default:
         return (
           <motion.div key="fallback" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center min-h-[80vh] p-8 text-center">
@@ -92,7 +101,8 @@ export default function App() {
         </AnimatePresence>
       </main>
       
-      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} isAdmin={isAdmin} />
+      <FABMenu onNavigate={setActiveTab} toggleDark={() => setDark(!dark)} isDark={dark} />
     </div>
   );
 }
