@@ -3,34 +3,26 @@ import FinanceHub from "../features/finance/FinanceHub";
 import VehicleHub from "../features/vehicle/VehicleHub";
 import EstateHub from "../features/estate/EstateHub";
 import AdminPanel from "../features/admin/AdminPanel";
-import Feedback from "../features/feedback/Feedback";
 import GoldSilverHub from "../features/metals/GoldSilverHub";
 import Dashboard from "../features/dashboard/Dashboard";
+import Feedback from "../features/feedback/Feedback";
 import AdminAccess from "../features/admin/AdminAccess";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import { AnimatePresence, motion } from "motion/react";
 import FloatingMenu from "../components/ui/FloatingMenu";
 import { observeAuth, logoutAdmin } from "../services/authService";
-import useFeedbackNotifications from "../hooks/useFeedbackNotifications";
 
 export default function Routes() {
   const [page, setPage] = useState<string>("dashboard");
-  const [adminToken, setAdminToken] = useState<string | null>(localStorage.getItem("adminToken"));
+  const [adminToken, setAdminToken] = useState<string | null>(null);
+  const [authInitialized, setAuthInitialized] = useState(false);
   const [showAdminGate, setShowAdminGate] = useState(false);
-
-  // Activate Real-time Feedback Notifications for Admin
-  useFeedbackNotifications();
 
   useEffect(() => {
     const unsub = observeAuth((user) => {
-      if (user) {
-        setAdminToken(user.uid);
-        localStorage.setItem("adminToken", user.uid);
-      } else {
-        setAdminToken(null);
-        localStorage.removeItem("adminToken");
-      }
+      setAdminToken(user ? user.uid : null);
+      setAuthInitialized(true);
     });
 
     return () => unsub();
@@ -42,10 +34,9 @@ export default function Routes() {
     // 🔐 Auto logout when LEAVING admin
     if (currentPage === "admin" && nextPage !== "admin") {
       handleAdminLogout();
-      console.log("Admin session cleared on navigation away from terminal");
     }
 
-    // 🔐 If going to admin → ask password (now Google Login)
+    // 🔐 If going to admin → check token
     if (nextPage === "admin" && !adminToken) {
       setShowAdminGate(true);
       return;
@@ -102,6 +93,13 @@ export default function Routes() {
       case "vehicle": return <VehicleHub />;
       case "estate": return <EstateHub />;
       case "admin": 
+        if (!authInitialized) {
+          return (
+            <div className="flex h-64 items-center justify-center">
+              <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          );
+        }
         if (!adminToken) {
           return <Dashboard setPage={navigate} />;
         }

@@ -12,13 +12,10 @@ async function startServer() {
 
   // 1. Basic Security & Middleware
   app.set("trust proxy", 1);
-  app.use(helmet({
-    contentSecurityPolicy: false,
-  }));
-  app.use(cors());
   app.use(express.json());
 
-  // 2. Rate Limiting
+  // 2. Rate Limiting disabled for debugging
+  /*
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     limit: 200,
@@ -27,13 +24,19 @@ async function startServer() {
     message: { success: false, message: 'Too many requests' }
   });
   app.use('/api/', limiter);
+  */
 
   // 3. API ROUTES
+  app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+  });
   
   // Finance History (In-memory fallback for complex calculations)
   let financeHistory: any[] = [];
 
   app.post('/api/finance', (req, res) => {
+    console.log('Received finance data:', req.body);
     const data = {
       id: Date.now().toString(),
       ...req.body,
@@ -82,6 +85,12 @@ async function startServer() {
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server (Hybrid) running on port ${PORT}`);
+  });
+
+  // Global Error Handler
+  app.use((err: any, req: any, res: any, next: any) => {
+    console.error('SERVER ERROR:', err);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   });
 }
 

@@ -29,41 +29,6 @@
       },
       "required": ["city", "petrol", "diesel", "updatedAt"]
     },
-    "Feedback": {
-      "title": "User Feedback",
-      "description": "Suggestions and bug reports from users",
-      "type": "object",
-      "properties": {
-        "message": {
-          "type": "string",
-          "description": "The feedback message content"
-        },
-        "type": {
-          "type": "string",
-          "enum": ["Suggestion", "Bug", "Improvement"],
-          "description": "The category of feedback"
-        },
-        "rating": {
-          "type": "integer",
-          "description": "Star rating from 1 to 5"
-        },
-        "status": {
-          "type": "string",
-          "enum": ["unread", "read"],
-          "description": "Whether the transmission has been reviewed"
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the user (optional)"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "When the feedback was submitted"
-        }
-      },
-      "required": ["message", "type", "createdAt"]
-    },
     "Visitor": {
       "title": "Visitor Log",
       "description": "Information about a specific user visit",
@@ -93,6 +58,41 @@
           "format": "date-time"
         }
       }
+    },
+    "Feedback": {
+      "title": "User Feedback",
+      "description": "Suggestions and bug reports from users",
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "The feedback message content"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["Suggestion", "Bug", "Improvement", "UI/UX"],
+          "description": "The category of feedback"
+        },
+        "rating": {
+          "type": "integer",
+          "description": "Star rating from 1 to 5"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["unread", "read"],
+          "description": "Whether the transmission has been reviewed"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the user (optional)"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the feedback was submitted"
+        }
+      },
+      "required": ["message", "type", "createdAt"]
     }
   },
   "firestore": {

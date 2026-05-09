@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Card3D from "../../components/ui/3DCard";
 import Icon3D from "../../components/ui/3DIcon";
 import Button from "../../components/ui/MotionButton";
-import { loginAdmin, loginAdminPassword } from "../../services/authService";
+import { loginAdmin, loginAdminPassword, loginAnonymously } from "../../services/authService";
 import { ShieldAlert, LogIn, Fingerprint } from "lucide-react";
 import Input from "../../components/ui/MotionInput";
 import { useAdminStore } from "../../store/adminStore";

@@ -1,18 +1,20 @@
 import { 
   collection, 
   addDoc, 
-  serverTimestamp, 
   onSnapshot, 
   query, 
   orderBy, 
-  doc, 
-  deleteDoc, 
+  serverTimestamp,
+  doc,
   updateDoc,
-  getDocFromServer
-} from 'firebase/firestore';
-import { db, auth } from '../lib/firebase';
+  deleteDoc,
+  writeBatch,
+  getDocs,
+  limit
+} from "firebase/firestore";
+import { db, auth } from "../lib/firebase";
 
-const COLLECTION_NAME = 'feedback';
+const COLLECTION_NAME = "feedback";
 
 export enum OperationType {
   CREATE = 'create',
@@ -44,62 +46,87 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
     },
     operationType,
     path
-  };
+  }
   console.error('Firestore Error: ', JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
 }
 
-// Test connection on boot
-export async function testConnection() {
-  try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
-  } catch (error) {
-    if(error instanceof Error && error.message.includes('the client is offline')) {
-      console.error("Please check your Firebase configuration.");
-    }
-  }
-}
-
 export const submitFeedback = async (data: { 
-  name?: string,
-  message: string, 
-  type: string, 
-  rating: number,
-  userId?: string,
-  browser?: string,
-  os?: string
+  name?: string; 
+  message: string; 
+  type: string; 
+  rating: number;
 }) => {
   try {
-    await addDoc(collection(db, COLLECTION_NAME), {
+    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
       ...data,
-      status: 'unread',
+      userId: auth.currentUser?.uid || "anonymous",
       createdAt: serverTimestamp(),
-      userId: data.userId || auth.currentUser?.uid || 'anonymous'
+      status: "unread",
+      browser: navigator.userAgent.split(' ')[0],
+      os: navigator.platform
     });
+    return docRef.id;
   } catch (error) {
-    handleFirestoreError(error, OperationType.WRITE, COLLECTION_NAME);
+    handleFirestoreError(error, OperationType.CREATE, COLLECTION_NAME);
   }
 };
 
 export const subscribeToFeedback = (callback: (data: any[]) => void) => {
-  const q = query(collection(db, COLLECTION_NAME), orderBy('createdAt', 'desc'));
-  
+  const q = query(collection(db, COLLECTION_NAME), orderBy("createdAt", "desc"));
   return onSnapshot(q, (snapshot) => {
-    const feedback = snapshot.docs.map(doc => ({
+    const data = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     }));
-    callback(feedback);
+    callback(data);
   }, (error) => {
-    handleFirestoreError(error, OperationType.GET, COLLECTION_NAME);
+    handleFirestoreError(error, OperationType.LIST, COLLECTION_NAME);
   });
 };
 
-export const removeFeedback = async (id: string) => {
+export const clearAllFeedback = async () => {
+  const colRef = collection(db, COLLECTION_NAME);
+  const BATCH_SIZE = 400;
+  let totalDeleted = 0;
+
   try {
-    await deleteDoc(doc(db, COLLECTION_NAME, id));
+    while (true) {
+      const q = query(colRef, limit(BATCH_SIZE));
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) break;
+
+      const batch = writeBatch(db);
+      snapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+
+      await batch.commit();
+      totalDeleted += snapshot.size;
+
+      // Small delay to allow the system to breathe
+      await new Promise((res) => setTimeout(res, 50));
+      
+      // If the batch was smaller than limit, we're likely done
+      if (snapshot.size < BATCH_SIZE) break;
+    }
+    return totalDeleted;
   } catch (error) {
-    handleFirestoreError(error, OperationType.DELETE, `${COLLECTION_NAME}/${id}`);
+    handleFirestoreError(error, OperationType.DELETE, COLLECTION_NAME);
+    return 0;
+  }
+};
+
+export const removeMultipleFeedback = async (ids: string[]) => {
+  const batch = writeBatch(db);
+  try {
+    ids.forEach(id => {
+      batch.delete(doc(db, COLLECTION_NAME, id));
+    });
+    await batch.commit();
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, `${COLLECTION_NAME}/bulk`);
   }
 };
 

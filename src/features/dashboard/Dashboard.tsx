@@ -6,8 +6,8 @@ import {
   Coins, 
   Car, 
   Home, 
-  Shield, 
-  MessageCircle 
+  Shield,
+  MessageCircle
 } from "lucide-react";
 
 interface DashboardProps {
@@ -18,7 +18,14 @@ export default function Dashboard({ setPage }: DashboardProps) {
   const role = localStorage.getItem("role") || "user";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      <div className="text-center space-y-2 pt-4">
+        <h1 className="text-4xl font-black italic uppercase tracking-tighter text-slate-900 dark:text-white">
+          Smartcal<span className="text-blue-500">pro+</span>
+        </h1>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-40">Integrated Intelligence Platform</p>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <MenuCard
           title="Finance"
@@ -37,6 +44,14 @@ export default function Dashboard({ setPage }: DashboardProps) {
         />
 
         <MenuCard
+          title="Feedback"
+          icon={<MessageCircle className="w-6 h-6" />}
+          color="from-emerald-400 to-teal-600"
+          onClick={() => setPage("feedback")}
+          description="Transmissions"
+        />
+
+        <MenuCard
           title="Vehicle"
           icon={<Car className="w-6 h-6" />}
           color="from-teal-400 to-cyan-600"
@@ -50,14 +65,6 @@ export default function Dashboard({ setPage }: DashboardProps) {
           color="from-pink-500 to-purple-600"
           onClick={() => setPage("estate")}
           description="Spatial Valuation"
-        />
-
-        <MenuCard
-          title="Feedback"
-          icon={<MessageCircle className="w-6 h-6" />}
-          color="from-green-400 to-emerald-600"
-          onClick={() => setPage("feedback")}
-          description="Transmissions"
         />
 
         {role === "admin" && (

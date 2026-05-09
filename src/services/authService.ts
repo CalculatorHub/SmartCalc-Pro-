@@ -41,6 +41,9 @@ export const loginAnonymously = async () => {
     const result = await signInAnonymously(auth);
     return result.user;
   } catch (error: any) {
+    if (error.code === 'auth/admin-restricted-operation') {
+      throw new Error("Access Key login requires 'Anonymous Auth' to be enabled in Firebase Console (Authentication > Sign-in method).");
+    }
     throw new Error("Failed to initialize session: " + error.message);
   }
 };

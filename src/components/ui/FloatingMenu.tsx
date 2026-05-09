@@ -62,17 +62,6 @@ export default function FloatingMenu({ setPage }: FloatingMenuProps) {
             transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
             className="flex flex-col items-end gap-3"
           >
-            {/* 💬 FEEDBACK */}
-            <Item
-              icon="💬"
-              label="Feedback"
-              color="bg-green-500 hover:bg-green-600"
-              onClick={() => {
-                setPage("feedback");
-                setOpen(false);
-              }}
-            />
-
             {/* ⚙️ ADMIN */}
             <Item
               icon="⚙️"
@@ -80,6 +69,15 @@ export default function FloatingMenu({ setPage }: FloatingMenuProps) {
               color="bg-indigo-600 hover:bg-black shadow-indigo-500/30"
               onClick={() => {
                 setPage("admin");
+                setOpen(false);
+              }}
+            />
+            <Item
+              icon="💬"
+              label="Feedback"
+              color="bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30"
+              onClick={() => {
+                setPage("feedback");
                 setOpen(false);
               }}
             />

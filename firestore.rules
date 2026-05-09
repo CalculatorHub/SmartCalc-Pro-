@@ -8,7 +8,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && 
-             request.auth.token.email == "webistehosting@gmail.com" && 
+             (request.auth.token.email in ["webistehosting@gmail.com", "reddyvamshi607@gmail.com"]) && 
              request.auth.token.email_verified == true;
     }
 
@@ -24,28 +24,22 @@ service cloud.firestore {
       return resource.data;
     }
 
-    // Default deny
-    match /{document=**} {
-      allow read, write: if false;
-    }
-
-    // Feedback collection
     match /feedback/{feedbackId} {
       function isValidFeedback(data) {
-        return data.message is string && data.message.size() > 0 && data.message.size() <= 5000 &&
-               data.type is string && data.type in ['Bug', 'UI/UX', 'Improvement', 'Suggestion'] &&
-               data.rating is number && data.rating >= 1 && data.rating <= 5 &&
-               data.createdAt == request.time &&
-               (data.get('status', 'unread') is string) &&
-               (data.get('userId', '') is string) &&
-               (data.get('browser', '') is string) &&
-               (data.get('os', '') is string) &&
-               (data.get('name', '') is string);
+        return data.message is string && data.message.size() > 0 &&
+               data.type is string && 
+               data.rating >= 1 &&
+               data.createdAt != null &&
+               data.status == 'unread';
       }
 
       allow create: if isValidId(feedbackId) && isValidFeedback(incoming());
       
-      allow read, list, delete, update: if isAdmin() || isSignedIn();
+      // Allow read/list/update/delete for master admin emails
+      allow read, list, update, delete: if isSignedIn() && 
+                                          (request.auth.token.email == "webistehosting@gmail.com" || 
+                                           request.auth.token.email == "reddyvamshi607@gmail.com") &&
+                                          request.auth.token.email_verified == true;
     }
 
     // Test connection path

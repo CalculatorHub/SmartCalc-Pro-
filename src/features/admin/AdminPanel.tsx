@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react";
-import Card from "../../components/ui/MotionCard";
 import Card3D from "../../components/ui/3DCard";
 import Icon3D from "../../components/ui/3DIcon";
 import Button from "../../components/ui/MotionButton";
 import { logoutAdmin } from "../../services/authService";
-import { subscribeToFeedback, removeFeedback, updateFeedbackStatus } from "../../services/feedbackService";
+import { subscribeToFeedback, updateFeedbackStatus, removeMultipleFeedback, clearAllFeedback } from "../../services/feedbackService";
 import { auth } from "../../lib/firebase";
-import { LogOut, MessageSquare, LayoutDashboard, Star, Trash2, Download, Filter, Edit2, Check, X, ShieldAlert, CheckSquare, Square, Eye } from "lucide-react";
+import { LogOut, ShieldAlert, MessageSquare, Trash2, Check, X, Star, Eye, CheckSquare, Square, Download, Edit2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import AdminDashboard from "./AdminDashboard";
 
 import { useAdminStore } from "../../store/adminStore";
 
@@ -17,7 +15,6 @@ interface AdminPanelProps {
 }
 
 export default function AdminPanel({ onLogout }: AdminPanelProps) {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "feedback">("dashboard");
   const [feedback, setFeedback] = useState<any[]>([]);
   const [filter, setFilter] = useState("All");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -29,25 +26,23 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
   const isPasswordVerified = useAdminStore((s) => s.isPasswordVerified);
   const isGoogleAdmin = auth.currentUser && auth.currentUser.email === ADMIN_EMAIL;
 
-  if (!isGoogleAdmin && !isPasswordVerified) {
+  if (!isPasswordVerified && !isGoogleAdmin) {
     return (
-      <Card3D className="text-center py-20">
-        <ShieldAlert className="w-16 h-16 mx-auto text-pink-500 mb-4" />
-        <h2 className="text-2xl font-black uppercase tracking-tighter mb-2">Access Denied</h2>
-        <p className="opacity-50 text-sm">Your profile is not authorized for terminal access.</p>
-        <Button onClick={onLogout} className="mt-6">Return to Grid</Button>
-      </Card3D>
+      <div className="max-w-xl mx-auto py-20 text-center space-y-6">
+        <ShieldAlert className="w-16 h-16 mx-auto text-red-500 animate-pulse" />
+        <h1 className="text-2xl font-bold">Access Revoked</h1>
+        <p className="text-slate-500">Security protocol requires master authorization.</p>
+        <button onClick={onLogout} className="text-blue-500 font-bold hover:underline">Return to Terminal</button>
+      </div>
     );
   }
 
   useEffect(() => {
-    if (activeTab === "feedback") {
-      const unsub = subscribeToFeedback((data) => {
-        setFeedback(data);
-      });
-      return () => unsub();
-    }
-  }, [activeTab]);
+    const unsub = subscribeToFeedback((data) => {
+      setFeedback(data);
+    });
+    return () => unsub();
+  }, []);
 
   const filtered = filter === "All" 
     ? feedback 
@@ -68,51 +63,44 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
     }
   };
 
+  const handleBulkMarkRead = async () => {
+    setBulkLoading(true);
+    try {
+      await Promise.all(Array.from(selectedIds).map((id: string) => updateFeedbackStatus(id, { status: 'read' })));
+      setSelectedIds(new Set());
+    } catch (err: any) {
+      alert("Status update failed: " + err.message);
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
   const handleBulkDelete = async () => {
     if (!confirm(`Purge ${selectedIds.size} selected transmissions?`)) return;
     setBulkLoading(true);
     try {
-      await Promise.all(Array.from(selectedIds).map((id: string) => removeFeedback(id)));
+      await removeMultipleFeedback(Array.from(selectedIds));
       setSelectedIds(new Set());
+      alert(`Purged ${selectedIds.size} items ✅`);
+    } catch (err: any) {
+      alert("Purge failed: " + err.message);
     } finally {
       setBulkLoading(false);
     }
   };
 
-  const handleBulkMarkRead = async () => {
-    setBulkLoading(true);
-    try {
-      await Promise.all(Array.from(selectedIds).map((id: string) => 
-        updateFeedbackStatus(id, { status: 'read' })
-      ));
-      setSelectedIds(new Set());
-    } finally {
-      setBulkLoading(false);
-    }
-  };
+  const handleClearAll = async () => {
+    const confirmDelete = confirm("⚠️ Delete ALL feedback?\nThis cannot be undone!");
+    if (!confirmDelete) return;
 
-  const handlePurgeProcessed = async () => {
-    const targets = feedback.filter(f => f.type === 'Bug' || f.type === 'UI/UX');
-    if (targets.length === 0) {
-      alert("No Bug or UI/UX transmissions detected.");
-      return;
-    }
-    if (!confirm(`Purge all ${targets.length} Bug and UI/UX transmissions?`)) return;
     setBulkLoading(true);
     try {
-      await Promise.all(targets.map(f => removeFeedback(f.id)));
+      const count = await clearAllFeedback();
+      alert(`✅ ${count} items deleted`);
       setSelectedIds(new Set());
-    } finally {
-      setBulkLoading(false);
-    }
-  };
-
-  const handlePurgeAll = async () => {
-    if (!confirm("CRITICAL: This will permanently delete ALL transmissions in the database. Proceed?")) return;
-    setBulkLoading(true);
-    try {
-      await Promise.all(feedback.map(f => removeFeedback(f.id)));
-      setSelectedIds(new Set());
+    } catch (err: any) {
+      console.error(err);
+      alert("❌ Failed to delete: " + err.message);
     } finally {
       setBulkLoading(false);
     }
@@ -131,12 +119,6 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
     a.download = `SmartCal_Feedback_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (confirm("Permanently purge this transmission?")) {
-      await removeFeedback(id);
-    }
   };
 
   const handleEditInit = (f: any) => {
@@ -161,60 +143,39 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-xl font-black uppercase tracking-tighter dark:text-white flex items-center gap-2">
-          Admin Terminal
-        </h2>
-        <button onClick={handleLogoutWithAuth} className="p-2.5 rounded-2xl bg-white dark:bg-slate-800 shadow shadow-blue-500/10 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/10">
-          <LogOut className="w-5 h-5" />
+    <div className="max-w-4xl mx-auto space-y-8 pb-32">
+      <div className="flex justify-between items-end">
+        <div className="space-y-4">
+          <Icon3D icon={<ShieldAlert className="w-8 h-8 text-white" />} color="from-red-500 to-red-700" />
+          <h1 className="text-3xl font-black tracking-tight uppercase italic">Admin <span className="text-red-500">Terminal</span></h1>
+        </div>
+        <button 
+          onClick={handleLogoutWithAuth}
+          className="flex items-center gap-2 px-6 py-2 bg-slate-900 text-white rounded-full font-black text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all"
+        >
+          <LogOut className="w-4 h-4" /> Termination Sequence
         </button>
       </div>
 
-      <div className="flex gap-2 p-1 bg-white/40 dark:bg-slate-900/40 rounded-2xl border border-white/5 backdrop-blur-xl">
-        <button
-          onClick={() => setActiveTab("dashboard")}
-          className={`flex-1 py-3 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 ${
-            activeTab === "dashboard" ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg" : "opacity-50"
-          }`}
-        >
-          <LayoutDashboard className="w-4 h-4" /> Dashboard
-        </button>
-        <button
-          onClick={() => setActiveTab("feedback")}
-          className={`flex-1 py-3 rounded-xl transition-all font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 ${
-            activeTab === "feedback" ? "bg-gradient-to-br from-emerald-500 to-teal-700 text-white shadow-lg" : "opacity-50"
-          }`}
-        >
-          <MessageSquare className="w-4 h-4" /> Feedback
-        </button>
-      </div>
+      <Card3D>
+         <div className="space-y-4">
+            <Button 
+              onClick={handleClearAll}
+              disabled={bulkLoading}
+              className={`w-full py-4 rounded-3xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl transition-all ${
+                bulkLoading ? "bg-slate-400 cursor-not-allowed" : "bg-red-600 hover:bg-red-700 shadow-red-500/40"
+              }`}
+            >
+              {bulkLoading ? "Processing Purge..." : "Clear All Feedback"}
+            </Button>
 
-      <AnimatePresence mode="wait">
-        {activeTab === "dashboard" ? (
-          <motion.div
-            key="dashboard"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-          >
-            <AdminDashboard />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="feedback"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-4"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-4">
               <div className="flex items-center gap-4">
-                <button 
-                  onClick={toggleSelectAll}
-                  className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/5 text-[10px] font-black uppercase tracking-widest text-slate-500"
-                >
-                  {selectedIds.size === filtered.length && filtered.length > 0 ? (
+                  <button 
+                    onClick={toggleSelectAll}
+                    className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/5 text-[10px] font-black uppercase tracking-widest text-slate-500"
+                  >
+                    {selectedIds.size === filtered.length && filtered.length > 0 ? (
                     <CheckSquare className="w-4 h-4 text-emerald-500" />
                   ) : (
                     <Square className="w-4 h-4" />
@@ -254,42 +215,29 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                         disabled={bulkLoading}
                         className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-500/20 transition-all font-black text-[10px] uppercase tracking-widest disabled:opacity-50"
                       >
-                        <Eye className="w-4 h-4" /> Read ({selectedIds.size})
+                        <Eye className="w-4 h-4" /> Mark Read ({selectedIds.size})
                       </button>
                       <button 
                         onClick={handleBulkDelete}
                         disabled={bulkLoading}
-                        className="flex items-center gap-2 px-4 py-2 bg-pink-500 text-white rounded-xl shadow-lg shadow-pink-500/20 transition-all font-black text-[10px] uppercase tracking-widest disabled:opacity-50"
+                        className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl shadow-lg shadow-red-600/30 transition-all font-black text-[10px] uppercase tracking-widest disabled:opacity-50"
                       >
-                        <Trash2 className="w-4 h-4" /> Delete ({selectedIds.size})
+                        <Trash2 className="w-4 h-4" /> Bulk Delete ({selectedIds.size})
                       </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
                 <button 
                   onClick={exportCSV}
-                  className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl border border-emerald-500/20 transition-all font-black text-[10px] uppercase tracking-widest"
+                  className="flex items-center gap-2 px-4 py-2 bg-slate-500/10 hover:bg-slate-500/20 text-slate-600 dark:text-slate-400 rounded-xl border border-slate-500/20 transition-all font-black text-[10px] uppercase tracking-widest"
                 >
                   <Download className="w-4 h-4" /> Export CSV
                 </button>
-                <button 
-                  onClick={handlePurgeAll}
-                  disabled={bulkLoading || feedback.length === 0}
-                  className="flex items-center gap-2 px-4 py-2 bg-pink-500/10 hover:bg-pink-500/20 text-pink-500 rounded-xl border border-pink-500/20 transition-all font-black text-[10px] uppercase tracking-widest disabled:opacity-30"
-                >
-                  <Trash2 className="w-4 h-4" /> Purge All
-                </button>
-                <button 
-                  onClick={handlePurgeProcessed}
-                  disabled={bulkLoading || feedback.filter(f => f.type === 'Bug' || f.type === 'UI/UX').length === 0}
-                  className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl border border-amber-500/20 transition-all font-black text-[10px] uppercase tracking-widest disabled:opacity-30"
-                >
-                  <Filter className="w-4 h-4" /> Clear Bugs/UI
-                </button>
               </div>
             </div>
+          </div>
 
-            <Card3D>
+          <div className="mt-8 space-y-4">
               <div className="flex items-center justify-between mb-6">
                 <p className="text-sm opacity-60">Firestore data streams active.</p>
                 <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-40">
@@ -333,6 +281,8 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                                 <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${
                                   f.type === 'Bug' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
                                   f.type === 'UI/UX' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
+                                  f.type === 'Improvement' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                                  f.type === 'Suggestion' ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20' :
                                   'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
                                 }`}>
                                   {f.type}
@@ -376,20 +326,13 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
-                          <button 
-                            onClick={() => handleDelete(f.id)}
-                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
                         </div>
                       </div>
 
                       <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest opacity-40 pt-3 border-t border-slate-100 dark:border-white/5">
                         <div className="flex gap-3">
                           <span>ID: {f.id.slice(-6)}</span>
-                          {f.userId && <span>User: {f.userId}</span>}
-                          {f.browser && <span className="hidden sm:inline">Agent: {f.browser} / {f.os}</span>}
+                          {f.userId && <span>User: {String(f.userId)}</span>}
                         </div>
                         <span>{f.createdAt?.toDate().toLocaleString() || "Pending..."}</span>
                       </div>
@@ -397,10 +340,8 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                   ))
                 )}
               </div>
-            </Card3D>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </div>
+      </Card3D>
     </div>
   );
 }

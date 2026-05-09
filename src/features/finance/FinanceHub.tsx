@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { 
   IndianRupee, 
@@ -18,19 +18,36 @@ import { num } from "../../utils/helpers";
 import { api } from "../../utils/api";
 
 export default function FinanceHub() {
+  const [apiStatus, setApiStatus] = useState<"checking" | "connected" | "failed">("checking");
+
+  useEffect(() => {
+    api("/api/finance")
+      .then(() => setApiStatus("connected"))
+      .catch(() => setApiStatus("failed"));
+  }, []);
+
   return (
     <div className="space-y-6">
       {/* HEADER */}
       <Card3D className="relative overflow-hidden">
-        <div className="flex items-center gap-4">
-          <Icon3D icon={<Landmark className="w-6 h-6" />} color="from-blue-500 to-indigo-600" />
-          <div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter italic">
-              Finance Hub
-            </h1>
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-0.5">
-              Quantum Accounting v2.0
-            </p>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Icon3D icon={<Landmark className="w-6 h-6" />} color="from-blue-500 to-indigo-600" />
+            <div>
+              <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter italic">
+                Finance Hub
+              </h1>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-0.5">
+                Quantum Accounting v2.0
+              </p>
+            </div>
+          </div>
+          <div className={`text-[10px] uppercase font-black tracking-widest px-3 py-1 rounded-full border ${
+            apiStatus === "connected" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
+            apiStatus === "failed" ? "bg-red-500/10 text-red-500 border-red-500/20" :
+            "bg-slate-500/10 text-slate-500 border-slate-500/20"
+          }`}>
+            {apiStatus === "checking" ? "Verifying Core..." : apiStatus === "connected" ? "Neural Link Active" : "Link Severed"}
           </div>
         </div>
       </Card3D>
