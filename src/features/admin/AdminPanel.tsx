@@ -91,6 +91,22 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
     }
   };
 
+  const handlePurgeProcessed = async () => {
+    const targets = feedback.filter(f => f.type === 'Bug' || f.type === 'UI/UX');
+    if (targets.length === 0) {
+      alert("No Bug or UI/UX transmissions detected.");
+      return;
+    }
+    if (!confirm(`Purge all ${targets.length} Bug and UI/UX transmissions?`)) return;
+    setBulkLoading(true);
+    try {
+      await Promise.all(targets.map(f => removeFeedback(f.id)));
+      setSelectedIds(new Set());
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
   const handlePurgeAll = async () => {
     if (!confirm("CRITICAL: This will permanently delete ALL transmissions in the database. Proceed?")) return;
     setBulkLoading(true);
@@ -263,6 +279,13 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                 >
                   <Trash2 className="w-4 h-4" /> Purge All
                 </button>
+                <button 
+                  onClick={handlePurgeProcessed}
+                  disabled={bulkLoading || feedback.filter(f => f.type === 'Bug' || f.type === 'UI/UX').length === 0}
+                  className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl border border-amber-500/20 transition-all font-black text-[10px] uppercase tracking-widest disabled:opacity-30"
+                >
+                  <Filter className="w-4 h-4" /> Clear Bugs/UI
+                </button>
               </div>
             </div>
 
@@ -302,25 +325,30 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                           </button>
                           
                           <div className="space-y-1 flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              {f.status === 'read' && (
-                                <span className="bg-slate-200 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded text-[8px] font-black uppercase">READ</span>
-                              )}
-                            <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${
-                              f.type === 'Bug' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
-                              f.type === 'UI/UX' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
-                              'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
-                            }`}>
-                              {f.type}
-                            </span>
-                            {f.rating && (
-                              <div className="flex gap-0.5">
-                                {[1, 2, 3, 4, 5].map(s => (
-                                  <Star key={s} className={`w-2.5 h-2.5 ${s <= f.rating ? 'text-yellow-400 fill-yellow-400' : 'text-slate-200 dark:text-slate-800'}`} />
-                                ))}
+                            <div className="flex items-center justify-between gap-4 mb-2">
+                              <div className="flex items-center gap-2">
+                                {f.status === 'read' && (
+                                  <span className="bg-slate-200 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded text-[8px] font-black uppercase">READ</span>
+                                )}
+                                <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest ${
+                                  f.type === 'Bug' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
+                                  f.type === 'UI/UX' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
+                                  'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                                }`}>
+                                  {f.type}
+                                </span>
+                                {f.name && (
+                                  <span className="text-[10px] font-bold text-slate-400">BY: {f.name}</span>
+                                )}
                               </div>
-                            )}
-                          </div>
+                              {f.rating && (
+                                <div className="flex gap-0.5">
+                                  {[1, 2, 3, 4, 5].map(s => (
+                                    <Star key={s} className={`w-2.5 h-2.5 ${s <= f.rating ? 'text-yellow-400 fill-yellow-400' : 'text-slate-200 dark:text-slate-800'}`} />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           
                           {editingId === f.id ? (
                             <div className="space-y-2">

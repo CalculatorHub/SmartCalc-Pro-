@@ -61,6 +61,7 @@ export async function testConnection() {
 }
 
 export const submitFeedback = async (data: { 
+  name?: string,
   message: string, 
   type: string, 
   rating: number,

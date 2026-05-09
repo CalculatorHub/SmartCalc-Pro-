@@ -3,10 +3,11 @@ import Card3D from "../../components/ui/3DCard";
 import Icon3D from "../../components/ui/3DIcon";
 import Button from "../../components/ui/MotionButton";
 import { submitFeedback } from "../../services/feedbackService";
-import { MessageSquare, Send, MessageCircle, Star, Info } from "lucide-react";
+import { MessageSquare, Send, MessageCircle, Star, Info, Check } from "lucide-react";
 import { motion } from "motion/react";
 
 export default function Feedback() {
+  const [name, setName] = useState("");
   const [msg, setMsg] = useState("");
   const [type, setType] = useState("Improvement");
   const [rating, setRating] = useState(5);
@@ -56,6 +57,7 @@ export default function Feedback() {
 
     try {
       await submitFeedback({ 
+        name: name,
         message: msg,
         type: type,
         rating: rating,
@@ -64,6 +66,7 @@ export default function Feedback() {
         os: getOSInfo()
       });
       setMsg("");
+      setName("");
       setSent(true);
       setError("");
       setTimeout(() => setSent(false), 3000);
@@ -71,6 +74,25 @@ export default function Feedback() {
       setError("Transmission failure: " + err.message);
     }
   };
+
+  if (sent) {
+    return (
+      <Card3D className="flex flex-col items-center justify-center py-20 text-center space-y-6">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-emerald-500/50"
+        >
+          <Check className="w-10 h-10" />
+        </motion.div>
+        <div>
+          <h2 className="text-2xl font-black uppercase tracking-tighter italic italic">Transmission Sent</h2>
+          <p className="opacity-50 text-xs font-bold uppercase tracking-widest mt-2">Data successfully synchronized with the cloud.</p>
+        </div>
+        <Button onClick={() => setSent(false)}>Send Another Message</Button>
+      </Card3D>
+    );
+  }
 
   return (
     <Card3D className="space-y-6">
@@ -86,45 +108,58 @@ export default function Feedback() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-4">
         <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase tracking-widest opacity-40 px-1">Category</label>
-          <select 
-            value={type} 
-            onChange={(e) => setType(e.target.value)}
-            className="w-full px-4 py-3 rounded-2xl bg-white dark:bg-[#020617] text-slate-900 dark:text-white border border-slate-300 dark:border-white/10 outline-none appearance-none"
-          >
-            <option value="Bug">Bug Report</option>
-            <option value="UI/UX">UI/UX Feedback</option>
-            <option value="Improvement">Improvement</option>
-            <option value="Suggestion">General Suggestion</option>
-          </select>
+          <label className="text-[10px] font-black uppercase tracking-widest opacity-40 px-1">Your Identity (Optional)</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Ghost User #749..."
+            className="w-full px-4 py-3 rounded-2xl bg-white dark:bg-[#020617] text-slate-900 dark:text-white border border-slate-300 dark:border-white/10 outline-none"
+          />
         </div>
 
-        <div className="space-y-2 flex flex-col items-center justify-end pb-1">
-          <p className="text-[10px] font-black uppercase tracking-widest opacity-40">
-            Rating
-          </p>
-          <div className="flex gap-1">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <motion.button
-                key={star}
-                whileHover={{ scale: 1.2 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setRating(star)}
-                onMouseEnter={() => setHover(star)}
-                onMouseLeave={() => setHover(0)}
-                className="transition-colors duration-200"
-              >
-                <Star
-                  className={`w-6 h-6 ${
-                    (hover || rating) >= star
-                      ? "text-yellow-400 fill-yellow-400"
-                      : "text-slate-300 dark:text-slate-700"
-                  }`}
-                />
-              </motion.button>
-            ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black uppercase tracking-widest opacity-40 px-1">Category</label>
+            <select 
+              value={type} 
+              onChange={(e) => setType(e.target.value)}
+              className="w-full px-4 py-3 rounded-2xl bg-white dark:bg-[#020617] text-slate-900 dark:text-white border border-slate-300 dark:border-white/10 outline-none appearance-none"
+            >
+              <option value="Bug">Bug Report</option>
+              <option value="UI/UX">UI/UX Feedback</option>
+              <option value="Improvement">Improvement</option>
+              <option value="Suggestion">General Suggestion</option>
+            </select>
+          </div>
+
+          <div className="space-y-2 flex flex-col items-center justify-end pb-1">
+            <p className="text-[10px] font-black uppercase tracking-widest opacity-40">
+              Rating
+            </p>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <motion.button
+                  key={star}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHover(star)}
+                  onMouseLeave={() => setHover(0)}
+                  className="transition-colors duration-200"
+                >
+                  <Star
+                    className={`w-6 h-6 ${
+                      (hover || rating) >= star
+                        ? "text-yellow-400 fill-yellow-400"
+                        : "text-slate-300 dark:text-slate-700"
+                    }`}
+                  />
+                </motion.button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
