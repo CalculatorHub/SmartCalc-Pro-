@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import Card from "../../components/ui/Card";
+import Card from "../../components/ui/MotionCard";
 import Card3D from "../../components/ui/3DCard";
 import Icon3D from "../../components/ui/3DIcon";
-import Input from "../../components/ui/Input";
-import Button from "../../components/ui/Button";
+import Input from "../../components/ui/MotionInput";
+import Button from "../../components/ui/MotionButton";
 import { api } from "../../utils/api";
 import { MessageSquare, Send, MessageCircle, Star } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";

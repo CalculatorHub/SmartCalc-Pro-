@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import Card3D from "../../components/ui/3DCard";
 import Icon3D from "../../components/ui/3DIcon";
-import Input from "../../components/ui/Input";
-import Button from "../../components/ui/Button";
+import Input from "../../components/ui/MotionInput";
+import Button from "../../components/ui/MotionButton";
 import { api } from "../../utils/api";
 import { ShieldAlert, Fingerprint } from "lucide-react";
 import { motion } from "motion/react";

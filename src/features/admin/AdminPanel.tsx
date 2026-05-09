@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import Card from "../../components/ui/Card";
+import Card from "../../components/ui/MotionCard";
 import Card3D from "../../components/ui/3DCard";
 import Icon3D from "../../components/ui/3DIcon";
-import Input from "../../components/ui/Input";
-import Button from "../../components/ui/Button";
+import Input from "../../components/ui/MotionInput";
+import Button from "../../components/ui/MotionButton";
 import { api } from "../../utils/api";
 import { Lock, LogOut, Shield, MessageSquare, LayoutDashboard, Star } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -97,8 +97,8 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                         )}
                       </div>
                       <div className="flex justify-between items-center text-[10px] uppercase font-black tracking-widest opacity-40 pt-2 border-t border-slate-100 dark:border-white/5">
-                        <span>ID: {f.id.slice(-6)}</span>
-                        <span>{new Date(f.createdAt).toLocaleString()}</span>
+                        <span>ID: {(f.id || f._id || "unknown").slice(-6)}</span>
+                        <span>{f.createdAt ? new Date(f.createdAt).toLocaleString() : 'Recent'}</span>
                       </div>
                     </div>
                   ))

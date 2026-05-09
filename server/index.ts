@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import mongoose from 'mongoose';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import jwt from 'jsonwebtoken';
@@ -11,28 +13,50 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
   const JWT_SECRET = process.env.JWT_SECRET || 'smartcalpro_secret_key_2024';
+  const MONGO_URI = process.env.MONGO_URI;
 
   // 1. Basic Security & Middleware
   app.set("trust proxy", 1);
+  app.use(helmet({
+    contentSecurityPolicy: false, // Vite needs this disabled in dev or carefully configured
+  }));
   app.use(cors());
   app.use(express.json());
 
-  // 2. Rate Limiting (Prevent abuse)
+  // 2. Database Connectivity
+  if (MONGO_URI) {
+    mongoose.connect(MONGO_URI, {
+      serverSelectionTimeoutMS: 5000, // Fail fast if DB is unreachable
+    })
+      .then(() => console.log("✅ MongoDB Connected"))
+      .catch((err) => console.error("DB Error:", err));
+  } else {
+    console.warn("⚠️ MONGO_URI not found. Using in-memory store.");
+  }
+
+  // Feedback Schema/Model for MongoDB (if connected)
+  const feedbackSchema = new mongoose.Schema({
+    feedback: { type: String, required: true },
+    rating: { type: Number, default: 5 },
+  }, { timestamps: true });
+
+  const Feedback = mongoose.models.Feedback || mongoose.model("Feedback", feedbackSchema);
+
+  // 3. Rate Limiting
   const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 100, // Limit each IP to 100 requests per window
+    windowMs: 15 * 60 * 1000,
+    limit: 100,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     message: { success: false, message: 'Too many requests from this IP, please try again later.' }
   });
   app.use('/api/', limiter);
 
-  // 2. Middlewares
+  // 4. Middlewares
   const authenticateUser = (req: any, res: any, next: any) => {
     const token = req.headers.authorization;
     if (!token) return res.status(401).json({ success: false, message: "Unauthorized" });
     
-    // Bypass for demo/unrestricted mode
     if (token === "unrestricted_session") {
       req.user = { username: 'demo', role: 'admin' };
       return next();
@@ -51,7 +75,6 @@ async function startServer() {
     const adminToken = req.headers['x-admin-token'] as string;
     if (!adminToken) return res.status(401).json({ success: false, message: "Admin token missing" });
 
-    // Bypass for demo/unrestricted mode
     if (adminToken === "bypassed_admin_session") {
       req.admin = { username: 'admin', role: 'admin', scope: 'admin' };
       return next();
@@ -67,9 +90,9 @@ async function startServer() {
     }
   };
 
-  // 3. SECURE API ROUTES
+  // 5. API ROUTES
   
-  // Finance History Store (In-memory for demo)
+  // Finance History (Fallback in-memory)
   let financeHistory: any[] = [];
 
   app.post('/api/finance', (req, res) => {
@@ -79,7 +102,6 @@ async function startServer() {
       createdAt: new Date().toISOString()
     };
     financeHistory.unshift(data);
-    // Keep only last 50 items
     if (financeHistory.length > 50) financeHistory.pop();
     res.json(data);
   });
@@ -88,24 +110,48 @@ async function startServer() {
     res.json(financeHistory);
   });
   
-  // Feedback Storage
+  // Feedback Storage (MongoDB with in-memory fallback)
   let feedbackArchive: any[] = [];
 
-  app.post('/api/feedback', (req, res) => {
-    const data = {
-      id: Date.now().toString(),
-      ...req.body,
-      createdAt: new Date().toISOString()
-    };
-    feedbackArchive.unshift(data);
-    res.json({ success: true, data });
+  app.post('/api/feedback', async (req, res) => {
+    try {
+      const { feedback, rating } = req.body;
+      const data = {
+        feedback,
+        rating: rating || 5,
+        createdAt: new Date().toISOString()
+      };
+
+      // Only attempt DB write if connected (readyState 1 = connected)
+      if (MONGO_URI && mongoose.connection.readyState === 1) {
+        const newFeedback = await Feedback.create(data);
+        return res.json({ success: true, data: newFeedback });
+      } else {
+        console.log("Using in-memory fallback for feedback submission");
+        const fallbackData = { id: Date.now().toString(), ...data };
+        feedbackArchive.unshift(fallbackData);
+        return res.json({ success: true, data: fallbackData });
+      }
+    } catch (err) {
+      console.error('Feedback Error:', err);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
   });
 
-  app.get('/api/admin/feedback', authenticateUser, requireAdmin, (req, res) => {
-    res.json(feedbackArchive);
+  app.get('/api/admin/feedback', authenticateUser, requireAdmin, async (req, res) => {
+    try {
+      if (MONGO_URI && mongoose.connection.readyState === 1) {
+        const data = await Feedback.find().sort({ createdAt: -1 });
+        res.json(data);
+      } else {
+        res.json(feedbackArchive);
+      }
+    } catch (err) {
+      res.status(500).json({ success: false, message: "Server error" });
+    }
   });
 
-  // Admin Step-Up (Requires valid user session)
+  // Admin Auth
   app.post("/api/admin/step-up", authenticateUser, async (req: any, res: any) => {
     const { password } = req.body;
     const adminKey = process.env.ADMIN_ACCESS_KEY || 'Patel@9488';
@@ -122,13 +168,10 @@ async function startServer() {
     }
   });
 
-  // Main Login
   app.post("/api/admin/login", async (req, res) => {
     const { username, password } = req.body;
     const adminKey = process.env.ADMIN_ACCESS_KEY || 'Patel@9488';
     
-    // In a real app we would store the hash in a DB
-    // For this context, we check against the config key
     if (username === "admin" && password === adminKey) {
       const token = jwt.sign({ username: 'admin', role: 'admin' }, JWT_SECRET, { expiresIn: '2h' });
       res.json({ success: true, token });
@@ -137,31 +180,14 @@ async function startServer() {
     }
   });
 
-  // Example: Secure Gold/Silver Price Proxy (Hides API Key from Frontend)
   app.get('/api/prices/metals', async (req, res) => {
-    try {
-      // In a real scenario, you'd get this from an actual third-party API
-      // const API_KEY = process.env.METALS_API_KEY;
-      // const response = await fetch(`https://api.metals.live/v1/latest?api_key=${API_KEY}`);
-      // const data = await response.json();
-      
-      // For now, we simulate a secure response that would normally require a key
-      res.json({
-        success: true,
-        data: {
-          gold24: 8650,
-          gold22: 7930,
-          silver: 115,
-          timestamp: new Date().toISOString()
-        }
-      });
-    } catch (error) {
-      console.error('Proxy Error:', error);
-      res.status(500).json({ success: false, message: 'Failed to fetch metal prices' });
-    }
+    res.json({
+      success: true,
+      data: { gold24: 8650, gold22: 7930, silver: 115, timestamp: new Date().toISOString() }
+    });
   });
 
-  // 4. Vite middleware or Static serving
+  // 6. Vite middleware or Static serving
   const isProd = process.env.NODE_ENV === "production";
   
   if (!isProd) {
@@ -178,12 +204,6 @@ async function startServer() {
     });
   }
 
-  // 5. Global Error Handler
-  app.use((err: any, req: any, res: any, next: any) => {
-    console.error(err.stack);
-    res.status(500).json({ success: false, message: 'Internal Server Error' });
-  });
-
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
@@ -192,3 +212,4 @@ async function startServer() {
 startServer().catch(err => {
   console.error('Server failed to start:', err);
 });
+

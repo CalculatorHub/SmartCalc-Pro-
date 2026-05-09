@@ -6,6 +6,7 @@ interface NavItemProps {
   label: string;
   active: boolean;
   onClick: () => void;
+  key?: string | number;
 }
 
 export default function NavItem({ icon, label, active, onClick }: NavItemProps) {

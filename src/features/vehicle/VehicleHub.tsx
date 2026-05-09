@@ -12,8 +12,8 @@ import {
 } from "lucide-react";
 import Card3D from "../../components/ui/3DCard";
 import Icon3D from "../../components/ui/3DIcon";
-import InputUI from "../../components/ui/Input";
-import Button from "../../components/ui/Button";
+import InputUI from "../../components/ui/MotionInput";
+import Button from "../../components/ui/MotionButton";
 import { num } from "../../utils/helpers";
 
 type FuelType = "petrol" | "diesel";

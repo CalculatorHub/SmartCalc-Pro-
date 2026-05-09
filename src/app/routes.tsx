@@ -16,9 +16,17 @@ import FloatingMenu from "../components/ui/FloatingMenu";
 
 export default function Routes() {
   const [page, setPage] = useState<string>("dashboard");
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token") || "unrestricted_session");
+  const [token, setToken] = useState<string | null>(() => {
+    const saved = localStorage.getItem("token");
+    if (!saved) localStorage.setItem("token", "unrestricted_session");
+    return saved || "unrestricted_session";
+  });
   const [adminToken, setAdminToken] = useState<string | null>(localStorage.getItem("adminToken"));
-  const [role, setRole] = useState<string | null>(localStorage.getItem("role") || "admin");
+  const [role, setRole] = useState<string | null>(() => {
+    const saved = localStorage.getItem("role");
+    if (!saved) localStorage.setItem("role", "admin");
+    return saved || "admin";
+  });
   const [showAdminGate, setShowAdminGate] = useState(false);
 
   const handleLogin = (newToken: string, newRole: string) => {

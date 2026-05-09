@@ -12,15 +12,15 @@ export default function FloatingMenu({ setPage }: FloatingMenuProps) {
 
   const items = [
     { 
-      icon: <MessageSquare className="w-6 h-6" />, 
+      icon: "💬", 
       page: "feedback", 
-      color: "from-emerald-400 to-emerald-600",
+      color: "from-green-400 to-emerald-600",
       label: "Support",
       glow: "shadow-emerald-500/40"
     },
     ...(role === "admin"
       ? [{ 
-          icon: <ShieldCheck className="w-6 h-6" />, 
+          icon: "⚙️", 
           page: "admin", 
           color: "from-slate-700 to-slate-900",
           label: "Admin",

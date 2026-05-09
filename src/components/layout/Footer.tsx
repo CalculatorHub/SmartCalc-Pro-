@@ -11,11 +11,10 @@ export default function Footer({ setPage, activePage }: FooterProps) {
   const role = localStorage.getItem("role");
 
   const items = [
-    { key: "dashboard", label: "Hub", icon: <LayoutDashboard className="w-5 h-5" /> },
-    { key: "finance", label: "Finance", icon: <IndianRupee className="w-5 h-5" /> },
-    { key: "metals", label: "Metals", icon: <Coins className="w-5 h-5" /> },
-    { key: "estate", label: "Estate", icon: <Home className="w-5 h-5" /> },
-    { key: "vehicle", label: "Vehicle", icon: <Car className="w-5 h-5" /> },
+    { key: "finance", label: "Finance", icon: <span className="text-xl">₹</span> },
+    { key: "metals", label: "Gold", icon: <span className="text-xl">🪙</span> },
+    { key: "vehicle", label: "Vehicle", icon: <span className="text-xl">🚗</span> },
+    { key: "estate", label: "Estate", icon: <span className="text-xl">🏠</span> },
   ];
 
   return (
