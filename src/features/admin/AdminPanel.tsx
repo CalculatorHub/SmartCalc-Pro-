@@ -19,14 +19,6 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
 
   useEffect(() => {
     loadFeedback();
-
-    // Auto-logout after 5 minutes (frontend safety measure)
-    const timer = setTimeout(() => {
-      onLogout();
-      alert("Admin session expired for security.");
-    }, 5 * 60 * 1000);
-
-    return () => clearTimeout(timer);
   }, []);
 
   const loadFeedback = async () => {

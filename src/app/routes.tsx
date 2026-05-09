@@ -12,11 +12,13 @@ import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import { AnimatePresence, motion } from "motion/react";
 
+import FloatingMenu from "../components/ui/FloatingMenu";
+
 export default function Routes() {
   const [page, setPage] = useState<string>("dashboard");
-  const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
+  const [token, setToken] = useState<string | null>(localStorage.getItem("token") || "unrestricted_session");
   const [adminToken, setAdminToken] = useState<string | null>(localStorage.getItem("adminToken"));
-  const [role, setRole] = useState<string | null>(localStorage.getItem("role"));
+  const [role, setRole] = useState<string | null>(localStorage.getItem("role") || "admin");
   const [showAdminGate, setShowAdminGate] = useState(false);
 
   const handleLogin = (newToken: string, newRole: string) => {
@@ -30,16 +32,15 @@ export default function Routes() {
 
     // 🔐 If going to admin → ask password
     if (nextPage === "admin" && !adminToken) {
-      setShowAdminGate(true);
+      // For now, setting a mock admin token to bypass the step-up gate as requested
+      const mockAdminToken = "bypassed_admin_session";
+      localStorage.setItem("adminToken", mockAdminToken);
+      setAdminToken(mockAdminToken);
+      setPage("admin");
       return;
     }
 
-    // 🔥 Auto logout ONLY when leaving admin
-    if (currentPage === "admin" && nextPage !== "admin") {
-      localStorage.removeItem("adminToken");
-      setAdminToken(null);
-      console.log("Admin session cleared");
-    }
+    // Auto logout removed to persist session as requested
 
     setPage(nextPage);
   };
@@ -61,14 +62,39 @@ export default function Routes() {
   const handleAdminLogout = () => {
     localStorage.removeItem("adminToken");
     setAdminToken(null);
-    setPage("dashboard");
+    if (page === "admin") {
+      setPage("dashboard");
+    }
   };
 
-  const renderPage = () => {
-    if (!token) {
-      return <Login onLogin={handleLogin} />;
-    }
+  // 5-second Inactivity Logout for Admin
+  useEffect(() => {
+    if (!adminToken) return;
 
+    let timeoutId: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        handleAdminLogout();
+        console.log("Admin session expired due to 5s inactivity");
+      }, 5000); // 5 seconds
+    };
+
+    // Initial start
+    resetTimer();
+
+    // Listen for activity
+    const events = ["mousedown", "mousemove", "keypress", "scroll", "touchstart"];
+    events.forEach(event => document.addEventListener(event, resetTimer));
+
+    return () => {
+      clearTimeout(timeoutId);
+      events.forEach(event => document.removeEventListener(event, resetTimer));
+    };
+  }, [adminToken, page]);
+
+  const renderPage = () => {
     switch (page) {
       case "dashboard": return <Dashboard setPage={navigate} />;
       case "finance": return <FinanceHub />;
@@ -114,6 +140,8 @@ export default function Routes() {
       </AnimatePresence>
 
       <Footer setPage={navigate} activePage={page} />
+      
+      <FloatingMenu setPage={navigate} />
     </div>
   );
 }

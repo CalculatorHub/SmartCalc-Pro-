@@ -16,7 +16,6 @@ export default function Footer({ setPage, activePage }: FooterProps) {
     { key: "metals", label: "Metals", icon: <Coins className="w-5 h-5" /> },
     { key: "estate", label: "Estate", icon: <Home className="w-5 h-5" /> },
     { key: "vehicle", label: "Vehicle", icon: <Car className="w-5 h-5" /> },
-    { key: "feedback", label: "Msg", icon: <MessageSquare className="w-5 h-5" /> },
   ];
 
   return (
@@ -31,14 +30,6 @@ export default function Footer({ setPage, activePage }: FooterProps) {
             onClick={() => setPage(item.key)}
           />
         ))}
-        {role === "admin" && (
-          <NavItem
-            label="Admin"
-            icon={<ShieldCheck className="w-5 h-5" />}
-            active={activePage === "admin"}
-            onClick={() => setPage("admin")}
-          />
-        )}
       </div>
     </footer>
   );
