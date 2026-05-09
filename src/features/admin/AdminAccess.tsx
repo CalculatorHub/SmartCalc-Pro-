@@ -67,7 +67,6 @@ export default function AdminAccess({ onSuccess, onCancel }: AdminAccessProps) {
           <div className="text-left space-y-1">
             <div className="flex justify-between items-center px-1">
               <label className="text-[10px] font-black uppercase tracking-widest opacity-50">Access Key</label>
-              <span className="text-[8px] font-bold opacity-30">Demo: Patel@9488</span>
             </div>
             <Input 
               value={pass} 
