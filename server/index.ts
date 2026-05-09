@@ -3,13 +3,17 @@ import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import 'dotenv/config';
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
+  const JWT_SECRET = process.env.JWT_SECRET || 'smartcalpro_secret_key_2024';
 
   // 1. Basic Security & Middleware
+  app.set("trust proxy", 1);
   app.use(cors());
   app.use(express.json());
 
@@ -23,7 +27,33 @@ async function startServer() {
   });
   app.use('/api/', limiter);
 
-  // 3. SECURE API ROUTES (Backend Proxy)
+  // 2. Middlewares
+  const authenticateUser = (req: any, res: any, next: any) => {
+    const token = req.headers.authorization;
+    if (!token) return res.status(401).json({ success: false, message: "Unauthorized" });
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      req.user = decoded;
+      next();
+    } catch {
+      res.status(401).json({ success: false, message: "Invalid session" });
+    }
+  };
+
+  const requireAdmin = (req: any, res: any, next: any) => {
+    const adminToken = req.headers['x-admin-token'] as string;
+    if (!adminToken) return res.status(401).json({ success: false, message: "Admin token missing" });
+    try {
+      const decoded: any = jwt.verify(adminToken, JWT_SECRET);
+      if (decoded.scope !== 'admin') throw new Error();
+      req.admin = decoded;
+      next();
+    } catch {
+      res.status(401).json({ success: false, message: "Admin session expired" });
+    }
+  };
+
+  // 3. SECURE API ROUTES
   
   // Finance History Store (In-memory for demo)
   let financeHistory: any[] = [];
@@ -40,28 +70,54 @@ async function startServer() {
     res.json(data);
   });
 
-  app.get('/api/finance', (req, res) => {
+  app.get('/api/finance', authenticateUser, (req: any, res: any) => {
     res.json(financeHistory);
   });
   
-  // Admin Authentication
-  app.post('/api/admin/auth', (req, res) => {
-    const { key } = req.body;
+  // Feedback Storage
+  let feedbackArchive: any[] = [];
+
+  app.post('/api/feedback', (req, res) => {
+    const data = {
+      id: Date.now().toString(),
+      ...req.body,
+      createdAt: new Date().toISOString()
+    };
+    feedbackArchive.unshift(data);
+    res.json({ success: true, data });
+  });
+
+  app.get('/api/admin/feedback', authenticateUser, requireAdmin, (req, res) => {
+    res.json(feedbackArchive);
+  });
+
+  // Admin Step-Up (Requires valid user session)
+  app.post("/api/admin/step-up", authenticateUser, async (req: any, res: any) => {
+    const { password } = req.body;
     const adminKey = process.env.ADMIN_ACCESS_KEY || 'Patel@9488';
-    
-    if (key === adminKey) {
-      res.json({ success: true });
+
+    if (password === adminKey) {
+      const adminToken = jwt.sign(
+        { id: req.user.id, username: 'admin', role: 'admin', scope: 'admin' }, 
+        JWT_SECRET, 
+        { expiresIn: '5m' }
+      );
+      res.json({ success: true, adminToken });
     } else {
-      res.status(401).json({ success: false, message: 'Invalid Key' });
+      res.status(401).json({ success: false, message: "Invalid Access Key" });
     }
   });
 
-  app.post("/api/admin/login", (req, res) => {
+  // Main Login
+  app.post("/api/admin/login", async (req, res) => {
     const { username, password } = req.body;
-    // Simple demo logic - using the same key as password for consistency
     const adminKey = process.env.ADMIN_ACCESS_KEY || 'Patel@9488';
+    
+    // In a real app we would store the hash in a DB
+    // For this context, we check against the config key
     if (username === "admin" && password === adminKey) {
-      res.json({ success: true });
+      const token = jwt.sign({ username: 'admin', role: 'admin' }, JWT_SECRET, { expiresIn: '2h' });
+      res.json({ success: true, token });
     } else {
       res.status(401).json({ success: false, message: "Invalid credentials" });
     }
