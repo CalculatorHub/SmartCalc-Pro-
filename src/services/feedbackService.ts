@@ -72,7 +72,9 @@ export const submitFeedback = async (data: {
   try {
     await addDoc(collection(db, COLLECTION_NAME), {
       ...data,
+      status: 'unread',
       createdAt: serverTimestamp(),
+      userId: data.userId || auth.currentUser?.uid || 'anonymous'
     });
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, COLLECTION_NAME);

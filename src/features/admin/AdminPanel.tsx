@@ -41,7 +41,7 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
   }
 
   useEffect(() => {
-    if (activeTab === "feedback" && auth.currentUser) {
+    if (activeTab === "feedback") {
       const unsub = subscribeToFeedback((data) => {
         setFeedback(data);
       });

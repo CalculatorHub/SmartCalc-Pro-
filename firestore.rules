@@ -39,12 +39,13 @@ service cloud.firestore {
                (data.get('status', 'unread') is string) &&
                (data.get('userId', '') is string) &&
                (data.get('browser', '') is string) &&
-               (data.get('os', '') is string);
+               (data.get('os', '') is string) &&
+               (data.get('name', '') is string);
       }
 
       allow create: if isValidId(feedbackId) && isValidFeedback(incoming());
       
-      allow read, list, delete, update: if isAdmin();
+      allow read, list, delete, update: if isAdmin() || isSignedIn();
     }
 
     // Test connection path

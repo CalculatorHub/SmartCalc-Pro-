@@ -1,4 +1,10 @@
-import { signInWithPopup, signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { 
+  signInWithPopup, 
+  signOut, 
+  onAuthStateChanged, 
+  signInAnonymously,
+  User 
+} from 'firebase/auth';
 import { auth, googleProvider } from '../lib/firebase';
 
 const ADMIN_EMAIL = "webistehosting@gmail.com";
@@ -30,6 +36,15 @@ export const loginAdminPassword = (password: string) => {
   throw new Error("Invalid Access Key ❌");
 };
 
+export const loginAnonymously = async () => {
+  try {
+    const result = await signInAnonymously(auth);
+    return result.user;
+  } catch (error: any) {
+    throw new Error("Failed to initialize session: " + error.message);
+  }
+};
+
 export const logoutAdmin = async () => {
   await signOut(auth);
   localStorage.removeItem("admin");
@@ -38,13 +53,7 @@ export const logoutAdmin = async () => {
 
 export const observeAuth = (callback: (user: User | null) => void) => {
   return onAuthStateChanged(auth, (user) => {
-    if (user && user.email === ADMIN_EMAIL) {
-      localStorage.setItem("admin", "true");
-      callback(user);
-    } else {
-      localStorage.removeItem("admin");
-      callback(null);
-    }
+    callback(user);
   });
 };
 

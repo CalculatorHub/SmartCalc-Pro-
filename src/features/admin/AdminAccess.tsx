@@ -33,13 +33,18 @@ export default function AdminAccess({ onSuccess, onCancel }: AdminAccessProps) {
     }
   };
 
-  const handlePasswordLogin = () => {
+  const handlePasswordLogin = async () => {
+    setLoading(true);
+    setError("");
     try {
       loginAdminPassword(pass);
+      await loginAnonymously();
       verifyPassword();
       onSuccess("password-admin");
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
