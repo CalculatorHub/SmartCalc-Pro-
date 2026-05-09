@@ -36,6 +36,7 @@ service cloud.firestore {
                data.type is string && data.type in ['Bug', 'UI/UX', 'Improvement', 'Suggestion'] &&
                data.rating is number && data.rating >= 1 && data.rating <= 5 &&
                data.createdAt == request.time &&
+               (data.get('status', 'unread') is string) &&
                (data.get('userId', '') is string) &&
                (data.get('browser', '') is string) &&
                (data.get('os', '') is string);

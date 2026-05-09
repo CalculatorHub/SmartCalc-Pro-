@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus, X } from "lucide-react";
 import useAuth from "../../hooks/useAuth";
+import { useAdminStore } from "../../store/adminStore";
 
 const ADMIN_EMAIL = "webistehosting@gmail.com";
 
@@ -12,7 +13,9 @@ interface FloatingMenuProps {
 export default function FloatingMenu({ setPage }: FloatingMenuProps) {
   const [open, setOpen] = useState(false);
   const user = useAuth();
-  const isAdmin = user && user.email === ADMIN_EMAIL;
+  const isPasswordVerified = useAdminStore((s) => s.isPasswordVerified);
+  const isGoogleAdmin = user && user.email === ADMIN_EMAIL;
+  const isAdmin = isGoogleAdmin || isPasswordVerified;
 
   // 🔥 COMMON ITEM COMPONENT
   const Item = ({ icon, label, onClick, color }: { icon: string, label: string, onClick: () => void, color: string }) => (
@@ -71,17 +74,15 @@ export default function FloatingMenu({ setPage }: FloatingMenuProps) {
             />
 
             {/* ⚙️ ADMIN */}
-            {isAdmin && (
-              <Item
-                icon="⚙️"
-                label="Admin"
-                color="bg-gray-800 hover:bg-black shadow-gray-500/30"
-                onClick={() => {
-                  setPage("admin");
-                  setOpen(false);
-                }}
-              />
-            )}
+            <Item
+              icon="⚙️"
+              label="Admin"
+              color="bg-indigo-600 hover:bg-black shadow-indigo-500/30"
+              onClick={() => {
+                setPage("admin");
+                setOpen(false);
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>

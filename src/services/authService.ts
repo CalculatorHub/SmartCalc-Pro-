@@ -21,9 +21,19 @@ export const loginAdmin = async () => {
   }
 };
 
+export const loginAdminPassword = (password: string) => {
+  const DEFAULT_PASS = "Patel@9488";
+  if (password === DEFAULT_PASS) {
+    localStorage.setItem("admin_password_verified", "true");
+    return true;
+  }
+  throw new Error("Invalid Access Key ❌");
+};
+
 export const logoutAdmin = async () => {
   await signOut(auth);
   localStorage.removeItem("admin");
+  localStorage.removeItem("admin_password_verified");
 };
 
 export const observeAuth = (callback: (user: User | null) => void) => {
@@ -39,5 +49,5 @@ export const observeAuth = (callback: (user: User | null) => void) => {
 };
 
 export const isAdmin = () => {
-  return localStorage.getItem("admin") === "true";
+  return localStorage.getItem("admin") === "true" || localStorage.getItem("admin_password_verified") === "true";
 };

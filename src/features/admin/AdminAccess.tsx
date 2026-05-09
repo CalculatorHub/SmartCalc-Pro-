@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import Card3D from "../../components/ui/3DCard";
 import Icon3D from "../../components/ui/3DIcon";
 import Button from "../../components/ui/MotionButton";
-import { loginAdmin } from "../../services/authService";
-import { ShieldAlert, LogIn } from "lucide-react";
+import { loginAdmin, loginAdminPassword } from "../../services/authService";
+import { ShieldAlert, LogIn, Fingerprint } from "lucide-react";
+import Input from "../../components/ui/MotionInput";
+import { useAdminStore } from "../../store/adminStore";
 import { motion } from "motion/react";
 
 interface AdminAccessProps {
@@ -12,19 +14,32 @@ interface AdminAccessProps {
 }
 
 export default function AdminAccess({ onSuccess, onCancel }: AdminAccessProps) {
+  const [pass, setPass] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const verifyPassword = useAdminStore((s) => s.verifyPassword);
 
-  const handleLogin = async () => {
+  const handleGoogleLogin = async () => {
     setLoading(true);
     setError("");
     try {
       const user = await loginAdmin();
+      verifyPassword();
       onSuccess(user.uid);
     } catch (err: any) {
       setError(err.message || "Verification Failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordLogin = () => {
+    try {
+      loginAdminPassword(pass);
+      verifyPassword();
+      onSuccess("password-admin");
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
@@ -63,12 +78,35 @@ export default function AdminAccess({ onSuccess, onCancel }: AdminAccessProps) {
             Security protocols active. Only authorized profiles can grant terminal access.
           </p>
 
+          <div className="text-left space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-widest opacity-50 px-1">Access Key</label>
+            <Input 
+              value={pass} 
+              setValue={setPass} 
+              type="password"
+              placeholder="••••••••"
+              autoFocus
+            />
+          </div>
+
           {error && (
             <p className="text-pink-500 text-[10px] font-black uppercase tracking-widest bg-pink-500/10 p-2 rounded-lg">{error}</p>
           )}
 
           <div className="space-y-3">
-            <Button onClick={handleLogin} disabled={loading}>
+            <Button onClick={handlePasswordLogin} disabled={loading || !pass.trim()}>
+              <span className="flex items-center justify-center gap-2">
+                <Fingerprint className="w-4 h-4" />
+                {loading ? "VERIFYING..." : "GRANT ACCESS"}
+              </span>
+            </Button>
+            
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200 dark:border-white/5"></div></div>
+              <div className="relative flex justify-center text-[8px] font-black uppercase tracking-widest"><span className="bg-white dark:bg-slate-900 px-2 text-slate-400">OR</span></div>
+            </div>
+
+            <Button onClick={handleGoogleLogin} disabled={loading} className="bg-white dark:bg-white/10 text-slate-900 dark:text-white border border-slate-200 dark:border-white/5">
               <span className="flex items-center justify-center gap-2">
                 <LogIn className="w-4 h-4" />
                 {loading ? "AUTHENTICATING..." : "LOGIN WITH GOOGLE"}
