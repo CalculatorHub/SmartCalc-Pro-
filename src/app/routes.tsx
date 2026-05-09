@@ -32,15 +32,16 @@ export default function Routes() {
 
     // 🔐 If going to admin → ask password
     if (nextPage === "admin" && !adminToken) {
-      // For now, setting a mock admin token to bypass the step-up gate as requested
-      const mockAdminToken = "bypassed_admin_session";
-      localStorage.setItem("adminToken", mockAdminToken);
-      setAdminToken(mockAdminToken);
-      setPage("admin");
+      setShowAdminGate(true);
       return;
     }
 
-    // Auto logout removed to persist session as requested
+    // 🔐 Auto logout ONLY when leaving admin
+    if (currentPage === "admin" && nextPage !== "admin") {
+      localStorage.removeItem("adminToken");
+      setAdminToken(null);
+      console.log("Admin session cleared on navigation");
+    }
 
     setPage(nextPage);
   };
@@ -77,8 +78,8 @@ export default function Routes() {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         handleAdminLogout();
-        console.log("Admin session expired due to 5s inactivity");
-      }, 5000); // 5 seconds
+        console.log("Admin session expired due to 5m inactivity");
+      }, 5 * 60 * 1000); // 5 minutes
     };
 
     // Initial start
