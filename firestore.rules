@@ -1,97 +1,54 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // ===============================================================
-    // Price Hub Rules
-    // ===============================================================
-    match /metadata/{docId} {
-      allow read: if true;
-      allow write: if isAdmin() || (request.resource.data.syncSecret == "c4lh_sync_2026_99x");
-    }
-
-    match /fuel_rates/{cityId} {
-      allow read: if true;
-      allow write: if isAdmin() || (request.resource.data.syncSecret == "c4lh_sync_2026_99x");
-    }
-
-    // ===============================================================
-    // Assumed Data Model
-    // ===============================================================
-    //
-    // Collection: feedback
-    // Document ID: auto-generated
-    // Fields:
-    //   - message: string (required, 1-1000 chars)
-    //   - type: string (required, ['Suggestion', 'Bug'])
-    //   - userId: string (required, matches auth.uid)
-    //   - userEmail: string (required, matches auth.token.email)
-    //   - createdAt: timestamp (required)
-    //
-    // ===============================================================
-
-    // Helper Functions
-    function isAuthenticated() {
+    // Helper functions
+    function isSignedIn() {
       return request.auth != null;
     }
 
     function isAdmin() {
-      return isAuthenticated() && 
-             request.auth.token.email == "reddyvamshi607@gmail.com" &&
+      return isSignedIn() && 
+             request.auth.token.email == "webistehosting@gmail.com" && 
              request.auth.token.email_verified == true;
     }
 
-    function isValidFeedback(data) {
-      return data.keys().hasAll(['message', 'type', 'createdAt']) &&
-             data.keys().hasOnly(['message', 'type', 'name', 'rating', 'createdAt']) &&
-             data.message is string && data.message.size() >= 1 && data.message.size() <= 1000 &&
-             data.type in ['Suggestion', 'Bug', 'Improvement'] &&
-             (data.name == null || (data.name is string && data.name.size() <= 100)) &&
-             (data.rating == null || (data.rating is int && data.rating >= 0 && data.rating <= 5)) &&
-             data.createdAt is timestamp;
+    function isValidId(id) {
+      return id is string && id.size() <= 128;
     }
 
-    match /feedback/{feedbackId} {
-      // Admin dashboard now uses a local password, so we allow read access.
-      // INSECURE: In a production app, use Firebase Auth for admin access.
-      allow read: if true;
-      
-      // Anyone can submit feedback
-      allow create: if isValidFeedback(request.resource.data);
-      
-      // Only allow updates/deletes if needed (currently not used by admin UI)
-      allow update, delete: if true;
+    function incoming() {
+      return request.resource.data;
     }
 
-    match /stats/{docId} {
-      allow read: if true;
-      allow create, update: if true;
-    }
-
-    match /system/{docId} {
-      allow read: if true;
-      allow create, update: if true;
-    }
-
-    function isValidPriceData(data) {
-       return data.keys().hasAll(['gold24', 'gold22', 'silver', 'updatedAt']) &&
-              data.gold24 is number && data.gold22 is number && data.silver is number;
-    }
-
-    function isValidFuelRate(data) {
-       return data.keys().hasAll(['city', 'petrol', 'diesel', 'updatedAt']) &&
-              data.city is string && data.petrol is number && data.diesel is number;
-    }
-
-    match /visitor_list/{docId} {
-      allow read: if true;
-      allow create: if true;
-      // In a real app, restrict updates
-      allow update, delete: if true;
+    function existing() {
+      return resource.data;
     }
 
     // Default deny
-    match /{path=**} {
+    match /{document=**} {
       allow read, write: if false;
+    }
+
+    // Feedback collection
+    match /feedback/{feedbackId} {
+      function isValidFeedback(data) {
+        return data.message is string && data.message.size() > 0 && data.message.size() <= 5000 &&
+               data.type is string && data.type in ['Bug', 'UI/UX', 'Improvement', 'Suggestion'] &&
+               data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+               data.createdAt == request.time &&
+               (data.get('userId', '') is string) &&
+               (data.get('browser', '') is string) &&
+               (data.get('os', '') is string);
+      }
+
+      allow create: if isValidId(feedbackId) && isValidFeedback(incoming());
+      
+      allow read, list, delete, update: if isAdmin();
+    }
+
+    // Test connection path
+    match /test/connection {
+      allow get: if true;
     }
   }
 }

@@ -6,49 +6,49 @@ import AdminPanel from "../features/admin/AdminPanel";
 import Feedback from "../features/feedback/Feedback";
 import GoldSilverHub from "../features/metals/GoldSilverHub";
 import Dashboard from "../features/dashboard/Dashboard";
-import Login from "../features/auth/Login";
 import AdminAccess from "../features/admin/AdminAccess";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import { AnimatePresence, motion } from "motion/react";
-
 import FloatingMenu from "../components/ui/FloatingMenu";
+import { observeAuth, logoutAdmin } from "../services/authService";
+import useFeedbackNotifications from "../hooks/useFeedbackNotifications";
 
 export default function Routes() {
   const [page, setPage] = useState<string>("dashboard");
-  const [token, setToken] = useState<string | null>(() => {
-    const saved = localStorage.getItem("token");
-    if (!saved) localStorage.setItem("token", "unrestricted_session");
-    return saved || "unrestricted_session";
-  });
   const [adminToken, setAdminToken] = useState<string | null>(localStorage.getItem("adminToken"));
-  const [role, setRole] = useState<string | null>(() => {
-    const saved = localStorage.getItem("role");
-    if (!saved) localStorage.setItem("role", "admin");
-    return saved || "admin";
-  });
   const [showAdminGate, setShowAdminGate] = useState(false);
 
-  const handleLogin = (newToken: string, newRole: string) => {
-    setToken(newToken);
-    setRole(newRole);
-    setPage("dashboard");
-  };
+  // Activate Real-time Feedback Notifications for Admin
+  useFeedbackNotifications();
+
+  useEffect(() => {
+    const unsub = observeAuth((user) => {
+      if (user) {
+        setAdminToken(user.uid);
+        localStorage.setItem("adminToken", user.uid);
+      } else {
+        setAdminToken(null);
+        localStorage.removeItem("adminToken");
+      }
+    });
+
+    return () => unsub();
+  }, []);
 
   const navigate = (nextPage: string) => {
     const currentPage = page;
 
-    // 🔐 If going to admin → ask password
+    // 🔐 Auto logout when LEAVING admin
+    if (currentPage === "admin" && nextPage !== "admin") {
+      handleAdminLogout();
+      console.log("Admin session cleared on navigation away from terminal");
+    }
+
+    // 🔐 If going to admin → ask password (now Google Login)
     if (nextPage === "admin" && !adminToken) {
       setShowAdminGate(true);
       return;
-    }
-
-    // 🔐 Auto logout ONLY when leaving admin
-    if (currentPage === "admin" && nextPage !== "admin") {
-      localStorage.removeItem("adminToken");
-      setAdminToken(null);
-      console.log("Admin session cleared on navigation");
     }
 
     setPage(nextPage);
@@ -60,23 +60,16 @@ export default function Routes() {
     setPage("admin");
   };
 
-  const handleLogout = () => {
-    localStorage.clear();
-    setToken(null);
+  const handleAdminLogout = async () => {
+    await logoutAdmin();
     setAdminToken(null);
-    setRole(role);
-    setPage("dashboard");
-  };
-
-  const handleAdminLogout = () => {
     localStorage.removeItem("adminToken");
-    setAdminToken(null);
     if (page === "admin") {
       setPage("dashboard");
     }
   };
 
-  // 5-second Inactivity Logout for Admin
+  // 5-minute Inactivity Logout for Admin
   useEffect(() => {
     if (!adminToken) return;
 
@@ -90,10 +83,8 @@ export default function Routes() {
       }, 5 * 60 * 1000); // 5 minutes
     };
 
-    // Initial start
     resetTimer();
 
-    // Listen for activity
     const events = ["mousedown", "mousemove", "keypress", "scroll", "touchstart"];
     events.forEach(event => document.addEventListener(event, resetTimer));
 
@@ -138,7 +129,6 @@ export default function Routes() {
         </AnimatePresence>
       </main>
 
-      {/* 🔐 ADMIN PASSWORD POPUP */}
       <AnimatePresence>
         {showAdminGate && (
           <AdminAccess 
@@ -149,7 +139,6 @@ export default function Routes() {
       </AnimatePresence>
 
       <Footer setPage={navigate} activePage={page} />
-      
       <FloatingMenu setPage={navigate} />
     </div>
   );

@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import Card3D from "../../components/ui/3DCard";
 import Icon3D from "../../components/ui/3DIcon";
-import Input from "../../components/ui/MotionInput";
 import Button from "../../components/ui/MotionButton";
-import { api } from "../../utils/api";
-import { ShieldAlert, Fingerprint } from "lucide-react";
+import { loginAdmin } from "../../services/authService";
+import { ShieldAlert, LogIn } from "lucide-react";
 import { motion } from "motion/react";
 
 interface AdminAccessProps {
@@ -13,19 +12,15 @@ interface AdminAccessProps {
 }
 
 export default function AdminAccess({ onSuccess, onCancel }: AdminAccessProps) {
-  const [pass, setPass] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleVerify = async () => {
+  const handleLogin = async () => {
     setLoading(true);
     setError("");
     try {
-      const res = await api("/api/admin/step-up", "POST", { password: pass });
-      if (res.adminToken) {
-        localStorage.setItem("adminToken", res.adminToken);
-        onSuccess(res.adminToken);
-      }
+      const user = await loginAdmin();
+      onSuccess(user.uid);
     } catch (err: any) {
       setError(err.message || "Verification Failed");
     } finally {
@@ -57,33 +52,27 @@ export default function AdminAccess({ onSuccess, onCancel }: AdminAccessProps) {
           
           <div className="space-y-2">
             <h2 className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase italic">
-              Neural Step-Up
+              Admin Access
             </h2>
             <p className="text-[10px] font-black uppercase tracking-widest opacity-40">
-              Identity Affirmation Required
+              Identity Affirmation via Google
             </p>
           </div>
 
-          <div className="text-left space-y-1">
-            <div className="flex justify-between items-center px-1">
-              <label className="text-[10px] font-black uppercase tracking-widest opacity-50">Access Key</label>
-            </div>
-            <Input 
-              value={pass} 
-              setValue={setPass} 
-              type="password"
-              placeholder="••••••••"
-              autoFocus
-            />
-          </div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed px-4">
+            Security protocols active. Only authorized profiles can grant terminal access.
+          </p>
 
           {error && (
-            <p className="text-pink-500 text-[10px] font-black uppercase tracking-widest">{error}</p>
+            <p className="text-pink-500 text-[10px] font-black uppercase tracking-widest bg-pink-500/10 p-2 rounded-lg">{error}</p>
           )}
 
           <div className="space-y-3">
-            <Button onClick={handleVerify} disabled={loading}>
-              {loading ? "VERIFYING..." : "GRANT TERMINAL ACCESS"}
+            <Button onClick={handleLogin} disabled={loading}>
+              <span className="flex items-center justify-center gap-2">
+                <LogIn className="w-4 h-4" />
+                {loading ? "AUTHENTICATING..." : "LOGIN WITH GOOGLE"}
+              </span>
             </Button>
             <button 
               onClick={onCancel}

@@ -6,7 +6,6 @@ import {
   Zap, 
   MapPin, 
   ShieldCheck,
-  RefreshCw,
   Gauge,
   Car
 } from "lucide-react";
@@ -23,7 +22,6 @@ export default function VehicleHub() {
   const [distance, setDistance] = useState<string>("");
   const [mileage, setMileage] = useState<string>("");
   const [fuelPrice, setFuelPrice] = useState<string>("109.04");
-  const [syncing, setSyncing] = useState(false);
 
   const dNum = num(distance);
   const mNum = num(mileage);
@@ -32,14 +30,6 @@ export default function VehicleHub() {
   const litersNeeded = mNum > 0 ? dNum / mNum : 0;
   const totalCost = litersNeeded * pNum;
   const costPerKm = dNum > 0 ? totalCost / dNum : 0;
-
-  const handleSyncPrice = () => {
-    setSyncing(true);
-    setTimeout(() => {
-      setSyncing(false);
-      setFuelPrice((109.04 + (Math.random() * 2 - 1)).toFixed(2));
-    }, 1000);
-  };
 
   return (
     <div className="space-y-6">
@@ -103,13 +93,6 @@ export default function VehicleHub() {
              <label className="text-[10px] font-black uppercase tracking-widest opacity-50 ml-1">Rate (₹/L)</label>
              <InputUI value={fuelPrice} setValue={setFuelPrice} type="number" />
           </div>
-          <button 
-            onClick={handleSyncPrice}
-            disabled={syncing}
-            className={`w-14 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-500 flex items-center justify-center transition-all ${syncing ? 'animate-pulse opacity-50' : ''}`}
-          >
-            <RefreshCw className={`w-5 h-5 ${syncing ? 'animate-spin' : ''}`} />
-          </button>
         </div>
       </Card3D>
 
