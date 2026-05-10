@@ -110,7 +110,7 @@ export default function Routes() {
   };
 
   return (
-    <div className="max-w-lg mx-auto px-4 pb-24">
+    <div className="max-w-md mx-auto px-4 pb-24 overflow-x-hidden">
       <Header />
       
       <main className="relative min-h-[70vh]">

@@ -90,16 +90,22 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
   };
 
   const handleClearAll = async () => {
+    if (!auth.currentUser) {
+      alert("Unauthorized: Please log in first.");
+      return;
+    }
+
     const confirmDelete = confirm("⚠️ Delete ALL feedback?\nThis cannot be undone!");
     if (!confirmDelete) return;
 
+    console.log("Initiating master purge for user:", auth.currentUser.email);
     setBulkLoading(true);
     try {
       const count = await clearAllFeedback();
       alert(`✅ ${count} items deleted`);
       setSelectedIds(new Set());
     } catch (err: any) {
-      console.error(err);
+      console.error("Purge Error:", err);
       alert("❌ Failed to delete: " + err.message);
     } finally {
       setBulkLoading(false);
@@ -183,7 +189,7 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                   {selectedIds.size === filtered.length && filtered.length > 0 ? "DESELECT ALL" : "SELECT ALL"}
                 </button>
 
-                <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-white/5 overflow-x-auto no-scrollbar">
+                <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-white/5 overflow-x-auto no-scrollbar pb-1">
                   {["All", "Bug", "UI/UX", "Improvement", "Suggestion"].map(t => (
                     <button
                       key={t}
@@ -191,7 +197,7 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                         setFilter(t);
                         setSelectedIds(new Set());
                       }}
-                      className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                      className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${
                         filter === t ? "bg-white dark:bg-slate-700 shadow-sm text-emerald-600 dark:text-emerald-400" : "opacity-40"
                       }`}
                     >

@@ -38,8 +38,7 @@ service cloud.firestore {
       // Allow read/list/update/delete for master admin emails
       allow read, list, update, delete: if isSignedIn() && 
                                           (request.auth.token.email == "webistehosting@gmail.com" || 
-                                           request.auth.token.email == "reddyvamshi607@gmail.com") &&
-                                          request.auth.token.email_verified == true;
+                                           request.auth.token.email == "reddyvamshi607@gmail.com");
     }
 
     // Test connection path

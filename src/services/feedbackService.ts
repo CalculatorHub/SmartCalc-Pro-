@@ -86,32 +86,25 @@ export const subscribeToFeedback = (callback: (data: any[]) => void) => {
 };
 
 export const clearAllFeedback = async () => {
-  const colRef = collection(db, COLLECTION_NAME);
-  const BATCH_SIZE = 400;
-  let totalDeleted = 0;
-
+  const ref = collection(db, COLLECTION_NAME);
+  
   try {
-    while (true) {
-      const q = query(colRef, limit(BATCH_SIZE));
-      const snapshot = await getDocs(q);
+    console.log("Fetching all feedback for master purge...");
+    const snapshot = await getDocs(ref);
 
-      if (snapshot.empty) break;
-
-      const batch = writeBatch(db);
-      snapshot.forEach((doc) => {
-        batch.delete(doc.ref);
-      });
-
-      await batch.commit();
-      totalDeleted += snapshot.size;
-
-      // Small delay to allow the system to breathe
-      await new Promise((res) => setTimeout(res, 50));
-      
-      // If the batch was smaller than limit, we're likely done
-      if (snapshot.size < BATCH_SIZE) break;
+    if (snapshot.empty) {
+      console.log("Purge unnecessary: No transmissions detected.");
+      return 0;
     }
-    return totalDeleted;
+
+    const batch = writeBatch(db);
+    snapshot.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+    console.log(`Purge successful: ${snapshot.size} items deleted.`);
+    return snapshot.size;
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, COLLECTION_NAME);
     return 0;
