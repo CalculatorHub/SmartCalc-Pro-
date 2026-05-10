@@ -80,3 +80,9 @@
     border-t border-white/20;
   }
 }
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}

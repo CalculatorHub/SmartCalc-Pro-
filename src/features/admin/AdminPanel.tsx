@@ -149,7 +149,7 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-32">
+    <div className="max-w-md mx-auto space-y-8 pb-32 px-4 shadow-sm overflow-x-hidden">
       <div className="flex justify-between items-end">
         <div className="space-y-4">
           <Icon3D icon={<ShieldAlert className="w-8 h-8 text-white" />} color="from-red-500 to-red-700" />

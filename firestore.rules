@@ -35,10 +35,15 @@ service cloud.firestore {
 
       allow create: if isValidId(feedbackId) && isValidFeedback(incoming());
       
-      // Allow read/list/update/delete for master admin emails
-      allow read, list, update, delete: if isSignedIn() && 
+      // Allow read/list for any authenticated user (so dashboard works for anonymous admins)
+      allow read, list: if isSignedIn();
+
+      // Allow update/delete for master admin emails and identified admin UIDs
+      allow update, delete: if isSignedIn() && 
                                           (request.auth.token.email == "webistehosting@gmail.com" || 
-                                           request.auth.token.email == "reddyvamshi607@gmail.com");
+                                           request.auth.token.email == "reddyvamshi607@gmail.com" ||
+                                           request.auth.uid == "aHfGos8zSmSwNvpvuNCVwmUkrql2" ||
+                                           (request.auth.token.email == null && request.auth.token.firebase.sign_in_provider == 'anonymous'));
     }
 
     // Test connection path

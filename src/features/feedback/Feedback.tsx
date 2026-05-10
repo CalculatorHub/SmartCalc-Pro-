@@ -40,7 +40,7 @@ export default function Feedback() {
   };
 
   return (
-    <div className="max-w-xl mx-auto space-y-8">
+    <div className="max-w-md mx-auto space-y-8 px-4 overflow-x-hidden">
       <div className="text-center space-y-4">
         <Icon3D icon={<MessageSquare className="w-8 h-8 text-white" />} color="from-emerald-400 to-teal-600" />
         <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white uppercase italic">
