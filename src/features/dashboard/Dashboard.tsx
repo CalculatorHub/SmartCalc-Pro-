@@ -5,9 +5,7 @@ import {
   Landmark, 
   Coins, 
   Car, 
-  Home, 
-  Shield,
-  MessageCircle
+  Home
 } from "lucide-react";
 
 interface DashboardProps {
@@ -44,14 +42,6 @@ export default function Dashboard({ setPage }: DashboardProps) {
         />
 
         <MenuCard
-          title="Feedback"
-          icon={<MessageCircle className="w-6 h-6" />}
-          color="from-emerald-400 to-teal-600"
-          onClick={() => setPage("feedback")}
-          description="Transmissions"
-        />
-
-        <MenuCard
           title="Vehicle"
           icon={<Car className="w-6 h-6" />}
           color="from-teal-400 to-cyan-600"
@@ -66,16 +56,6 @@ export default function Dashboard({ setPage }: DashboardProps) {
           onClick={() => setPage("estate")}
           description="Spatial Valuation"
         />
-
-        {role === "admin" && (
-          <MenuCard
-            title="Admin"
-            icon={<Shield className="w-6 h-6" />}
-            color="from-gray-700 to-slate-900"
-            onClick={() => setPage("admin")}
-            description="Neural Terminal"
-          />
-        )}
       </div>
     </div>
   );

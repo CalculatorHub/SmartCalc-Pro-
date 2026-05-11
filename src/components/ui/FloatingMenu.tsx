@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Plus, X } from "lucide-react";
-import useAuth from "../../hooks/useAuth";
-import { useAdminStore } from "../../store/adminStore";
-
-const ADMIN_EMAIL = "webistehosting@gmail.com";
 
 interface FloatingMenuProps {
   setPage: (page: string) => void;
@@ -12,10 +8,6 @@ interface FloatingMenuProps {
 
 export default function FloatingMenu({ setPage }: FloatingMenuProps) {
   const [open, setOpen] = useState(false);
-  const user = useAuth();
-  const isPasswordVerified = useAdminStore((s) => s.isPasswordVerified);
-  const isGoogleAdmin = user && user.email === ADMIN_EMAIL;
-  const isAdmin = isGoogleAdmin || isPasswordVerified;
 
   // 🔥 COMMON ITEM COMPONENT
   const Item = ({ icon, label, onClick, color }: { icon: string, label: string, onClick: () => void, color: string }) => (
@@ -55,36 +47,8 @@ export default function FloatingMenu({ setPage }: FloatingMenuProps) {
 
   return (
     <div className="fixed bottom-20 right-4 flex flex-col items-end gap-3 z-[60]">
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            animate={{ y: [0, -5, 0] }}
-            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-            className="flex flex-col items-end gap-3"
-          >
-            {/* ⚙️ ADMIN */}
-            <Item
-              icon="⚙️"
-              label="Admin"
-              color="bg-indigo-600 hover:bg-black shadow-indigo-500/30"
-              onClick={() => {
-                setPage("admin");
-                setOpen(false);
-              }}
-            />
-            <Item
-              icon="💬"
-              label="Feedback"
-              color="bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/30"
-              onClick={() => {
-                setPage("feedback");
-                setOpen(false);
-              }}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
+      {/* ADD NEW ITEMS HERE IF NEEDED IN THE FUTURE */}
+      
       {/* ➕ MAIN BUTTON */}
       <motion.button
         whileTap={{ scale: 0.9 }}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { 
   IndianRupee, 
   TrendingUp, 
@@ -8,22 +8,27 @@ import {
   Tag, 
   Wallet,
   Save,
-  Landmark
+  Landmark,
+  ShieldCheck,
+  History,
+  Trash2
 } from "lucide-react";
 import Card3D from "../../components/ui/3DCard";
 import Icon3D from "../../components/ui/3DIcon";
 import InputUI from "../../components/ui/MotionInput";
 import Button from "../../components/ui/MotionButton";
 import { num } from "../../utils/helpers";
-import { api } from "../../utils/api";
+import { saveFinanceRecord, subscribeToFinance, deleteFinanceRecord } from "../../services/financeService";
 
 export default function FinanceHub() {
-  const [apiStatus, setApiStatus] = useState<"checking" | "connected" | "failed">("checking");
+  const [records, setRecords] = useState<any[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
-    api("/api/finance")
-      .then(() => setApiStatus("connected"))
-      .catch(() => setApiStatus("failed"));
+    const unsub = subscribeToFinance((data) => {
+      setRecords(data);
+    });
+    return () => unsub();
   }, []);
 
   return (
@@ -38,19 +43,57 @@ export default function FinanceHub() {
                 Finance Hub
               </h1>
               <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mt-0.5">
-                Quantum Accounting v2.0
+                Quantum Accounting v3.0
               </p>
             </div>
           </div>
-          <div className={`text-[10px] uppercase font-black tracking-widest px-3 py-1 rounded-full border ${
-            apiStatus === "connected" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
-            apiStatus === "failed" ? "bg-red-500/10 text-red-500 border-red-500/20" :
-            "bg-slate-500/10 text-slate-500 border-slate-500/20"
-          }`}>
-            {apiStatus === "checking" ? "Verifying Core..." : apiStatus === "connected" ? "Neural Link Active" : "Link Severed"}
-          </div>
+          <button 
+            onClick={() => setShowHistory(!showHistory)}
+            className={`p-3 rounded-2xl transition-all ${showHistory ? 'bg-blue-500 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}
+          >
+            <History className="w-5 h-5" />
+          </button>
         </div>
       </Card3D>
+
+      <AnimatePresence>
+        {showHistory && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <Card3D className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Recent Transmissions</h3>
+                <span className="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded text-[8px] font-black">{records.length} RECORDS</span>
+              </div>
+              
+              <div className="space-y-3 max-h-64 overflow-y-auto no-scrollbar">
+                {records.length === 0 ? (
+                  <p className="text-center py-8 text-xs opacity-30 italic">No records found in local matrix.</p>
+                ) : (
+                  records.map(r => (
+                    <div key={r.id} className="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex justify-between items-center group">
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-500">{r.type}</p>
+                        <p className="text-sm font-bold">₹ {r.result}</p>
+                      </div>
+                      <button 
+                         onClick={() => deleteFinanceRecord(r.id)}
+                         className="p-2 text-red-500/30 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </Card3D>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <RateConverter />
       <DateInterestPlanner />
@@ -64,7 +107,7 @@ export default function FinanceHub() {
 
 const saveFinance = async (type: string, inputs: any, result: any) => {
   try {
-    await api("/api/finance", "POST", { type, inputs, result });
+    await saveFinanceRecord({ type, inputs, result: String(result) });
   } catch (error) {
     console.error("Failed to save finance record:", error);
   }

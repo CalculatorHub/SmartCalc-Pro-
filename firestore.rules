@@ -1,54 +1,20 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper functions
-    function isSignedIn() {
-      return request.auth != null;
+    
+    match /finance/{doc} {
+      allow create: if true;
+      allow read, list: if true;
+      allow delete: if false;
     }
 
-    function isAdmin() {
-      return isSignedIn() && 
-             (request.auth.token.email in ["webistehosting@gmail.com", "reddyvamshi607@gmail.com"]) && 
-             request.auth.token.email_verified == true;
-    }
-
-    function isValidId(id) {
-      return id is string && id.size() <= 128;
-    }
-
-    function incoming() {
-      return request.resource.data;
-    }
-
-    function existing() {
-      return resource.data;
-    }
-
-    match /feedback/{feedbackId} {
-      function isValidFeedback(data) {
-        return data.message is string && data.message.size() > 0 &&
-               data.type is string && 
-               data.rating >= 1 &&
-               data.createdAt != null &&
-               data.status == 'unread';
-      }
-
-      allow create: if isValidId(feedbackId) && isValidFeedback(incoming());
-      
-      // Allow read/list for any authenticated user (so dashboard works for anonymous admins)
-      allow read, list: if isSignedIn();
-
-      // Allow update/delete for master admin emails and identified admin UIDs
-      allow update, delete: if isSignedIn() && 
-                                          (request.auth.token.email == "webistehosting@gmail.com" || 
-                                           request.auth.token.email == "reddyvamshi607@gmail.com" ||
-                                           request.auth.uid == "aHfGos8zSmSwNvpvuNCVwmUkrql2" ||
-                                           (request.auth.token.email == null && request.auth.token.firebase.sign_in_provider == 'anonymous'));
-    }
-
-    // Test connection path
     match /test/connection {
       allow get: if true;
+    }
+    
+    // Default deny for everything else
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

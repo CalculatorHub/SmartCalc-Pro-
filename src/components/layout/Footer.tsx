@@ -1,5 +1,5 @@
 import React from "react";
-import { Home, IndianRupee, Coins, Car, ShieldCheck, MessageSquare, LayoutDashboard } from "lucide-react";
+import { Home, Coins, Car } from "lucide-react";
 import NavItem from "../ui/NavItem";
 
 interface FooterProps {
@@ -8,8 +8,6 @@ interface FooterProps {
 }
 
 export default function Footer({ setPage, activePage }: FooterProps) {
-  const role = localStorage.getItem("role");
-
   const items = [
     { key: "finance", label: "Finance", icon: <span className="text-xl">₹</span> },
     { key: "metals", label: "Gold", icon: <span className="text-xl">🪙</span> },

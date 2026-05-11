@@ -5,6 +5,7 @@ import helmet from 'helmet';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import 'dotenv/config';
+import firebaseConfig from '../firebase-applet-config.json';
 
 async function startServer() {
   const app = express();
