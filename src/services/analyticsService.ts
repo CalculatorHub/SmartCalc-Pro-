@@ -1,5 +1,5 @@
 import { doc, getDoc, setDoc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 
 const STATS_DOC_PATH = 'stats/visitors';
 
@@ -28,7 +28,6 @@ export const trackVisitor = async (userName?: string) => {
     }
 
     if (lastVisitDate === today) {
-      console.log('Already counted today for stats');
       return;
     }
 
@@ -69,10 +68,9 @@ export const trackVisitor = async (userName?: string) => {
 
     // 4. Update Local Storage ONLY AFTER SUCCESSFUL DB UPDATE
     localStorage.setItem('smartcalpro_last_visit', today);
-    console.log('Visitor tracked successfully');
     return true;
   } catch (error) {
-    console.error('Error tracking visitor:', error);
+    handleFirestoreError(error, OperationType.WRITE, "stats_update");
     return false;
   }
 };
@@ -87,7 +85,7 @@ export const getVisitorStats = async () => {
     }
     return { totalCount: 0 };
   } catch (error) {
-    console.error('Error fetching stats:', error);
+    handleFirestoreError(error, OperationType.GET, STATS_DOC_PATH);
     return { totalCount: 0 };
   }
 };

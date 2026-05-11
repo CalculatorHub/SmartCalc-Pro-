@@ -7,10 +7,9 @@ import {
   serverTimestamp,
   doc,
   deleteDoc,
-  getDocs,
   limit
 } from "firebase/firestore";
-import { db } from "../lib/firebase";
+import { db, handleFirestoreError, OperationType } from "../lib/firebase";
 
 const COLLECTION_NAME = "finance";
 
@@ -27,8 +26,7 @@ export const saveFinanceRecord = async (data: {
     });
     return docRef.id;
   } catch (error) {
-    console.error("Failed to save finance record:", error);
-    throw error;
+    handleFirestoreError(error, OperationType.CREATE, COLLECTION_NAME);
   }
 };
 
@@ -45,15 +43,15 @@ export const subscribeToFinance = (callback: (data: any[]) => void) => {
     }));
     callback(data);
   }, (error) => {
-    console.error("Finance Subscription Error:", error);
+    handleFirestoreError(error, OperationType.GET, COLLECTION_NAME);
   });
 };
 
 export const deleteFinanceRecord = async (id: string) => {
+  const path = `${COLLECTION_NAME}/${id}`;
   try {
     await deleteDoc(doc(db, COLLECTION_NAME, id));
   } catch (error) {
-    console.error("Failed to delete finance record:", error);
-    throw error;
+    handleFirestoreError(error, OperationType.DELETE, path);
   }
 };

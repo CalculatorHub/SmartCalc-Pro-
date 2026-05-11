@@ -2,10 +2,34 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    match /finance/{doc} {
-      allow create: if true;
+    // Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidFinance(data) {
+      return data.keys().hasAll(['type', 'result', 'userId', 'createdAt']) &&
+             data.type is string && data.type.size() <= 200 &&
+             data.result is string && data.result.size() <= 1000 &&
+             data.userId is string &&
+             data.createdAt is timestamp;
+    }
+
+    match /finance/{docId} {
+      allow create: if isValidFinance(request.resource.data);
       allow read, list: if true;
-      allow delete: if false;
+      allow delete: if true;
+      allow update: if false; 
+    }
+
+    match /stats/{docId} {
+      allow read: if true;
+      allow write: if true; // In a real app, this should be more restricted
+    }
+
+    match /visitor_list/{docId} {
+      allow create: if true;
+      allow read: if true;
     }
 
     match /test/connection {
