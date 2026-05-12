@@ -42,6 +42,50 @@ export const getMonthsBetween = (start: string | Date, end: string | Date) => {
   return Math.max(months, 1); // never 0
 };
 
+export const numberToIndianWords = (num: number): string => {
+  if (num === 0) return 'Zero';
+  if (!num || isNaN(num)) return '';
+
+  const singleDigits = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+  const doubleDigits = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+  const tensPlace = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+  const convertGroup = (n: number) => {
+    let str = '';
+    if (n >= 100) {
+      str += singleDigits[Math.floor(n / 100)] + ' Hundred ';
+      n %= 100;
+    }
+    if (n >= 10 && n <= 19) {
+      str += doubleDigits[n - 10] + ' ';
+    } else if (n >= 20 || (n > 0 && n < 10)) {
+      str += tensPlace[Math.floor(n / 10)] + ' ' + singleDigits[n % 10] + ' ';
+    }
+    return str.trim();
+  };
+
+  let res = '';
+  let temp = Math.floor(num);
+
+  if (temp >= 10000000) {
+    res += convertGroup(Math.floor(temp / 10000000)) + ' Crore ';
+    temp %= 10000000;
+  }
+  if (temp >= 100000) {
+    res += convertGroup(Math.floor(temp / 100000)) + ' Lakh ';
+    temp %= 100000;
+  }
+  if (temp >= 1000) {
+    res += convertGroup(Math.floor(temp / 1000)) + ' Thousand ';
+    temp %= 1000;
+  }
+  if (temp > 0) {
+    res += convertGroup(temp);
+  }
+
+  return res.trim() + ' Rupees Only';
+};
+
 export function calculateFinance(
   principal: number,
   rate: number,

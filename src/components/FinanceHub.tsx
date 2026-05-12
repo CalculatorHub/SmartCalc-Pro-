@@ -8,7 +8,7 @@ import {
   Download, FileText, Share2, History, PlusCircle, Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { annualToMonthlyRate, monthlyToAnnualRate, getMonthsBetween } from '../lib/financeUtils';
+import { annualToMonthlyRate, monthlyToAnnualRate, getMonthsBetween, numberToIndianWords } from '../lib/financeUtils';
 import { exportToCSV, exportToPDF } from '../lib/exportUtils';
 
 // --- Components ---
@@ -122,6 +122,15 @@ const RateConverter = () => {
               }`}
             />
           </motion.div>
+          {mode === 'rsToPct' && inputVal && parseFloat(inputVal) > 0 && (
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-[10px] font-bold text-blue-500 italic px-1"
+            >
+              {numberToIndianWords(parseFloat(inputVal))}
+            </motion.p>
+          )}
           <AnimatePresence>
             {hasInteracted && !inputVal && (
               <motion.p 
@@ -205,7 +214,7 @@ const RateConverter = () => {
         <div className="flex items-start gap-2 px-1">
           <Info className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" />
           <p className="text-[10px] leading-relaxed text-gray-500 dark:text-gray-400 font-medium">
-            Logic: Standard 12% rate per Rupee base calculation is applied.
+            Logic: Converts annual percentage rates to monthly rupee-per-100 rates and vice versa.
           </p>
         </div>
       </div>
@@ -221,7 +230,7 @@ const InterestCalculator = () => {
   const [rate, setRate] = useState('');
   const [timeMode, setTimeMode] = useState<'YEARS' | 'DATES'>('YEARS');
   const [time, setTime] = useState('');
-  const [startDate, setStartDate] = useState('');
+  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState('');
   const [type, setType] = useState<'SI' | 'CI'>('CI');
   const [history, setHistory] = useState<any[]>([]);
@@ -242,8 +251,7 @@ const InterestCalculator = () => {
     }
 
     const P = parseFloat(principal);
-    const monthlyRate = parseFloat(rate);
-    const R = monthlyRate * 12; // Convert monthly rupee rate to annual percentage
+    const R = parseFloat(rate); // Annual Rate in %
     
     let totalInterest = 0;
     let totalAmount = 0;
@@ -377,15 +385,24 @@ const InterestCalculator = () => {
               }`}
             />
           </motion.div>
+          {principal && parseFloat(principal) > 0 && (
+            <motion.p 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-[10px] font-bold text-blue-500 italic px-1"
+            >
+              {numberToIndianWords(parseFloat(principal))}
+            </motion.p>
+          )}
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rate (₹ per 100 / mo)</label>
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Annual Rate (%)</label>
             <motion.div whileFocus={{ scale: 1.01 }}>
               <input
                 type="number"
                 value={rate}
-                placeholder="₹ per 100/mo"
+                placeholder="e.g. 5"
                 onChange={(e) => {
                   const val = e.target.value;
                   if (parseFloat(val) < 0) return;
@@ -401,51 +418,56 @@ const InterestCalculator = () => {
             </motion.div>
           </div>
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{timeMode === 'YEARS' ? 'Years' : 'Duration'}</label>
-              <button 
-                onClick={() => setTimeMode(t => t === 'YEARS' ? 'DATES' : 'YEARS')}
-                className="text-[8px] font-black text-blue-500 uppercase tracking-widest hover:underline"
-              >
-                {timeMode === 'YEARS' ? 'Use Dates' : 'Use Years'}
-              </button>
-            </div>
-            {timeMode === 'YEARS' ? (
-              <motion.div whileFocus={{ scale: 1.01 }}>
-                <input
-                  type="number"
-                  value={time}
-                  placeholder="Period"
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (parseFloat(val) < 0) return;
-                    setTime(val);
-                    setIsCalculated(false);
-                  }}
-                  onBlur={() => setHasInteracted(prev => ({ ...prev, time: true }))}
-                  autoComplete="off"
-                  className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold outline-none border transition-all focus:ring-2 focus:ring-blue-500 ${
-                    hasInteracted.time && !time ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
-                  }`}
-                />
-              </motion.div>
-            ) : (
-              <div className="flex flex-col gap-1.5">
-                 <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => { setStartDate(e.target.value); setIsCalculated(false); }}
-                  className="w-full h-8 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-lg px-2 text-[10px] font-bold border border-transparent dark:border-white/10 focus:ring-2 focus:ring-blue-500"
-                />
-                 <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => { setEndDate(e.target.value); setIsCalculated(false); }}
-                  className="w-full h-8 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-lg px-2 text-[10px] font-bold border border-transparent dark:border-white/10 focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            )}
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Start Date</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => { setStartDate(e.target.value); setIsCalculated(false); }}
+              className="w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold border border-transparent dark:border-white/10 focus:ring-2 focus:ring-blue-500"
+            />
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+              {timeMode === 'YEARS' ? 'Tenure (Years)' : 'End Date'}
+            </label>
+            <button 
+              onClick={() => setTimeMode(t => t === 'YEARS' ? 'DATES' : 'YEARS')}
+              className="px-2 py-0.5 bg-blue-500/10 text-[9px] font-black text-blue-500 uppercase tracking-widest rounded transition-colors hover:bg-blue-500/20"
+            >
+              {timeMode === 'YEARS' ? 'Switch to End Date' : 'Switch to Years'}
+            </button>
+          </div>
+          {timeMode === 'YEARS' ? (
+            <motion.div whileFocus={{ scale: 1.01 }}>
+              <input
+                type="number"
+                value={time}
+                placeholder="Number of years"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (parseFloat(val) < 0) return;
+                  setTime(val);
+                  setIsCalculated(false);
+                }}
+                onBlur={() => setHasInteracted(prev => ({ ...prev, time: true }))}
+                autoComplete="off"
+                className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold outline-none border transition-all focus:ring-2 focus:ring-blue-500 ${
+                  hasInteracted.time && !time ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+                }`}
+              />
+            </motion.div>
+          ) : (
+             <input
+              type="date"
+              value={endDate}
+              min={startDate}
+              onChange={(e) => { setEndDate(e.target.value); setIsCalculated(false); }}
+              className="w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold border border-transparent dark:border-white/10 focus:ring-2 focus:ring-blue-500"
+            />
+          )}
         </div>
       </div>
 
@@ -493,6 +515,9 @@ const InterestCalculator = () => {
           >
             <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest block mb-1">Interest</span>
             <span className="text-base font-extrabold text-gray-900 dark:text-white">₹{isCalculated && stats ? stats.totalInterest.toLocaleString() : '0'}</span>
+            {isCalculated && stats && stats.totalInterest > 0 && (
+              <span className="text-[8px] font-bold text-emerald-500/80 italic block mt-1 leading-tight">{numberToIndianWords(stats.totalInterest)}</span>
+            )}
           </motion.div>
           <motion.div 
             animate={isCalculated ? { scale: [1, 1.05, 1] } : {}}
@@ -501,6 +526,9 @@ const InterestCalculator = () => {
           >
             <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block mb-1">Maturity</span>
             <span className="text-base font-extrabold text-gray-900 dark:text-white">₹{isCalculated && stats ? stats.totalAmount.toLocaleString() : '0'}</span>
+            {isCalculated && stats && stats.totalAmount > 0 && (
+              <span className="text-[8px] font-bold text-blue-500/80 italic block mt-1 leading-tight">{numberToIndianWords(stats.totalAmount)}</span>
+            )}
           </motion.div>
         </div>
         {isCalculated && (
@@ -547,7 +575,7 @@ const InterestCalculator = () => {
                   <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-2">
                       <span className="text-[8px] font-black px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded uppercase">{item.type}</span>
-                      <span className="text-[9px] font-bold text-gray-400 italic">P: ₹{item.principal.toLocaleString()} @ ₹{item.rate}/mo</span>
+                      <span className="text-[9px] font-bold text-gray-400 italic">P: ₹{item.principal.toLocaleString()} @ {item.rate}% p.a.</span>
                     </div>
                     <span className="text-[9px] font-extrabold text-blue-500/80 uppercase tracking-tighter block mb-0.5">{item.durationLabel}</span>
                     <span className="text-sm font-black text-gray-900 dark:text-white">₹{item.total.toLocaleString()}</span>
