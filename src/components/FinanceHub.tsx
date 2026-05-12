@@ -228,27 +228,19 @@ const RateConverter = () => {
 const InterestCalculator = () => {
   const [principal, setPrincipal] = useState('');
   const [rate, setRate] = useState('');
-  const [timeMode, setTimeMode] = useState<'YEARS' | 'DATES'>('YEARS');
-  const [time, setTime] = useState('');
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState('');
   const [type, setType] = useState<'SI' | 'CI'>('CI');
   const [history, setHistory] = useState<any[]>([]);
   const [error, setError] = useState('');
-  const [hasInteracted, setHasInteracted] = useState({ principal: false, rate: false, time: false, dates: false });
+  const [hasInteracted, setHasInteracted] = useState({ principal: false, rate: false, dates: false });
   const [isCalculated, setIsCalculated] = useState(false);
 
   const stats = useMemo(() => {
-    if (!principal || !rate) return null;
+    if (!principal || !rate || !startDate || !endDate) return null;
     
-    let T = 0;
-    if (timeMode === 'YEARS') {
-      if (!time) return null;
-      T = parseFloat(time);
-    } else {
-      if (!startDate || !endDate) return null;
-      T = getMonthsBetween(startDate, endDate) / 12;
-    }
+    const totalMonths = getMonthsBetween(startDate, endDate);
+    const T = totalMonths / 12;
 
     const P = parseFloat(principal);
     const R = parseFloat(rate); // Annual Rate in %
@@ -257,25 +249,36 @@ const InterestCalculator = () => {
     let totalAmount = 0;
     const chartData = [];
 
-    if (type === 'SI') {
-      totalInterest = (P * R * T) / 100;
-      totalAmount = P + totalInterest;
-      
-      for (let i = 1; i <= T; i++) {
-        chartData.push({
-          year: i,
-          amount: Math.round(P + (P * R * i) / 100)
-        });
-      }
-    } else {
-      totalAmount = P * Math.pow(1 + R / 100, T);
-      totalInterest = totalAmount - P;
-      
-      for (let i = 1; i <= T; i++) {
-        chartData.push({
-          year: i,
-          amount: Math.round(P * Math.pow(1 + R / 100, i))
-        });
+    if (totalMonths > 0) {
+      if (type === 'SI') {
+        totalInterest = (P * R * T) / 100;
+        totalAmount = P + totalInterest;
+        
+        // Show progression by month if period is short, otherwise by year
+        const step = totalMonths > 24 ? 12 : 1;
+        const unit = totalMonths > 24 ? 'Year' : 'Month';
+        
+        for (let i = step; i <= totalMonths; i += step) {
+          const t_partial = i / 12;
+          chartData.push({
+            label: `${unit} ${totalMonths > 24 ? i / 12 : i}`,
+            amount: Math.round(P + (P * R * t_partial) / 100)
+          });
+        }
+      } else {
+        totalAmount = P * Math.pow(1 + R / 100, T);
+        totalInterest = totalAmount - P;
+        
+        const step = totalMonths > 24 ? 12 : 1;
+        const unit = totalMonths > 24 ? 'Year' : 'Month';
+
+        for (let i = step; i <= totalMonths; i += step) {
+          const t_partial = i / 12;
+          chartData.push({
+            label: `${unit} ${totalMonths > 24 ? i / 12 : i}`,
+            amount: Math.round(P * Math.pow(1 + R / 100, t_partial))
+          });
+        }
       }
     }
 
@@ -284,12 +287,17 @@ const InterestCalculator = () => {
       totalAmount: Math.round(totalAmount),
       chartData
     };
-  }, [principal, rate, time, type]);
+  }, [principal, rate, startDate, endDate, type]);
 
   const handleCalculate = () => {
-    setHasInteracted({ principal: true, rate: true, time: true, dates: true });
-    if (!principal || !rate || (timeMode === 'YEARS' ? !time : (!startDate || !endDate))) {
+    setHasInteracted({ principal: true, rate: true, dates: true });
+    if (!principal || !rate || !startDate || !endDate) {
       setError('Please enter all required values');
+      setIsCalculated(false);
+      return;
+    }
+    if (new Date(endDate) <= new Date(startDate)) {
+      setError('End date must be after start date');
       setIsCalculated(false);
       return;
     }
@@ -304,11 +312,9 @@ const InterestCalculator = () => {
       type: type === 'SI' ? 'Simple' : 'Compound',
       principal: parseFloat(principal),
       rate: parseFloat(rate),
-      timeMode,
-      years: timeMode === 'YEARS' ? parseFloat(time) : null,
-      startDate: timeMode === 'DATES' ? startDate : null,
-      endDate: timeMode === 'DATES' ? endDate : null,
-      durationLabel: timeMode === 'DATES' ? `${startDate} to ${endDate}` : `${time} Years`,
+      startDate,
+      endDate,
+      durationLabel: `${startDate} to ${endDate}`,
       interest: stats.totalInterest,
       total: stats.totalAmount,
       date: new Date().toLocaleTimeString()
@@ -429,45 +435,14 @@ const InterestCalculator = () => {
         </div>
 
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-              {timeMode === 'YEARS' ? 'Tenure (Years)' : 'End Date'}
-            </label>
-            <button 
-              onClick={() => setTimeMode(t => t === 'YEARS' ? 'DATES' : 'YEARS')}
-              className="px-2 py-0.5 bg-blue-500/10 text-[9px] font-black text-blue-500 uppercase tracking-widest rounded transition-colors hover:bg-blue-500/20"
-            >
-              {timeMode === 'YEARS' ? 'Switch to End Date' : 'Switch to Years'}
-            </button>
-          </div>
-          {timeMode === 'YEARS' ? (
-            <motion.div whileFocus={{ scale: 1.01 }}>
-              <input
-                type="number"
-                value={time}
-                placeholder="Number of years"
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (parseFloat(val) < 0) return;
-                  setTime(val);
-                  setIsCalculated(false);
-                }}
-                onBlur={() => setHasInteracted(prev => ({ ...prev, time: true }))}
-                autoComplete="off"
-                className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold outline-none border transition-all focus:ring-2 focus:ring-blue-500 ${
-                  hasInteracted.time && !time ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
-                }`}
-              />
-            </motion.div>
-          ) : (
-             <input
-              type="date"
-              value={endDate}
-              min={startDate}
-              onChange={(e) => { setEndDate(e.target.value); setIsCalculated(false); }}
-              className="w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold border border-transparent dark:border-white/10 focus:ring-2 focus:ring-blue-500"
-            />
-          )}
+          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">End Date</label>
+          <input
+            type="date"
+            value={endDate}
+            min={startDate}
+            onChange={(e) => { setEndDate(e.target.value); setIsCalculated(false); }}
+            className="w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold border border-transparent dark:border-white/10 focus:ring-2 focus:ring-blue-500"
+          />
         </div>
       </div>
 
@@ -485,14 +460,15 @@ const InterestCalculator = () => {
           )}
         </AnimatePresence>
 
-        {isCalculated && timeMode === 'DATES' && (
+        {isCalculated && (
           <motion.div 
             initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center justify-center gap-2 py-1 px-3 bg-blue-500/10 rounded-full w-fit mx-auto"
           >
+            <Zap className="w-3 h-3 text-blue-500" />
             <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest whitespace-nowrap">
-              Period: {startDate} to {endDate}
+              Calculation Active
             </span>
           </motion.div>
         )}
@@ -501,7 +477,7 @@ const InterestCalculator = () => {
           whileTap={{ scale: 0.98 }}
           onClick={handleCalculate}
           className={`w-full h-11 text-white text-sm font-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 ${
-            !principal || !rate || !time ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+            !principal || !rate || !startDate || !endDate ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
           }`}
         >
            <Calculator className="w-4 h-4" />
@@ -593,27 +569,49 @@ const InterestCalculator = () => {
 
       <div className="space-y-3">
         <h4 className="text-[10px] font-extrabold text-gray-400 uppercase tracking-[0.2em]">Growth Projection</h4>
-        <div className="h-[200px] w-full">
+        <div className="h-[250px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={stats?.chartData || []} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+            <BarChart data={stats?.chartData || []} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#2563eb" stopOpacity={0.8} />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" opacity={0.3} />
-              <XAxis dataKey="year" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
-              <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} tickFormatter={(v) => `₹${v/1000}k`} />
-              <Tooltip 
-                cursor={{ fill: '#f8fafc', opacity: 0.1 }}
-                contentStyle={{ 
-                  borderRadius: '12px', 
-                  border: 'none', 
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  backgroundColor: '#fff'
-                }}
+              <XAxis 
+                dataKey="label" 
+                fontSize={9} 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: '#64748b', fontWeight: 'bold' }} 
               />
-              <Bar dataKey="amount" radius={[4, 4, 0, 0]}>
-                {isCalculated && stats?.chartData?.map((_entry: any, index: number) => (
-                  <Cell key={`cell-${index}`} fill={index === (stats?.chartData?.length ?? 0) - 1 ? '#2563eb' : '#3b82f6'} fillOpacity={0.8} />
-                ))}
+              <YAxis 
+                fontSize={9} 
+                axisLine={false} 
+                tickLine={false} 
+                tick={{ fill: '#64748b', fontWeight: 'bold' }} 
+                tickFormatter={(v) => `₹${v >= 100000 ? (v/100000).toFixed(1) + 'L' : (v/1000).toFixed(0) + 'k'}`} 
+              />
+              <Tooltip 
+                cursor={{ fill: '#3b82f6', opacity: 0.05 }}
+                contentStyle={{ 
+                  borderRadius: '16px', 
+                  border: 'none', 
+                  boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+                  fontSize: '11px',
+                  fontWeight: 'bold',
+                  backgroundColor: '#1e293b',
+                  color: '#f8fafc'
+                }}
+                itemStyle={{ color: '#60a5fa' }}
+                formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Amount']}
+              />
+              <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
+                {stats?.chartData?.map((_entry: any, index: number) => {
+                  const colors = ['#3b82f6', '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899', '#f43f5e'];
+                  return <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />;
+                })}
               </Bar>
             </BarChart>
           </ResponsiveContainer>

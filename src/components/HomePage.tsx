@@ -1,8 +1,9 @@
 import React from 'react';
 import { 
-  ArrowUp, Lock, Wallet, Coins, Car, Landmark, Shield
+  ArrowUp, Lock, Wallet, Coins, Car, Landmark, Shield, Download
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import DownloadAppButton from './DownloadAppSection';
 
 interface HomePageProps {
   onNavigate: (tab: any) => void;
@@ -86,6 +87,29 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               <ProtocolBtn icon={Shield} label="ADMIN" onClick={() => onNavigate('admin')} accent="purple" />
             </div>
           </section>
+
+          {/* DOWNLOAD */}
+          <motion.section 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-5 bg-blue-600/10 dark:bg-blue-600/5 rounded-3xl border border-blue-600/10 space-y-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20">
+                <ArrowUp className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">Install Web App</h4>
+                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Mobile Experience</p>
+              </div>
+            </div>
+            <p className="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400 font-medium">
+              Access the Matrix faster by adding it to your home screen. Open this site in Chrome or Safari on your phone, then tap <span className="font-black text-blue-600">"Add to Home Screen"</span>.
+            </p>
+            <div className="pt-2">
+              <DownloadAppButton />
+            </div>
+          </motion.section>
         </div>
       </div>
 
