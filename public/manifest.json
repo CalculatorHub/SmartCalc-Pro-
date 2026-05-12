@@ -1,21 +1,22 @@
 {
-  "name": "Smartcalpro",
-  "short_name": "Smartcalpro",
-  "description": "Smartcalpro - Precision calculators for finance, gold & silver rates, travel, and land.",
-  "start_url": "./",
+  "name": "Smart Calculator Hub",
+  "short_name": "CalHub",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0ea5e9",
+  "background_color": "#020617",
+  "theme_color": "#3b82f6",
   "icons": [
     {
-      "src": "https://picsum.photos/seed/calhub192/192/192",
+      "src": "https://raw.githubusercontent.com/lucide-react/lucide/main/icons/calculator.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://picsum.photos/seed/calhub512/512/512",
+      "src": "https://raw.githubusercontent.com/lucide-react/lucide/main/icons/calculator.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
