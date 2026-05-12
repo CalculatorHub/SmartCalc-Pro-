@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-  ArrowUp, Lock, Wallet, Coins, Car, Landmark, Shield, Download
+  ArrowUp, Lock, Wallet, Coins, Car, Landmark, Shield, TrendingUp, Home, Download, Clock, Fuel, Rocket, ArrowRight
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import DownloadAppButton from './DownloadAppSection';
@@ -10,131 +10,222 @@ interface HomePageProps {
 }
 
 export default function HomePage({ onNavigate }: HomePageProps) {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  const cards = [
+    {
+      title: "Finance",
+      desc: "EMI, SIP, Interest tools",
+      icon: Wallet,
+      tab: 'finance',
+      color: 'from-blue-600 to-blue-500'
+    },
+    {
+      title: "Metals",
+      desc: "Gold & Silver rates",
+      icon: TrendingUp,
+      tab: 'gold',
+      color: 'from-amber-500 to-amber-600'
+    },
+    {
+      title: "Vehicle",
+      desc: "Fuel & maintenance",
+      icon: Car,
+      tab: 'vehicle',
+      color: 'from-emerald-500 to-emerald-600'
+    },
+    {
+      title: "Estate",
+      desc: "Property calculations",
+      icon: Home,
+      tab: 'land',
+      color: 'from-purple-500 to-purple-600'
+    },
+  ];
 
-  const ProtocolBtn = ({ label, onClick, accent = 'blue', icon: Icon }: { label: string; onClick: () => void; accent?: 'blue' | 'purple', icon: any }) => {
-    const gradients = {
-      blue: 'from-blue-600 to-blue-500 shadow-[0_10px_25px_rgba(37,99,235,0.3)]',
-      purple: 'from-[#7c3aed] to-[#6366f1] shadow-[0_10px_25px_rgba(124,58,237,0.3)]'
-    };
+  const stats = [
+    { label: "EMI", value: "₹12,450", sub: "This Month", icon: Wallet, color: "text-blue-500" },
+    { label: "Gold", value: "₹6,245/g", sub: "+0.65%", icon: TrendingUp, color: "text-amber-500" },
+    { label: "Fuel", value: "₹3,200", sub: "This Week", icon: Fuel, color: "text-emerald-500" },
+  ];
 
-    return (
-      <motion.button
-        whileHover={{ translateY: -2, scale: 1.01 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={onClick}
-        className={`w-full p-3.5 rounded-2xl bg-gradient-to-br ${gradients[accent]} text-white font-bold tracking-widest text-sm transition-all duration-300 uppercase flex items-center justify-start gap-4 group`}
-      >
-        <div className="w-8 h-8 flex items-center justify-center">
-          <Icon className="w-6 h-6" />
-        </div>
-        {label}
-      </motion.button>
-    );
-  };
+  const recentActivity = [
+    { label: "EMI Calculator", value: "₹12,450/month", icon: Wallet },
+    { label: "Gold Calculator", value: "₹62,000", icon: Coins },
+    { label: "Fuel Cost", value: "₹3,200", icon: Fuel },
+  ];
 
   return (
-    <div className="pb-32 pt-2 md:pt-10" id="home-matrix">
-      {/* Premium Desktop Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-start">
-        
-        {/* Left Segment: Branding & Description */}
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="space-y-6 px-1"
-        >
-          <div className="space-y-2">
-            <h2 className="text-4xl lg:text-6xl font-black text-gray-900 dark:text-white tracking-tighter leading-none italic uppercase">
-              The Matrix <br/>
-              <span className="text-blue-600">Protocol.</span>
-            </h2>
-            <div className="w-20 h-1 bg-blue-600 rounded-full" />
-          </div>
-          
-          <p className="text-gray-500 dark:text-gray-400 max-w-md text-base lg:text-lg leading-relaxed font-medium">
-            The world's most advanced utility matrix for professional-grade calculations. 
-            Built with AES-256 encrypted logic for speed, precision, and absolute privacy.
+    <div className="pb-32 pt-2 text-white" id="home-matrix">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6 px-1">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight italic">Hello User 👋</h1>
+          <p className="text-sm font-semibold text-gray-400 mt-0.5">
+            Smart tools for smarter financial decisions.
           </p>
+        </div>
+        <motion.button 
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => onNavigate('admin')}
+          className="bg-white/10 p-3 rounded-2xl border border-white/10 backdrop-blur-xl shadow-xl"
+        >
+          <Shield className="w-5 h-5 text-blue-400" />
+        </motion.button>
+      </div>
 
-          <div className="hidden md:flex flex-col gap-4 pt-6 border-t border-gray-200 dark:border-white/10">
-            <div className="flex items-center gap-3 text-xs font-bold text-gray-400 uppercase tracking-widest">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Core Link Active
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Right Segment: Action Panels */}
-        <div className="space-y-10">
-          {/* PROTOCOLS */}
-          <section className="space-y-4">
-            <h2 className="text-[10px] font-black tracking-[0.3em] text-gray-400 dark:text-gray-500 uppercase px-1">PROTOCOLS</h2>
-            <div className="space-y-3">
-              <ProtocolBtn icon={Wallet} label="FINANCE" onClick={() => onNavigate('finance')} />
-              <ProtocolBtn icon={Coins} label="METALS" onClick={() => onNavigate('gold')} />
-              <ProtocolBtn icon={Car} label="VEHICLE" onClick={() => onNavigate('vehicle')} />
-              <ProtocolBtn icon={Landmark} label="ESTATE" onClick={() => onNavigate('land')} />
-            </div>
-          </section>
-
-          {/* CORE */}
-          <section className="space-y-4">
-            <h2 className="text-[10px] font-black tracking-[0.3em] text-gray-400 dark:text-gray-500 uppercase px-1">CORE</h2>
-            <div className="space-y-3">
-              <ProtocolBtn icon={Shield} label="ADMIN" onClick={() => onNavigate('admin')} accent="purple" />
-            </div>
-          </section>
-
-          {/* DOWNLOAD */}
-          <motion.section 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-5 bg-blue-600/10 dark:bg-blue-600/5 rounded-3xl border border-blue-600/10 space-y-4"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-                <ArrowUp className="w-6 h-6 text-white" />
+      {/* Stats Cards */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        {stats.map((item, i) => {
+          const Icon = item.icon;
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.1 }}
+              className="bg-white/5 backdrop-blur-xl border border-white/10 p-3 rounded-2xl shadow-lg"
+            >
+              <div className="flex items-center gap-1.5 mb-2">
+                <Icon size={14} className={item.color} />
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{item.label}</span>
               </div>
-              <div>
-                <h4 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tight">Install Web App</h4>
-                <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Mobile Experience</p>
-              </div>
-            </div>
-            <p className="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400 font-medium">
-              Access the Matrix faster by adding it to your home screen. Open this site in Chrome or Safari on your phone, then tap <span className="font-black text-blue-600">"Add to Home Screen"</span>.
-            </p>
-            <div className="pt-2">
-              <DownloadAppButton />
-            </div>
-          </motion.section>
+              <p className="text-xs font-black tracking-tight">{item.value}</p>
+              <p className="text-[9px] font-bold text-emerald-400 mt-1">{item.sub}</p>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Quote Section */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-white/10 rounded-2xl p-5 backdrop-blur-xl">
+          <p className="text-base font-bold leading-relaxed italic">
+            “Small calculations today build big wealth tomorrow.”
+          </p>
+          <p className="text-[11px] font-semibold text-gray-400 mt-2 uppercase tracking-wide">
+            Precision tools for your financial growth.
+          </p>
         </div>
       </div>
 
-      {/* FOOTER */}
-      <footer className="text-center pt-20 border-t border-gray-200 dark:border-white/10 space-y-6 mt-20">
-        <div className="flex flex-col items-center gap-3">
-          <p className="text-[10px] font-black tracking-widest text-gray-400 uppercase opacity-50">© 2026 CALHUB — ALL RIGHTS RESERVED</p>
-          <p className="text-[11px] font-black tracking-[0.2em] text-blue-600 dark:text-blue-400 uppercase">CRAFTED BY PATEL VAMSHIDHAR REDDY</p>
-          <div className="flex items-center gap-2 text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase opacity-50">
-            <Lock className="w-3 h-3" />
-            <span>AES-256 ENCRYPTED MATRIX</span>
+      {/* About Section */}
+      <div className="mb-8">
+        <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] px-1 mb-2">About CALHUB</h2>
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex gap-4 items-start shadow-xl">
+          <div className="bg-blue-600/20 p-2.5 rounded-xl border border-blue-500/20">
+            <Wallet size={18} className="text-blue-400" />
+          </div>
+          <p className="text-[11px] leading-relaxed text-gray-400 font-medium tracking-wide">
+            CALHUB is your all-in-one financial calculator platform. 
+            Easily calculate EMI, gold value, fuel costs, and property 
+            estimates with speed, accuracy, and absolute privacy.
+          </p>
+        </div>
+      </div>
+
+      {/* Start Calculating CTA */}
+      <div className="mb-8">
+        <motion.button 
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => onNavigate('finance')}
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-blue-500/20 flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3">
+            <Rocket size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+            Start Calculating
+          </div>
+          <ArrowRight size={18} />
+        </motion.button>
+      </div>
+
+      {/* Quick Tools */}
+      <div className="space-y-4 mb-8">
+        <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] px-1">Tool Matrix</h2>
+        <div className="grid gap-4">
+          {cards.map((card, i) => {
+            const Icon = card.icon;
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => onNavigate(card.tab)}
+                className={`bg-gradient-to-r ${card.color} p-[1.5px] rounded-3xl cursor-pointer shadow-lg shadow-black/20`}
+              >
+                <div className="bg-[#020617] rounded-[calc(1.5rem-1.5px)] p-4 flex items-center gap-4">
+                  <div className={`p-3 rounded-2xl bg-white/5 border border-white/10`}>
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-sm uppercase tracking-tight">{card.title}</h3>
+                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">
+                      {card.desc}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="space-y-4 mb-8">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-2 text-gray-500">
+            <Clock className="w-3 h-3" />
+            <h2 className="text-[10px] font-black uppercase tracking-[0.3em]">Recent Activity</h2>
+          </div>
+          <button className="text-[9px] font-black text-blue-500 uppercase tracking-widest">View All</button>
+        </div>
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4 shadow-xl">
+          {recentActivity.map((act, i) => {
+            const ActIcon = act.icon;
+            return (
+              <div key={i} className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0 last:pb-0">
+                <div className="flex items-center gap-3">
+                  <ActIcon className="w-4 h-4 text-blue-500" />
+                  <span className="text-[11px] font-bold text-gray-300 uppercase tracking-tight">{act.label}</span>
+                </div>
+                <span className="text-[10px] font-black text-blue-400">
+                  {act.value}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Install CTA */}
+      <motion.section 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="p-6 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 rounded-3xl border border-blue-600/20 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xl"
+      >
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30 shrink-0">
+            <Download className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h4 className="text-sm font-black text-white uppercase tracking-tight">Install CALHUB App</h4>
+            <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mt-0.5">Faster, smoother & works offline</p>
           </div>
         </div>
-      </footer>
+        <div className="w-full sm:w-auto">
+          <DownloadAppButton />
+        </div>
+      </motion.section>
 
-      {/* FLOAT BUTTON */}
-      <motion.button 
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={scrollToTop}
-        className="fixed bottom-24 sm:bottom-28 right-6 w-12 h-12 bg-white/20 dark:bg-white/10 backdrop-blur-xl text-gray-900 dark:text-white rounded-full shadow-2xl flex items-center justify-center transition-all z-[60] border border-gray-200 dark:border-white/20"
-      >
-        <ArrowUp className="w-5 h-5" />
-      </motion.button>
+      {/* Footer Branding */}
+      <div className="text-center pt-16 pb-8 space-y-2 opacity-30">
+        <p className="text-[8px] font-black tracking-[0.5em] text-gray-500 uppercase italic">AES-256 Matrix Protocol v3.0</p>
+      </div>
     </div>
   );
 }
+
 

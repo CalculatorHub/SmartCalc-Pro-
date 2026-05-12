@@ -40,16 +40,10 @@ export default function DownloadAppButton() {
         setDeferredPrompt(null);
         setIsInstallable(false);
       }
-    } else if (window.self !== window.top) {
-      // If in iframe and not installable, suggest opening in new tab
-      window.open(window.location.href, '_blank');
     }
   };
 
-  // Remove the null return so the button is always visible
-  // if (!isInstallable && !deferredPrompt) return null;
-
-  const isIframe = window.self !== window.top;
+  if (!isInstallable && !deferredPrompt) return null;
 
   return (
     <div className="flex flex-col gap-3">
@@ -66,21 +60,14 @@ export default function DownloadAppButton() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleAction}
-          disabled={!isInstallable && !isIframe}
-          className={`flex items-center gap-2 px-4 py-2 bg-blue-600 text-white shadow-lg shadow-blue-500/20 rounded-full transition-all duration-300 group ring-2 ring-blue-500/50 ${(!isInstallable && !isIframe) ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
+          className="flex items-center gap-2.5 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-all duration-300 shadow-lg shadow-blue-500/40 group border border-blue-400/20"
         >
-          <Download className="w-4 h-4 text-white group-hover:animate-bounce" />
-          <span className="text-[10px] font-black uppercase tracking-widest">
-            {isInstallable ? 'Install Now' : (isIframe ? 'Open to Install' : 'Install App')}
+          <Download className="w-5 h-5 group-hover:animate-bounce" />
+          <span className="text-sm uppercase tracking-widest">
+            Install App
           </span>
         </motion.button>
       </div>
-      
-      {isIframe && (
-        <p className="text-[9px] font-bold text-blue-500 dark:text-blue-400 uppercase tracking-widest opacity-80 pl-1">
-          * Open in new tab or phone browser to install
-        </p>
-      )}
     </div>
   );
 }
