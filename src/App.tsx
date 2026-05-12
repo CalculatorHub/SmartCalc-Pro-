@@ -21,16 +21,14 @@ export default function App() {
     return (saved as TabId) || 'home';
   });
 
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved === 'dark') return true;
-    if (saved === 'light') return false;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
-
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    // Force dark mode on mounting
+    document.documentElement.classList.add('dark');
+  }, []);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -46,16 +44,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('last_tab', activeTab);
   }, [activeTab]);
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [isDarkMode]);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -93,7 +81,7 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen transition-all duration-500 selection:bg-blue-500/30 font-sans ${isDarkMode ? 'dark bg-[#020617] text-gray-200' : 'bg-gray-100 text-gray-800'}`} id="main-container">
+    <div className="min-h-screen transition-all duration-500 selection:bg-blue-500/30 font-sans dark bg-[#020617] text-gray-200" id="main-container">
       {/* Header */}
       <header className="sticky top-0 left-0 right-0 h-20 bg-white/40 dark:bg-white/5 backdrop-blur-xl border-b border-gray-200 dark:border-white/10 z-50 px-6 flex items-center justify-between" id="header">
         <div className="flex items-center gap-3">
@@ -123,14 +111,6 @@ export default function App() {
           </button>
 
           <DownloadAppButton />
-
-          <button 
-            onClick={() => setIsDarkMode(!isDarkMode)}
-            className="w-12 h-12 flex items-center justify-center rounded-xl bg-white shadow-sm dark:bg-white/10 backdrop-blur border border-gray-200 dark:border-white/10 transition hover:scale-110 active:scale-95"
-            aria-label="Toggle Theme"
-          >
-            {isDarkMode ? '☀️' : '🌙'}
-          </button>
           
           <div className="relative">
             <button 

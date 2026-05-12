@@ -8,6 +8,7 @@ import {
   Download, FileText, Share2, History, PlusCircle, Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { annualToMonthlyRate, monthlyToAnnualRate, getMonthsBetween } from '../lib/financeUtils';
 import { exportToCSV, exportToPDF } from '../lib/exportUtils';
 
 // --- Components ---
@@ -33,15 +34,15 @@ const RateConverter = () => {
       return;
     }
     if (mode === 'pctToRs') {
-      const rs = val / 12;
+      const rs = annualToMonthlyRate(val);
       if (rs < 1) {
-        setResult({ value: (rs * 100).toFixed(0), unit: 'Paise' });
+        setResult({ value: (rs * 100).toFixed(0), unit: 'Paise/month' });
       } else {
-        setResult({ value: rs.toFixed(2), unit: 'Rupees (₹)' });
+        setResult({ value: rs.toFixed(2), unit: 'Rupees/month' });
       }
     } else {
-      const pct = val * 12;
-      setResult({ value: pct.toFixed(2), unit: 'Percent (%)' });
+      const pct = monthlyToAnnualRate(val);
+      setResult({ value: pct.toFixed(2), unit: 'Annual %' });
     }
   }, [inputVal, mode]);
 
@@ -70,13 +71,19 @@ const RateConverter = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-white/5 rounded-2xl shadow-md p-5 space-y-4 border border-gray-200 dark:border-white/10 transition-all hover:shadow-lg">
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white dark:bg-white/5 rounded-2xl shadow-md p-5 space-y-4 border border-gray-200 dark:border-white/10 transition-all hover:shadow-lg"
+    >
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <ArrowRightLeft className="w-5 h-5 text-blue-500" />
           Smart Converter
         </h3>
-        <button 
+        <motion.button 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => {
             setMode(prev => prev === 'pctToRs' ? 'rsToPct' : 'pctToRs');
             setInputVal('');
@@ -84,15 +91,18 @@ const RateConverter = () => {
           className="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full border border-blue-100 dark:border-blue-800"
         >
           Switch Mode
-        </button>
+        </motion.button>
       </div>
 
       <div className="space-y-4">
         <div className="space-y-1.5">
           <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            {mode === 'pctToRs' ? 'Enter Percentage (%)' : 'Enter Rupees (₹)'}
+            {mode === 'pctToRs' ? 'Enter Annual Percentage (%)' : 'Enter Monthly Rate (₹ per 100)'}
           </label>
-          <div className="relative group">
+          <motion.div 
+            whileFocus={{ scale: 1.01 }}
+            className="relative group"
+          >
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 transition-colors group-focus-within:text-blue-500">
               {mode === 'pctToRs' ? <Percent className="w-4 h-4" /> : <IndianRupee className="w-4 h-4" />}
             </div>
@@ -111,19 +121,29 @@ const RateConverter = () => {
                 hasInteracted && !inputVal ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/5'
               }`}
             />
-          </div>
-          {hasInteracted && !inputVal && (
-            <p className="text-[10px] font-bold text-red-500">Please enter all required values</p>
-          )}
+          </motion.div>
+          <AnimatePresence>
+            {hasInteracted && !inputVal && (
+              <motion.p 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="text-[10px] font-bold text-red-500"
+              >
+                Please enter all required values
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
 
         <AnimatePresence mode="wait">
           {result && (
             <motion.div 
               key={result.value + result.unit}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 10 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
               className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl flex flex-col items-center justify-center gap-2"
             >
               <div className="flex flex-col items-center">
@@ -136,13 +156,15 @@ const RateConverter = () => {
                   <span className="text-xs font-bold text-gray-600 dark:text-gray-400">{result.unit}</span>
                 </div>
               </div>
-              <button 
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={saveToHistory}
                 className="flex items-center gap-1.5 px-3 py-1 bg-white dark:bg-blue-900/40 text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-300 rounded-lg border border-blue-200 dark:border-blue-700/50 hover:bg-blue-100 transition-colors"
               >
                 <PlusCircle className="w-3 h-3" />
                 Save to Log
-              </button>
+              </motion.button>
             </motion.div>
           )}
         </AnimatePresence>
@@ -159,15 +181,23 @@ const RateConverter = () => {
               </div>
             </div>
             <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
-              {history.map((item) => (
-                <div key={item.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/5">
-                  <div className="flex flex-col">
-                    <span className="text-[8px] font-bold text-gray-400 uppercase">{item.input}</span>
-                    <span className="text-[10px] font-black text-gray-800 dark:text-gray-200">{item.output}</span>
-                  </div>
-                  <span className="text-[8px] font-medium text-gray-400">{item.date}</span>
-                </div>
-              ))}
+              <AnimatePresence initial={false}>
+                {history.map((item) => (
+                  <motion.div 
+                    key={item.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    className="flex items-center justify-between p-2 bg-gray-50 dark:bg-white/5 rounded-lg border border-gray-100 dark:border-white/5"
+                  >
+                    <div className="flex flex-col">
+                      <span className="text-[8px] font-bold text-gray-400 uppercase">{item.input}</span>
+                      <span className="text-[10px] font-black text-gray-800 dark:text-gray-200">{item.output}</span>
+                    </div>
+                    <span className="text-[8px] font-medium text-gray-400">{item.date}</span>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           </div>
         )}
@@ -179,7 +209,7 @@ const RateConverter = () => {
           </p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -189,18 +219,31 @@ const RateConverter = () => {
 const InterestCalculator = () => {
   const [principal, setPrincipal] = useState('');
   const [rate, setRate] = useState('');
+  const [timeMode, setTimeMode] = useState<'YEARS' | 'DATES'>('YEARS');
   const [time, setTime] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [type, setType] = useState<'SI' | 'CI'>('CI');
   const [history, setHistory] = useState<any[]>([]);
   const [error, setError] = useState('');
-  const [hasInteracted, setHasInteracted] = useState({ principal: false, rate: false, time: false });
+  const [hasInteracted, setHasInteracted] = useState({ principal: false, rate: false, time: false, dates: false });
   const [isCalculated, setIsCalculated] = useState(false);
 
   const stats = useMemo(() => {
-    if (!principal || !rate || !time) return null;
+    if (!principal || !rate) return null;
+    
+    let T = 0;
+    if (timeMode === 'YEARS') {
+      if (!time) return null;
+      T = parseFloat(time);
+    } else {
+      if (!startDate || !endDate) return null;
+      T = getMonthsBetween(startDate, endDate) / 12;
+    }
+
     const P = parseFloat(principal);
-    const R = parseFloat(rate);
-    const T = parseFloat(time);
+    const monthlyRate = parseFloat(rate);
+    const R = monthlyRate * 12; // Convert monthly rupee rate to annual percentage
     
     let totalInterest = 0;
     let totalAmount = 0;
@@ -236,8 +279,8 @@ const InterestCalculator = () => {
   }, [principal, rate, time, type]);
 
   const handleCalculate = () => {
-    setHasInteracted({ principal: true, rate: true, time: true });
-    if (!principal || !rate || !time) {
+    setHasInteracted({ principal: true, rate: true, time: true, dates: true });
+    if (!principal || !rate || (timeMode === 'YEARS' ? !time : (!startDate || !endDate))) {
       setError('Please enter all required values');
       setIsCalculated(false);
       return;
@@ -253,7 +296,11 @@ const InterestCalculator = () => {
       type: type === 'SI' ? 'Simple' : 'Compound',
       principal: parseFloat(principal),
       rate: parseFloat(rate),
-      years: parseFloat(time),
+      timeMode,
+      years: timeMode === 'YEARS' ? parseFloat(time) : null,
+      startDate: timeMode === 'DATES' ? startDate : null,
+      endDate: timeMode === 'DATES' ? endDate : null,
+      durationLabel: timeMode === 'DATES' ? `${startDate} to ${endDate}` : `${time} Years`,
       interest: stats.totalInterest,
       total: stats.totalAmount,
       date: new Date().toLocaleTimeString()
@@ -282,7 +329,12 @@ const InterestCalculator = () => {
   };
 
   return (
-    <div className="bg-white dark:bg-white/5 rounded-2xl shadow-md p-5 space-y-6 border border-gray-200 dark:border-white/10 transition-all hover:shadow-lg">
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 }}
+      className="bg-white dark:bg-white/5 rounded-2xl shadow-md p-5 space-y-6 border border-gray-200 dark:border-white/10 transition-all hover:shadow-lg"
+    >
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
           <Calculator className="w-5 h-5 text-blue-500" />
@@ -307,70 +359,124 @@ const InterestCalculator = () => {
       <div className="grid grid-cols-1 gap-4">
         <div className="space-y-1.5">
           <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Principal (₹)</label>
-          <input
-            type="number"
-            value={principal}
-            placeholder="Enter principal amount"
-            onChange={(e) => {
-              const val = e.target.value;
-              if (parseFloat(val) < 0) return;
-              setPrincipal(val);
-              setIsCalculated(false);
-            }}
-            onBlur={() => setHasInteracted(prev => ({ ...prev, principal: true }))}
-            autoComplete="off"
-            className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold outline-none border transition-all focus:ring-2 focus:ring-blue-500 ${
-              hasInteracted.principal && !principal ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
-            }`}
-          />
+          <motion.div whileFocus={{ scale: 1.01 }}>
+            <input
+              type="number"
+              value={principal}
+              placeholder="Enter principal amount"
+              onChange={(e) => {
+                const val = e.target.value;
+                if (parseFloat(val) < 0) return;
+                setPrincipal(val);
+                setIsCalculated(false);
+              }}
+              onBlur={() => setHasInteracted(prev => ({ ...prev, principal: true }))}
+              autoComplete="off"
+              className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold outline-none border transition-all focus:ring-2 focus:ring-blue-500 ${
+                hasInteracted.principal && !principal ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+              }`}
+            />
+          </motion.div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rate (%)</label>
-            <input
-              type="number"
-              value={rate}
-              placeholder="Interest rate"
-              onChange={(e) => {
-                const val = e.target.value;
-                if (parseFloat(val) < 0) return;
-                setRate(val);
-                setIsCalculated(false);
-              }}
-              onBlur={() => setHasInteracted(prev => ({ ...prev, rate: true }))}
-              autoComplete="off"
-              className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold outline-none border transition-all focus:ring-2 focus:ring-blue-500 ${
-                hasInteracted.rate && !rate ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
-              }`}
-            />
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Rate (₹ per 100 / mo)</label>
+            <motion.div whileFocus={{ scale: 1.01 }}>
+              <input
+                type="number"
+                value={rate}
+                placeholder="₹ per 100/mo"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (parseFloat(val) < 0) return;
+                  setRate(val);
+                  setIsCalculated(false);
+                }}
+                onBlur={() => setHasInteracted(prev => ({ ...prev, rate: true }))}
+                autoComplete="off"
+                className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold outline-none border transition-all focus:ring-2 focus:ring-blue-500 ${
+                  hasInteracted.rate && !rate ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+                }`}
+              />
+            </motion.div>
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Years</label>
-            <input
-              type="number"
-              value={time}
-              placeholder="Investment period"
-              onChange={(e) => {
-                const val = e.target.value;
-                if (parseFloat(val) < 0) return;
-                setTime(val);
-                setIsCalculated(false);
-              }}
-              onBlur={() => setHasInteracted(prev => ({ ...prev, time: true }))}
-              autoComplete="off"
-              className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold outline-none border transition-all focus:ring-2 focus:ring-blue-500 ${
-                hasInteracted.time && !time ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
-              }`}
-            />
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">{timeMode === 'YEARS' ? 'Years' : 'Duration'}</label>
+              <button 
+                onClick={() => setTimeMode(t => t === 'YEARS' ? 'DATES' : 'YEARS')}
+                className="text-[8px] font-black text-blue-500 uppercase tracking-widest hover:underline"
+              >
+                {timeMode === 'YEARS' ? 'Use Dates' : 'Use Years'}
+              </button>
+            </div>
+            {timeMode === 'YEARS' ? (
+              <motion.div whileFocus={{ scale: 1.01 }}>
+                <input
+                  type="number"
+                  value={time}
+                  placeholder="Period"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (parseFloat(val) < 0) return;
+                    setTime(val);
+                    setIsCalculated(false);
+                  }}
+                  onBlur={() => setHasInteracted(prev => ({ ...prev, time: true }))}
+                  autoComplete="off"
+                  className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold outline-none border transition-all focus:ring-2 focus:ring-blue-500 ${
+                    hasInteracted.time && !time ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+                  }`}
+                />
+              </motion.div>
+            ) : (
+              <div className="flex flex-col gap-1.5">
+                 <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => { setStartDate(e.target.value); setIsCalculated(false); }}
+                  className="w-full h-8 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-lg px-2 text-[10px] font-bold border border-transparent dark:border-white/10 focus:ring-2 focus:ring-blue-500"
+                />
+                 <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => { setEndDate(e.target.value); setIsCalculated(false); }}
+                  className="w-full h-8 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-lg px-2 text-[10px] font-bold border border-transparent dark:border-white/10 focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-3">
-        {error && (
-          <p className="text-[10px] font-bold text-red-500 bg-red-500/10 p-2 rounded-lg text-center">{error}</p>
+        <AnimatePresence>
+          {error && (
+            <motion.p 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="text-[10px] font-bold text-red-500 bg-red-500/10 p-2 rounded-lg text-center"
+            >
+              {error}
+            </motion.p>
+          )}
+        </AnimatePresence>
+
+        {isCalculated && timeMode === 'DATES' && (
+          <motion.div 
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center gap-2 py-1 px-3 bg-blue-500/10 rounded-full w-fit mx-auto"
+          >
+            <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest whitespace-nowrap">
+              Period: {startDate} to {endDate}
+            </span>
+          </motion.div>
         )}
-        <button 
+        <motion.button 
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleCalculate}
           className={`w-full h-11 text-white text-sm font-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 ${
             !principal || !rate || !time ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
@@ -378,26 +484,37 @@ const InterestCalculator = () => {
         >
            <Calculator className="w-4 h-4" />
            CALCULATE GROWTH
-        </button>
+        </motion.button>
 
-        <div className={`grid grid-cols-2 gap-3 transition-opacity duration-300 ${isCalculated ? 'opacity-100' : 'opacity-40'}`}>
-          <div className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl">
+        <div className={`grid grid-cols-2 gap-3 transition-all duration-300 ${isCalculated ? 'opacity-100' : 'opacity-40 scale-[0.98]'}`}>
+          <motion.div 
+            animate={isCalculated ? { scale: [1, 1.05, 1] } : {}}
+            className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl"
+          >
             <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest block mb-1">Interest</span>
             <span className="text-base font-extrabold text-gray-900 dark:text-white">₹{isCalculated && stats ? stats.totalInterest.toLocaleString() : '0'}</span>
-          </div>
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl">
+          </motion.div>
+          <motion.div 
+            animate={isCalculated ? { scale: [1, 1.05, 1] } : {}}
+            transition={{ delay: 0.1 }}
+            className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl"
+          >
             <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block mb-1">Maturity</span>
             <span className="text-base font-extrabold text-gray-900 dark:text-white">₹{isCalculated && stats ? stats.totalAmount.toLocaleString() : '0'}</span>
-          </div>
+          </motion.div>
         </div>
         {isCalculated && (
-          <button 
+          <motion.button 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={saveToHistory}
             className="w-full flex items-center justify-center gap-2 py-2 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 text-[10px] font-black uppercase tracking-[0.2em] text-gray-600 dark:text-gray-300 rounded-xl border border-gray-200 dark:border-white/10 transition-all"
           >
             <PlusCircle className="w-4 h-4" />
             Save Calculation
-          </button>
+          </motion.button>
         )}
       </div>
 
@@ -417,21 +534,31 @@ const InterestCalculator = () => {
             </div>
           </div>
           <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
-            {history.map((item) => (
-              <div key={item.id} className="p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5 flex items-center justify-between group">
-                <div className="flex flex-col gap-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[8px] font-black px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded uppercase">{item.type}</span>
-                    <span className="text-[9px] font-bold text-gray-400 italic">P: ₹{item.principal.toLocaleString()}</span>
+            <AnimatePresence initial={false}>
+              {history.map((item, index) => (
+                <motion.div 
+                  key={item.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 10 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="p-3 bg-gray-50 dark:bg-white/5 rounded-xl border border-gray-100 dark:border-white/5 flex items-center justify-between group"
+                >
+                  <div className="flex flex-col gap-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[8px] font-black px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded uppercase">{item.type}</span>
+                      <span className="text-[9px] font-bold text-gray-400 italic">P: ₹{item.principal.toLocaleString()} @ ₹{item.rate}/mo</span>
+                    </div>
+                    <span className="text-[9px] font-extrabold text-blue-500/80 uppercase tracking-tighter block mb-0.5">{item.durationLabel}</span>
+                    <span className="text-sm font-black text-gray-900 dark:text-white">₹{item.total.toLocaleString()}</span>
                   </div>
-                  <span className="text-sm font-black text-gray-900 dark:text-white">₹{item.total.toLocaleString()}</span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 block">+₹{item.interest.toLocaleString()}</span>
-                  <span className="text-[8px] font-medium text-gray-400 uppercase tracking-tighter">{item.date}</span>
-                </div>
-              </div>
-            ))}
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 block">+₹{item.interest.toLocaleString()}</span>
+                    <span className="text-[8px] font-medium text-gray-400 uppercase tracking-tighter">{item.date}</span>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         </div>
       )}
@@ -464,7 +591,7 @@ const InterestCalculator = () => {
           </ResponsiveContainer>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -481,7 +608,12 @@ const DiscountCalculator = () => {
   const isValid = price && discountPct;
 
   return (
-    <div className="bg-white dark:bg-white/5 rounded-2xl shadow-md p-5 space-y-4 border border-gray-200 dark:border-white/10 transition-all hover:shadow-lg">
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.2 }}
+      className="bg-white dark:bg-white/5 rounded-2xl shadow-md p-5 space-y-4 border border-gray-200 dark:border-white/10 transition-all hover:shadow-lg"
+    >
       <div className="flex items-center gap-2">
         <Tag className="w-5 h-5 text-blue-500" />
         <h3 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Discount Saver</h3>
@@ -490,39 +622,43 @@ const DiscountCalculator = () => {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Base Price (₹)</label>
-          <input
-            type="number"
-            value={price}
-            placeholder="Item price"
-            onChange={(e) => {
-              const val = e.target.value;
-              if (parseFloat(val) < 0) return;
-              setPrice(val);
-            }}
-            onBlur={() => setHasInteracted(prev => ({ ...prev, price: true }))}
-            autoComplete="off"
-            className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none border transition-all ${
-              hasInteracted.price && !price ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
-            }`}
-          />
+          <motion.div whileFocus={{ scale: 1.01 }}>
+            <input
+              type="number"
+              value={price}
+              placeholder="Item price"
+              onChange={(e) => {
+                const val = e.target.value;
+                if (parseFloat(val) < 0) return;
+                setPrice(val);
+              }}
+              onBlur={() => setHasInteracted(prev => ({ ...prev, price: true }))}
+              autoComplete="off"
+              className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none border transition-all ${
+                hasInteracted.price && !price ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+              }`}
+            />
+          </motion.div>
         </div>
         <div className="space-y-1.5">
           <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Discount (%)</label>
-          <input
-            type="number"
-            value={discountPct}
-            placeholder="Discount %"
-            onChange={(e) => {
-              const val = e.target.value;
-              if (parseFloat(val) < 0) return;
-              setDiscountPct(val);
-            }}
-            onBlur={() => setHasInteracted(prev => ({ ...prev, discount: true }))}
-            autoComplete="off"
-            className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none border transition-all ${
-              hasInteracted.discount && !discountPct ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
-            }`}
-          />
+          <motion.div whileFocus={{ scale: 1.01 }}>
+            <input
+              type="number"
+              value={discountPct}
+              placeholder="Discount %"
+              onChange={(e) => {
+                const val = e.target.value;
+                if (parseFloat(val) < 0) return;
+                setDiscountPct(val);
+              }}
+              onBlur={() => setHasInteracted(prev => ({ ...prev, discount: true }))}
+              autoComplete="off"
+              className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none border transition-all ${
+                hasInteracted.discount && !discountPct ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+              }`}
+            />
+          </motion.div>
         </div>
       </div>
 
@@ -539,7 +675,10 @@ const DiscountCalculator = () => {
         )}
       </AnimatePresence>
 
-      <div className={`p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 flex flex-col gap-3 transition-opacity ${isValid ? 'opacity-100' : 'opacity-40'}`}>
+      <motion.div 
+        animate={isValid ? { scale: [1, 1.02, 1], opacity: 1 } : { scale: 0.98, opacity: 0.4 }}
+        className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 flex flex-col gap-3 transition-opacity"
+      >
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500 font-medium tracking-tight">You Save:</span>
           <span className="font-bold text-emerald-600 dark:text-emerald-400">₹{isValid ? discountAmount.toLocaleString() : '0'}</span>
@@ -548,8 +687,8 @@ const DiscountCalculator = () => {
           <span className="text-sm text-gray-700 dark:text-gray-200 font-bold tracking-tight">Final Price:</span>
           <span className="text-xl font-black text-blue-600 dark:text-blue-400">₹{isValid ? finalPrice.toLocaleString() : '0'}</span>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
@@ -603,9 +742,10 @@ export default function FinanceHub() {
               { title: 'Growth Engine', desc: 'Visualize growth over time.', icon: <Target className="w-5 h-5 text-emerald-500" /> },
               { title: 'Savings Tool', desc: 'Calculate and track savings.', icon: <ShieldCheck className="w-5 h-5 text-indigo-500" /> },
             ].map((item, idx) => (
-              <div 
+              <motion.div 
                 key={idx}
-                className="bg-white dark:bg-white/5 p-5 rounded-2xl shadow-md border border-gray-200 dark:border-white/10 space-y-3 transition-all hover:shadow-lg group"
+                whileHover={{ translateY: -5, boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                className="bg-white dark:bg-white/5 p-5 rounded-2xl shadow-md border border-gray-200 dark:border-white/10 space-y-3 transition-all group"
               >
                 <div className="w-10 h-10 bg-gray-50 dark:bg-gray-900/50 rounded-xl flex items-center justify-center transition-colors group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30">
                   {item.icon}
@@ -614,7 +754,7 @@ export default function FinanceHub() {
                   <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tight">{item.title}</h4>
                   <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{item.desc}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </section>

@@ -16,6 +16,32 @@ export interface CalculationResult {
   }>;
 }
 
+export const annualToMonthlyRate = (annual: number) => {
+  if (!annual) return 0;
+  return annual / 12;
+};
+
+export const monthlyToAnnualRate = (monthly: number) => {
+  if (!monthly) return 0;
+  return monthly * 12;
+};
+
+export const getMonthsBetween = (start: string | Date, end: string | Date) => {
+  const s = new Date(start);
+  const e = new Date(end);
+
+  let months =
+    (e.getFullYear() - s.getFullYear()) * 12 +
+    (e.getMonth() - s.getMonth());
+
+  // ✅ handle partial month
+  if (e.getDate() > s.getDate()) {
+    months += 1;
+  }
+
+  return Math.max(months, 1); // never 0
+};
+
 export function calculateFinance(
   principal: number,
   rate: number,
