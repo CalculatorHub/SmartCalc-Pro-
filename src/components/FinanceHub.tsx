@@ -60,7 +60,12 @@ const RateConverter = () => {
 
   const handleExportCSV = () => {
     if (history.length === 0) return;
-    exportToCSV(history.map(({type, input, output, date}) => ({Type: type, Input: input, Output: output, Time: date})), 'Rate_Conversion_History');
+    exportToCSV(history.map(({type, input, output, date}) => ({
+      'Conversion Type': type, 
+      'Input Value': input, 
+      'Result': output, 
+      'Timestamp': date
+    })), 'Rate_Conversion_History');
   };
 
   const handleExportPDF = () => {
@@ -184,9 +189,21 @@ const RateConverter = () => {
               <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1">
                 <History className="w-3 h-3" /> Recent History
               </span>
-              <div className="flex gap-2">
-                <button onClick={handleExportCSV} className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase hover:underline">CSV</button>
-                <button onClick={handleExportPDF} className="text-[9px] font-black text-red-600 dark:text-red-400 uppercase hover:underline">PDF</button>
+              <div className="flex gap-3">
+                <button 
+                  onClick={handleExportCSV} 
+                  className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-1.5 px-2 py-1 bg-emerald-500/10 rounded hover:bg-emerald-500/20 transition-colors"
+                  title="Export to Excel (CSV)"
+                >
+                  <FileText className="w-3 h-3" /> Excel
+                </button>
+                <button 
+                  onClick={handleExportPDF} 
+                  className="text-[9px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest flex items-center gap-1.5 px-2 py-1 bg-red-500/10 rounded hover:bg-red-500/20 transition-colors"
+                  title="Export to PDF"
+                >
+                  <Download className="w-3 h-3" /> PDF
+                </button>
               </div>
             </div>
             <div className="space-y-1.5 max-h-[120px] overflow-y-auto pr-1">
@@ -324,14 +341,15 @@ const InterestCalculator = () => {
 
   const handleExportCSV = () => {
     if (history.length === 0) return;
-    exportToCSV(history.map(({type, principal, rate, years, interest, total, date}) => ({
-      Type: type, 
-      Principal: principal, 
-      Rate: rate, 
-      Years: years, 
-      Interest: interest, 
-      Total: total, 
-      Time: date
+    exportToCSV(history.map(({type, principal, rate, startDate, endDate, interest, total, date}) => ({
+      'Type': type, 
+      'Principal (Rs)': principal, 
+      'Annual Rate (%)': rate, 
+      'Start Date': startDate,
+      'End Date': endDate,
+      'Interest Earned (Rs)': interest, 
+      'Total Amount (Rs)': total, 
+      'Calculation Time': date
     })), 'Interest_Calculation_History');
   };
 
@@ -528,11 +546,19 @@ const InterestCalculator = () => {
             <h4 className="text-[10px] font-extrabold text-gray-400 uppercase tracking-[0.2em] flex items-center gap-2">
               <History className="w-3.5 h-3.5" /> Recent Results
             </h4>
-            <div className="flex gap-3">
-              <button onClick={handleExportCSV} className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-1 hover:underline">
-                <FileText className="w-3 h-3" /> CSV
+            <div className="flex gap-2">
+              <button 
+                onClick={handleExportCSV} 
+                className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest flex items-center gap-1.5 px-2 py-1 bg-emerald-500/10 rounded hover:bg-emerald-500/20 transition-colors"
+                title="Export to Excel (CSV)"
+              >
+                <FileText className="w-3 h-3" /> Excel
               </button>
-              <button onClick={handleExportPDF} className="text-[9px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest flex items-center gap-1 hover:underline">
+              <button 
+                onClick={handleExportPDF} 
+                className="text-[9px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest flex items-center gap-1.5 px-2 py-1 bg-red-500/10 rounded hover:bg-red-500/20 transition-colors"
+                title="Export to PDF"
+              >
                 <Download className="w-3 h-3" /> PDF
               </button>
             </div>
@@ -584,6 +610,7 @@ const InterestCalculator = () => {
                 fontSize={9} 
                 axisLine={false} 
                 tickLine={false} 
+                interval="preserveStartEnd"
                 tick={{ fill: '#64748b', fontWeight: 'bold' }} 
               />
               <YAxis 

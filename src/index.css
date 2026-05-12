@@ -3,6 +3,12 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-primary: #2563EB;
+  --color-secondary: #7C3AED;
+  --color-darkBg: #0B0F1A;
+  --color-card: rgba(255, 255, 255, 0.05);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --shadow-glow: 0 0 40px rgba(37, 99, 235, 0.25);
 }
 
 @utility hide-scrollbar {
@@ -15,9 +21,11 @@
 
 @layer base {
   * {
-    @apply border-gray-200 dark:border-gray-800;
+    @apply border-white/10;
   }
   body {
-    @apply font-sans antialiased bg-gray-50 dark:bg-[#0f172a] text-gray-900 dark:text-white;
+    @apply font-sans antialiased text-white;
+    background: radial-gradient(circle at top, #111827, #020617);
+    min-height: 100vh;
   }
 }

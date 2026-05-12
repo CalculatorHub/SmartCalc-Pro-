@@ -1,231 +1,178 @@
 import React from 'react';
-import { 
-  ArrowUp, Lock, Wallet, Coins, Car, Landmark, Shield, TrendingUp, Home, Download, Clock, Fuel, Rocket, ArrowRight
-} from 'lucide-react';
+import {
+  Shield,
+  Info,
+  Star,
+  CheckCircle,
+  ArrowRight,
+  Wallet,
+  TrendingUp,
+  Fuel,
+  Building,
+} from "lucide-react";
 import { motion } from 'motion/react';
-import DownloadAppButton from './DownloadAppSection';
 
-interface HomePageProps {
-  onNavigate: (tab: any) => void;
-}
-
-export default function HomePage({ onNavigate }: HomePageProps) {
-  const cards = [
+export default function HomePage() {
+  const features = [
     {
-      title: "Finance",
-      desc: "EMI, SIP, Interest tools",
+      title: "Financial Calculators",
+      desc: "EMI, Loan, SIP and more",
       icon: Wallet,
-      tab: 'finance',
-      color: 'from-blue-600 to-blue-500'
+      color: "from-blue-500 to-blue-700",
     },
     {
-      title: "Metals",
-      desc: "Gold & Silver rates",
+      title: "Gold & Silver Prices",
+      desc: "Live metal price tools",
       icon: TrendingUp,
-      tab: 'gold',
-      color: 'from-amber-500 to-amber-600'
+      color: "from-yellow-500 to-orange-600",
     },
     {
-      title: "Vehicle",
-      desc: "Fuel & maintenance",
-      icon: Car,
-      tab: 'vehicle',
-      color: 'from-emerald-500 to-emerald-600'
+      title: "Fuel Cost Calculator",
+      desc: "Trip & fuel estimation",
+      icon: Fuel,
+      color: "from-green-500 to-green-700",
     },
     {
-      title: "Estate",
-      desc: "Property calculations",
-      icon: Home,
-      tab: 'land',
-      color: 'from-purple-500 to-purple-600'
+      title: "Property Calculators",
+      desc: "Value & loan estimation",
+      icon: Building,
+      color: "from-purple-500 to-purple-700",
     },
-  ];
-
-  const stats = [
-    { label: "EMI", value: "₹12,450", sub: "This Month", icon: Wallet, color: "text-blue-500" },
-    { label: "Gold", value: "₹6,245/g", sub: "+0.65%", icon: TrendingUp, color: "text-amber-500" },
-    { label: "Fuel", value: "₹3,200", sub: "This Week", icon: Fuel, color: "text-emerald-500" },
-  ];
-
-  const recentActivity = [
-    { label: "EMI Calculator", value: "₹12,450/month", icon: Wallet },
-    { label: "Gold Calculator", value: "₹62,000", icon: Coins },
-    { label: "Fuel Cost", value: "₹3,200", icon: Fuel },
   ];
 
   return (
-    <div className="pb-32 pt-2 text-white" id="home-matrix">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6 px-1">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight italic">Hello User 👋</h1>
-          <p className="text-sm font-semibold text-gray-400 mt-0.5">
+    <div className="min-h-screen bg-darkBg px-5 pt-6 pb-24 text-white">
+
+      {/* HEADER */}
+      <div className="flex justify-between items-center">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <h1 className="text-xl font-semibold">
+            Hello, Vamshi 👋
+          </h1>
+          <p className="text-sm text-gray-400">
             Smart tools for smarter financial decisions.
           </p>
-        </div>
-        <motion.button 
-          whileHover={{ scale: 1.1, rotate: 5 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => onNavigate('admin')}
-          className="bg-white/10 p-3 rounded-2xl border border-white/10 backdrop-blur-xl shadow-xl"
+        </motion.div>
+
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white/10 p-3 rounded-full backdrop-blur-xl"
         >
-          <Shield className="w-5 h-5 text-blue-400" />
-        </motion.button>
+          <Shield size={18} />
+        </motion.div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        {stats.map((item, i) => {
-          const Icon = item.icon;
-          return (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: i * 0.1 }}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 p-3 rounded-2xl shadow-lg"
-            >
-              <div className="flex items-center gap-1.5 mb-2">
-                <Icon size={14} className={item.color} />
-                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">{item.label}</span>
-              </div>
-              <p className="text-xs font-black tracking-tight">{item.value}</p>
-              <p className="text-[9px] font-bold text-emerald-400 mt-1">{item.sub}</p>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {/* Quote Section */}
-      <div className="mb-6">
-        <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-white/10 rounded-2xl p-5 backdrop-blur-xl">
-          <p className="text-base font-bold leading-relaxed italic">
-            “Small calculations today build big wealth tomorrow.”
-          </p>
-          <p className="text-[11px] font-semibold text-gray-400 mt-2 uppercase tracking-wide">
-            Precision tools for your financial growth.
-          </p>
+      {/* ABOUT CARD */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="mt-6 bg-card border border-border rounded-2xl p-5 flex items-center gap-4 backdrop-blur-xl shadow-glow"
+      >
+        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shrink-0">
+          <Info className="text-white" />
         </div>
-      </div>
 
-      {/* About Section */}
-      <div className="mb-8">
-        <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] px-1 mb-2">About CALHUB</h2>
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex gap-4 items-start shadow-xl">
-          <div className="bg-blue-600/20 p-2.5 rounded-xl border border-blue-500/20">
-            <Wallet size={18} className="text-blue-400" />
-          </div>
-          <p className="text-[11px] leading-relaxed text-gray-400 font-medium tracking-wide">
-            CALHUB is your all-in-one financial calculator platform. 
-            Easily calculate EMI, gold value, fuel costs, and property 
-            estimates with speed, accuracy, and absolute privacy.
-          </p>
-        </div>
-      </div>
+        <p className="text-sm text-gray-300 leading-relaxed font-medium">
+          CalHub is your all-in-one financial calculator platform.
+          We provide simple, accurate and reliable tools for your
+          everyday financial calculations.
+        </p>
+      </motion.div>
 
-      {/* Start Calculating CTA */}
-      <div className="mb-8">
-        <motion.button 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => onNavigate('finance')}
-          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-blue-500/20 flex items-center justify-between group"
-        >
-          <div className="flex items-center gap-3">
-            <Rocket size={18} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-            Start Calculating
-          </div>
-          <ArrowRight size={18} />
-        </motion.button>
-      </div>
+      {/* WHAT IS */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="mt-6 bg-card border border-border rounded-2xl p-5 backdrop-blur-xl"
+      >
+        <h2 className="text-sm text-gray-400 mb-2 font-bold uppercase tracking-widest text-[10px]">
+          What is CalHub?
+        </h2>
 
-      {/* Quick Tools */}
-      <div className="space-y-4 mb-8">
-        <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] px-1">Tool Matrix</h2>
-        <div className="grid gap-4">
-          {cards.map((card, i) => {
-            const Icon = card.icon;
+        <p className="text-sm text-gray-300 font-medium">
+          CalHub helps you calculate EMI, loan details, gold prices,
+          fuel costs, and property values — all in one place.
+        </p>
+      </motion.div>
+
+      {/* FEATURES */}
+      <div className="mt-6">
+        <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3 flex items-center gap-2">
+          <Star size={12} /> Key Features
+        </h2>
+
+        <div className="space-y-3">
+          {features.map((item, i) => {
+            const Icon = item.icon;
+
             return (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, x: -10 }}
+                initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.1 }}
+                transition={{ delay: 0.3 + i * 0.1 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => onNavigate(card.tab)}
-                className={`bg-gradient-to-r ${card.color} p-[1.5px] rounded-3xl cursor-pointer shadow-lg shadow-black/20`}
+                className="bg-card border border-border rounded-xl p-4 flex items-center justify-between backdrop-blur-xl cursor-pointer"
               >
-                <div className="bg-[#020617] rounded-[calc(1.5rem-1.5px)] p-4 flex items-center gap-4">
-                  <div className={`p-3 rounded-2xl bg-white/5 border border-white/10`}>
-                    <Icon className="w-5 h-5 text-white" />
+                <div className="flex items-center gap-4">
+                  
+                  <div className={`p-3 rounded-xl bg-gradient-to-br ${item.color} shadow-lg shadow-black/20`}>
+                    <Icon size={18} className="text-white" />
                   </div>
+
                   <div>
-                    <h3 className="font-black text-sm uppercase tracking-tight">{card.title}</h3>
+                    <p className="font-bold text-sm tracking-tight">
+                      {item.title}
+                    </p>
                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide">
-                      {card.desc}
+                      {item.desc}
                     </p>
                   </div>
                 </div>
+
+                <ArrowRight size={16} className="text-gray-600" />
               </motion.div>
             );
           })}
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="space-y-4 mb-8">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-2 text-gray-500">
-            <Clock className="w-3 h-3" />
-            <h2 className="text-[10px] font-black uppercase tracking-[0.3em]">Recent Activity</h2>
-          </div>
-          <button className="text-[9px] font-black text-blue-500 uppercase tracking-widest">View All</button>
-        </div>
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4 shadow-xl">
-          {recentActivity.map((act, i) => {
-            const ActIcon = act.icon;
-            return (
-              <div key={i} className="flex items-center justify-between border-b border-white/5 pb-3 last:border-0 last:pb-0">
-                <div className="flex items-center gap-3">
-                  <ActIcon className="w-4 h-4 text-blue-500" />
-                  <span className="text-[11px] font-bold text-gray-300 uppercase tracking-tight">{act.label}</span>
-                </div>
-                <span className="text-[10px] font-black text-blue-400">
-                  {act.value}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      {/* WHY CHOOSE */}
+      <div className="mt-6">
+        <h2 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] mb-3">
+          Why Choose CalHub?
+        </h2>
 
-      {/* Install CTA */}
-      <motion.section 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="p-6 bg-gradient-to-r from-blue-600/10 to-indigo-600/10 rounded-3xl border border-blue-600/20 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xl"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/30 shrink-0">
-            <Download className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h4 className="text-sm font-black text-white uppercase tracking-tight">Install CALHUB App</h4>
-            <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mt-0.5">Faster, smoother & works offline</p>
-          </div>
+        <div className="grid grid-cols-2 gap-3 pb-8">
+          {[
+            "Fast & Accurate",
+            "Secure & Private",
+            "Easy to Use",
+            "All in One",
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.7 + i * 0.1 }}
+              className="bg-card border border-border rounded-xl p-4 text-center backdrop-blur-xl"
+            >
+              <CheckCircle className="mx-auto mb-2 text-blue-500" size={18} />
+              <p className="text-[11px] font-black uppercase tracking-tight">{item}</p>
+            </motion.div>
+          ))}
         </div>
-        <div className="w-full sm:w-auto">
-          <DownloadAppButton />
-        </div>
-      </motion.section>
-
-      {/* Footer Branding */}
-      <div className="text-center pt-16 pb-8 space-y-2 opacity-30">
-        <p className="text-[8px] font-black tracking-[0.5em] text-gray-500 uppercase italic">AES-256 Matrix Protocol v3.0</p>
       </div>
     </div>
   );
 }
+
 
 
