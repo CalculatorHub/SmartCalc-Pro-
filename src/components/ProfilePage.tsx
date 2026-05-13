@@ -1,7 +1,9 @@
 import React from 'react';
-import { User, Mail, Shield, Settings, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { User, Mail, Shield, Settings, ChevronRight, LayoutDashboard } from "lucide-react";
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   return (
     <div className="px-5 pt-6 pb-32 font-sans">
       <h1 className="text-2xl font-black italic tracking-tight mb-8 uppercase">Profile</h1>
@@ -44,12 +46,25 @@ export default function ProfilePage() {
             </div>
             <ChevronRight className="w-4 h-4 text-gray-600" />
           </button>
-          <button className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
+          <button className="w-full p-4 flex items-center justify-between border-b border-white/5 hover:bg-white/5 transition-colors">
             <div className="flex items-center gap-3">
               <Shield className="w-4 h-4 text-gray-400" />
               <span className="text-sm font-bold text-gray-300">Privacy Policy</span>
             </div>
             <ChevronRight className="w-4 h-4 text-gray-600" />
+          </button>
+          <button 
+            onClick={() => navigate('/admin')}
+            className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors group"
+          >
+            <div className="flex items-center gap-3">
+              <LayoutDashboard className="w-4 h-4 text-emerald-500 group-hover:scale-110 transition-transform" />
+              <span className="text-sm font-bold text-gray-300">Admin Protocol</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[9px] font-black italic text-emerald-500/50 uppercase tracking-tighter">System Access</span>
+              <ChevronRight className="w-4 h-4 text-gray-600" />
+            </div>
           </button>
         </div>
       </div>
