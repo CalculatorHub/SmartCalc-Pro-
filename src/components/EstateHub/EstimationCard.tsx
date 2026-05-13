@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatIndianCurrency } from '../../lib/financeUtils';
 
 export default function EstimationCard({ area, totalPrice, unit }: { area: number; totalPrice: number; unit: string }) {
   return (
@@ -6,7 +7,7 @@ export default function EstimationCard({ area, totalPrice, unit }: { area: numbe
       <div className="space-y-1">
         <h3 className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.3em]">Est. Valuation</h3>
         <div className="text-4xl font-black text-gray-900 dark:text-white tracking-tighter">
-            ₹{totalPrice.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+            {formatIndianCurrency(totalPrice)}
         </div>
       </div>
 

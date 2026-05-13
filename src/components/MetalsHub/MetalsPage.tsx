@@ -1,22 +1,23 @@
 import React from 'react';
 import GoldCard from './GoldCard';
 import SilverCard from './SilverCard';
-import { Coins } from 'lucide-react';
 
-export default function MetalsPage() {
+export default function MetalsPage({ mode = 'gold' }: { mode?: 'gold' | 'silver' }) {
   return (
-    <div className="space-y-6 pb-28 pt-4 animate-in fade-in slide-in-from-bottom-2 duration-500" id="metals-page">
+    <div className="space-y-6 pb-28 pt-4 animate-in fade-in duration-500">
       <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter flex items-center gap-2">
-          <Coins className="w-8 h-8 text-yellow-500" />
-          Gold
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          {mode === 'gold' ? 'Gold Calculator' : 'Silver Calculator'}
         </h2>
-        <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Gold & metal calculations</p>
+        <p className="text-sm text-gray-400">
+          {mode === 'gold' 
+            ? 'Professional tools for gold valuation.' 
+            : 'Accurate silver price estimation tools.'}
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <GoldCard />
-        <SilverCard />
+      <div className="max-w-md mx-auto">
+        {mode === 'gold' ? <GoldCard /> : <SilverCard />}
       </div>
     </div>
   );

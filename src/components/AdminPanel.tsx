@@ -124,9 +124,9 @@ export default function AdminPanel() {
           </div>
           <div>
             <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Feedback Hub</h2>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
               Admin Controller <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            </p>
+            </div>
           </div>
         </div>
         <button 

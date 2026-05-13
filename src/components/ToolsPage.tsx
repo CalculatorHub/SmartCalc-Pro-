@@ -1,43 +1,49 @@
 import React from 'react';
-import { Wallet, TrendingUp, Car, Building } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 
 export default function ToolsPage() {
   const navigate = useNavigate();
-  
+
   const tools = [
-    { title: "Finance", desc: "EMI, Loan tools", icon: Wallet, path: "/tools/finance", color: "from-blue-600 to-blue-500" },
-    { title: "Metals", desc: "Gold & Silver", icon: TrendingUp, path: "/tools/gold", color: "from-amber-500 to-amber-600" },
-    { title: "Vehicle", desc: "Fuel cost", icon: Car, path: "/tools/vehicle", color: "from-emerald-500 to-emerald-600" },
-    { title: "Estate", desc: "Property", icon: Building, path: "/tools/land", color: "from-purple-500 to-purple-600" },
+    { title: "Finance", icon: "💲", path: "/finance", glow: "shadow-blue-500/20" },
+    { title: "Gold", icon: "🪙", path: "/gold", glow: "shadow-yellow-500/20" },
+    { title: "Silver", icon: "🥈", path: "/silver", glow: "shadow-gray-400/20" },
+    { title: "Vehicle", icon: "🚗", path: "/vehicle", glow: "shadow-green-500/20" },
+    { title: "Estate", icon: "🏠", path: "/estate", glow: "shadow-purple-500/20" },
   ];
 
   return (
-    <div className="px-5 pt-6 pb-32">
-      <h1 className="text-2xl font-black italic tracking-tight mb-6">All Tools</h1>
+    <div className="px-5 pt-6 pb-28 text-white">
+      <h1 className="text-xl font-semibold mb-6 flex items-center gap-3">
+        All Protocols
+      </h1>
 
-      <div className="grid grid-cols-2 gap-4">
-        {tools.map((tool, i) => {
-          const Icon = tool.icon;
-          return (
-            <motion.div 
-              key={i} 
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate(tool.path)}
-              className={`bg-gradient-to-br ${tool.color} p-[1.5px] rounded-3xl cursor-pointer shadow-lg`}
-            >
-              <div className="bg-[#020617] h-full rounded-[calc(1.5rem-1.5px)] p-5 flex flex-col items-center text-center">
-                <div className="bg-white/5 p-3 rounded-2xl mb-3 border border-white/10">
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="font-black text-sm uppercase tracking-tight mb-1">{tool.title}</h3>
-                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wide leading-tight">{tool.desc}</p>
+      <div className="grid grid-cols-2 gap-5">
+        {tools.map((tool, i) => (
+          <motion.div
+            key={i}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate(tool.path)}
+            className="group relative rounded-2xl p-[1px] bg-gradient-to-br from-blue-500/20 to-purple-500/20 cursor-pointer backdrop-blur-xl transition-all duration-500 hover:from-blue-500/40 hover:to-purple-500/40 shadow-lg"
+          >
+            <div className={`bg-[#0B0F1A] rounded-2xl p-6 h-full flex flex-col items-center justify-center transition-all duration-300 group-hover:bg-white/5 ${tool.glow}`}>
+              {/* Emoji Icon Container */}
+              <div className="text-3xl mb-4 bg-white/10 p-4 rounded-2xl shadow-xl border border-white/5 group-hover:scale-110 transition-transform duration-300">
+                {tool.icon}
               </div>
-            </motion.div>
-          );
-        })}
+
+              {/* Title */}
+              <h3 className="font-bold text-sm tracking-tight text-gray-300 group-hover:text-white transition-colors">
+                {tool.title}
+              </h3>
+              
+              {/* Detail Accent */}
+              <div className="mt-3 w-8 h-1 bg-white/10 rounded-full group-hover:w-12 group-hover:bg-blue-500 transition-all duration-300" />
+            </div>
+          </motion.div>
+        ))}
       </div>
     </div>
   );

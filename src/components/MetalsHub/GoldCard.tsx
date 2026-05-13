@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Coins, Scale, Percent, ShoppingCart, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { formatIndianCurrency } from '../../lib/financeUtils';
 
 interface PurityOption {
   label: string;
@@ -18,8 +19,22 @@ export default function GoldCard() {
   const [rate, setRate] = useState('');
   const [making, setMaking] = useState('');
   const [purity, setPurity] = useState(PURITIES[0]);
-  const [error, setError] = useState('');
   const [hasInteracted, setHasInteracted] = useState({ weight: false, rate: false, making: false });
+
+  // Load saved rate on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('goldRate');
+    if (saved) {
+      setRate(saved);
+    }
+  }, []);
+
+  // Save rate when changed
+  useEffect(() => {
+    if (rate) {
+      localStorage.setItem('goldRate', rate);
+    }
+  }, [rate]);
 
   const [results, setResults] = useState({
     adjustedRate: 0,
@@ -29,26 +44,18 @@ export default function GoldCard() {
     isValid: false
   });
 
-  const handleCalculate = () => {
-    setHasInteracted({ weight: true, rate: true, making: true });
-    
-    if (!weight || !rate || !making) {
-      setError('Please enter all required values');
-      setResults(prev => ({ ...prev, isValid: false }));
-      return;
-    }
-
+  // Auto-calculation
+  useEffect(() => {
     const W = parseFloat(weight);
     const R = parseFloat(rate);
-    const M = parseFloat(making);
+    const M = parseFloat(making || '0');
 
-    if (W <= 0 || R <= 0 || M < 0) {
-      setError('Please enter valid positive values');
+    // Validation
+    if (isNaN(W) || isNaN(R) || W <= 0 || R <= 0) {
       setResults(prev => ({ ...prev, isValid: false }));
       return;
     }
 
-    setError('');
     const adjustedRate = R * purity.value;
     const goldValue = W * adjustedRate;
     const makingCharges = (goldValue * M) / 100;
@@ -61,160 +68,107 @@ export default function GoldCard() {
       totalPrice: total,
       isValid: true
     });
-  };
-
-  // Re-calculate if already valid when purity changes
-  useEffect(() => {
-    if (results.isValid) {
-      handleCalculate();
-    }
-  }, [purity]);
+  }, [weight, rate, making, purity]);
 
   const isFieldInvalid = (val: string, field: keyof typeof hasInteracted) => {
     return hasInteracted[field] && !val;
   };
 
   return (
-    <div className="bg-white dark:bg-white/5 rounded-2xl shadow-md p-5 border border-gray-200 dark:border-white/10 space-y-6" id="gold-valuation-card">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col">
-            <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest">METALLIC EVALUATION</span>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-              <Coins className="w-5 h-5 text-orange-500" />
-              Gold Valuation
-            </h3>
-            <span className="text-[7px] font-bold text-gray-400/50 uppercase tracking-[0.2em] mt-0.5">CRAFTED BY PATEL VAMSHIDHAR REDDY</span>
+    <div className="bg-card border border-border rounded-2xl p-5 space-y-6 backdrop-blur-xl shadow-lg" id="gold-valuation-card">
+      {/* Header */}
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-orange-500 rounded-full" />
+          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Manual Valuation</span>
         </div>
       </div>
 
-      <div className="space-y-4">
-        <div className="grid grid-cols-4 gap-2">
-          {PURITIES.map((p) => (
-            <button
-              key={p.label}
-              onClick={() => {
-                setPurity(p);
-                // Trigger recalc if valid
-                if (weight && rate && making) {
-                  setError('');
-                }
-              }}
-              className={`h-10 rounded-xl text-xs font-black transition-all ${
-                purity.label === p.label 
-                  ? 'bg-orange-500 text-white shadow-md' 
-                  : 'bg-gray-50 dark:bg-white/10 text-gray-500'
-              }`}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
+      {/* Purity Tabs */}
+      <div className="flex gap-2">
+        {PURITIES.map((p) => (
+          <button
+            key={p.label}
+            onClick={() => setPurity(p)}
+            className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              purity.label === p.label 
+                ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-lg' 
+                : 'bg-white/10 text-gray-400 hover:bg-white/15'
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
 
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-             <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Weight (g)</label>
-                <input
-                    type="number"
-                    value={weight}
-                    placeholder="Enter weight"
-                    onBlur={() => setHasInteracted(prev => ({ ...prev, weight: true }))}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (parseFloat(val) < 0) return;
-                      setWeight(val);
-                      setResults(prev => ({ ...prev, isValid: false }));
-                    }}
-                    autoComplete="off"
-                    className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-3 text-sm font-bold focus:ring-2 focus:ring-orange-500 outline-none border transition-all ${
-                      isFieldInvalid(weight, 'weight') ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
-                    }`}
-                />
-             </div>
-             <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">{purity.label} Rate (₹)</label>
-                <input
-                    type="number"
-                    value={rate}
-                    placeholder="Enter rate"
-                    onBlur={() => setHasInteracted(prev => ({ ...prev, rate: true }))}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (parseFloat(val) < 0) return;
-                      setRate(val);
-                      setResults(prev => ({ ...prev, isValid: false }));
-                    }}
-                    autoComplete="off"
-                    className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-3 text-sm font-bold focus:ring-2 focus:ring-orange-500 outline-none border transition-all ${
-                      isFieldInvalid(rate, 'rate') ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
-                    }`}
-                />
-             </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-black text-gray-400 uppercase tracking-wider">Making (%)</label>
+      <div className="space-y-4">
+        {/* Main Inputs Grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">Weight (g)</label>
             <input
-                type="number"
-                value={making}
-                placeholder="Enter making charges"
-                onBlur={() => setHasInteracted(prev => ({ ...prev, making: true }))}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (parseFloat(val) < 0) return;
-                  setMaking(val);
-                  setResults(prev => ({ ...prev, isValid: false }));
-                }}
-                autoComplete="off"
-                className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-3 text-sm font-bold focus:ring-2 focus:ring-orange-500 outline-none border transition-all ${
-                  isFieldInvalid(making, 'making') ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
-                }`}
+              type="number"
+              value={weight}
+              placeholder="Weight (g)"
+              onBlur={() => setHasInteracted(prev => ({ ...prev, weight: true }))}
+              onChange={(e) => setWeight(e.target.value)}
+              className={`w-full bg-white/10 text-white p-3 rounded-xl outline-none border transition-all ${
+                isFieldInvalid(weight, 'weight') ? 'border-red-500/50 bg-red-500/10' : 'border-white/10'
+              }`}
+            />
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between px-1">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Rate ₹/g</label>
+            </div>
+            <input
+              type="number"
+              value={rate}
+              placeholder="Rate ₹"
+              onBlur={() => setHasInteracted(prev => ({ ...prev, rate: true }))}
+              onChange={(e) => setRate(e.target.value)}
+              className={`w-full bg-white/10 text-white p-3 rounded-xl outline-none border transition-all ${
+                isFieldInvalid(rate, 'rate') ? 'border-red-500/50 bg-red-500/10' : 'border-white/10'
+              }`}
             />
           </div>
         </div>
 
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="text-[10px] font-bold text-red-500 bg-red-500/10 p-2 rounded-lg text-center"
-            >
-              {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className={`bg-gray-50 dark:bg-white/5 rounded-xl p-4 space-y-2 text-xs font-bold text-gray-500 dark:text-gray-400 border border-transparent dark:border-white/10 transition-opacity ${results.isValid ? 'opacity-100' : 'opacity-40'}`}>
-           <div className="flex justify-between">
-              <span>Adj. Rate</span>
-              <span className="text-gray-900 dark:text-white">₹{results.isValid ? results.adjustedRate.toFixed(2) : '0.00'}/g</span>
-           </div>
-           <div className="flex justify-between">
-              <span>Making Val</span>
-              <span className="text-emerald-500">+{results.isValid ? `₹${results.makingCharges.toFixed(2)}` : '₹0.00'}</span>
-           </div>
-           <div className="pt-2 border-t border-gray-200 dark:border-white/10 flex justify-between items-baseline">
-              <span className="text-[9px] uppercase tracking-widest text-orange-500">Total Price</span>
-              <span className="text-xl font-black text-gray-900 dark:text-white">₹{results.isValid ? results.totalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}</span>
-           </div>
+        {/* Making Charges */}
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">Making Charges (%)</label>
+          <input
+            type="number"
+            value={making}
+            placeholder="Making Charges %"
+            onBlur={() => setHasInteracted(prev => ({ ...prev, making: true }))}
+            onChange={(e) => setMaking(e.target.value)}
+            className={`w-full bg-white/10 text-white p-3 rounded-xl outline-none border transition-all ${
+              isFieldInvalid(making, 'making') ? 'border-red-500/50 bg-red-500/10' : 'border-white/10'
+            }`}
+          />
         </div>
 
-        <motion.button 
-          whileTap={{ scale: 0.98 }}
-          onClick={handleCalculate}
-          disabled={!weight || !rate || !making}
-          className={`w-full h-11 text-white text-sm font-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 ${
-            (!weight || !rate || !making) 
-              ? 'bg-gray-400 cursor-not-allowed grayscale' 
-              : 'bg-orange-500 hover:bg-orange-600'
-          }`}
-        >
-           <ArrowRight className="w-4 h-4" />
-           CALCULATE
-        </motion.button>
+        {/* Result Container */}
+        <div className={`mt-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-white/10 rounded-2xl p-5 text-center transition-all duration-500 ${results.isValid ? 'opacity-100 scale-100' : 'opacity-40 scale-[0.98]'}`}>
+          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Total Valuation</div>
+          <div className="text-2xl font-black text-green-400 tracking-tight">
+            {formatIndianCurrency(results.totalPrice, 2)}
+          </div>
+          {results.isValid && (
+            <div className="mt-3 pt-3 border-t border-white/5 grid grid-cols-2 gap-2 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+              <div className="flex flex-col text-left">
+                <span className="text-gray-600">Adj. Rate</span>
+                <span className="text-white">{formatIndianCurrency(results.adjustedRate, 2)}/g</span>
+              </div>
+              <div className="flex flex-col text-right">
+                <span className="text-gray-600">Making Val</span>
+                <span className="text-white">+{formatIndianCurrency(results.makingCharges, 2)}</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-
     </div>
   );
 }

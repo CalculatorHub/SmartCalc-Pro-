@@ -1,6 +1,8 @@
 {
   "name": "CalHub Finance",
-  "description": "A modern, mobile-first financial hub featuring a rate converter, step-by-step logic processing, and minimal growth analytics.",
+  "description": "A professional financial and value calculation suite featuring Tools for Finance (EMI/Loans), Gold & Silver valuation with live rates, Vehicle fuel costs, and Estate property estimation.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

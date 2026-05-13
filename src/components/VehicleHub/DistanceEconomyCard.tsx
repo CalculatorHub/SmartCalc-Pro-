@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Route, Gauge } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface DistanceEconomyCardProps {
   distance: string;
@@ -59,9 +60,23 @@ export default function DistanceEconomyCard({ distance, setDistance, mileage, se
                 }}
                 autoComplete="off"
                 className={`w-full h-12 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none border transition-all ${
-                  hasInteracted.mileage && !mileage ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+                  hasInteracted.mileage && (parseFloat(mileage) <= 0 || !mileage) ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
                 }`}
              />
+             <AnimatePresence mode="wait">
+               {hasInteracted.mileage && (parseFloat(mileage) <= 0 || !mileage) && (
+                 <motion.div 
+                   initial={{ opacity: 0, scale: 0.9 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   exit={{ opacity: 0, scale: 0.9 }}
+                   className="absolute -bottom-2 right-0 bg-red-500 text-white px-2 py-0.5 rounded-md shadow-lg z-10"
+                 >
+                   <span className="text-[9px] font-black uppercase tracking-tighter">
+                     {!mileage ? "Required" : parseFloat(mileage) === 0 ? "Zero Error" : "Positive Only"}
+                   </span>
+                 </motion.div>
+               )}
+             </AnimatePresence>
           </div>
         </div>
       </div>

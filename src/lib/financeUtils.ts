@@ -86,6 +86,29 @@ export const numberToIndianWords = (num: number): string => {
   return res.trim() + ' Rupees Only';
 };
 
+/**
+ * Formats a number into Indian Currency format with the ₹ symbol.
+ * Uses en-IN locale for 2,2,3 grouping.
+ */
+export const formatIndianCurrency = (num: number, decimals: number = 0): string => {
+  if (num === null || num === undefined || isNaN(num)) return '₹0';
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: decimals,
+  }).format(num);
+};
+
+/**
+ * Formats a number into Indian shorthand (k, Lakh, Crore).
+ */
+export const formatIndianShorthand = (num: number): string => {
+  if (num === null || num === undefined || isNaN(num)) return '₹0';
+  if (num >= 10000000) return `₹${(num / 10000000).toFixed(2)} Cr`;
+  if (num >= 100000) return `₹${(num / 100000).toFixed(2)} L`;
+  return formatIndianCurrency(num);
+};
+
 export function calculateFinance(
   principal: number,
   rate: number,

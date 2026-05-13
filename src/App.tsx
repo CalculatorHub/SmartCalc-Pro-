@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+import Logo from './components/ui/Logo';
+
 function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,21 +48,19 @@ function Layout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen transition-all duration-500 selection:bg-blue-500/30 font-sans dark bg-[#020617] text-gray-200">
       {/* Header */}
       <header className="sticky top-0 left-0 right-0 h-20 bg-white/5 backdrop-blur-xl border-b border-white/10 z-50 px-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => navigate('/')}
-            className="w-11 h-11 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30 group hover:rotate-6 transition-all duration-300 cursor-pointer"
-          >
-            {onHome ? (
-              <Menu className="w-6 h-6" />
-            ) : (
-              <ArrowLeft className="w-6 h-6" />
-            )}
+        <div className="flex items-center gap-6">
+          {!onHome && (
+            <button 
+              onClick={() => navigate(-1)}
+              className="w-10 h-10 bg-white/5 rounded-full flex items-center justify-center text-gray-400 hover:text-white border border-white/10 transition-all cursor-pointer"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+          )}
+          
+          <button onClick={() => navigate('/')} className="cursor-pointer">
+            <Logo />
           </button>
-          <div className="flex flex-col -space-y-1">
-             <h1 className="text-2xl font-black italic tracking-widest text-white">CALHUB</h1>
-             <span className="text-[8px] font-black text-blue-500 uppercase tracking-[0.4em] translate-x-0.5">PROTOCOL 01</span>
-          </div>
         </div>
 
         <div className="flex items-center gap-4">
@@ -168,10 +168,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/tools" element={<ToolsPage />} />
-          <Route path="/tools/finance" element={<FinanceHub />} />
-          <Route path="/tools/gold" element={<MetalsPage />} />
-          <Route path="/tools/vehicle" element={<VehiclePage />} />
-          <Route path="/tools/land" element={<EstatePage />} />
+          <Route path="/finance" element={<FinanceHub />} />
+          <Route path="/gold" element={<MetalsPage mode="gold" />} />
+          <Route path="/silver" element={<MetalsPage mode="silver" />} />
+          <Route path="/vehicle" element={<VehiclePage />} />
+          <Route path="/estate" element={<EstatePage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin" element={<AdminPanel />} />

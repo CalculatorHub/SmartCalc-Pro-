@@ -8,7 +8,7 @@ import {
   Download, FileText, Share2, History, PlusCircle, Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { annualToMonthlyRate, monthlyToAnnualRate, getMonthsBetween, numberToIndianWords } from '../lib/financeUtils';
+import { annualToMonthlyRate, monthlyToAnnualRate, getMonthsBetween, numberToIndianWords, formatIndianCurrency, formatIndianShorthand } from '../lib/financeUtils';
 import { exportToCSV, exportToPDF } from '../lib/exportUtils';
 
 // --- Components ---
@@ -79,10 +79,10 @@ const RateConverter = () => {
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-white/5 rounded-2xl shadow-md p-5 space-y-4 border border-gray-200 dark:border-white/10 transition-all hover:shadow-lg"
+      className="bg-card border border-border rounded-2xl p-5 space-y-4 backdrop-blur-xl shadow-lg transition-all hover:shadow-glow/20"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <h3 className="text-base font-semibold text-white flex items-center gap-2">
           <ArrowRightLeft className="w-5 h-5 text-blue-500" />
           Smart Converter
         </h3>
@@ -93,22 +93,23 @@ const RateConverter = () => {
             setMode(prev => prev === 'pctToRs' ? 'rsToPct' : 'pctToRs');
             setInputVal('');
           }}
-          className="text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full border border-blue-100 dark:border-blue-800"
+          className="text-[10px] font-bold uppercase tracking-widest px-4 py-2 bg-white/10 text-blue-400 rounded-xl border border-white/10 hover:bg-white/20 transition-all"
         >
           Switch Mode
         </motion.button>
       </div>
 
       <div className="space-y-4">
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-            {mode === 'pctToRs' ? 'Enter Annual Percentage (%)' : 'Enter Monthly Rate (₹ per 100)'}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-gray-400 flex items-center gap-2">
+            <Calculator size={14} />
+            {mode === 'pctToRs' ? 'Annual Percentage (%)' : 'Monthly Rate (₹ per 100)'}
           </label>
           <motion.div 
             whileFocus={{ scale: 1.01 }}
             className="relative group"
           >
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 transition-colors group-focus-within:text-blue-500">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 transition-colors group-focus-within:text-blue-500">
               {mode === 'pctToRs' ? <Percent className="w-4 h-4" /> : <IndianRupee className="w-4 h-4" />}
             </div>
             <input
@@ -122,8 +123,8 @@ const RateConverter = () => {
               onBlur={() => setHasInteracted(true)}
               placeholder={mode === 'pctToRs' ? "Enter percentage" : "Enter rupee value"}
               autoComplete="off"
-              className={`w-full h-12 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none border transition-all placeholder-gray-500 dark:placeholder-gray-400 ${
-                hasInteracted && !inputVal ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/5'
+              className={`w-full h-12 bg-white/10 text-white rounded-xl pl-12 pr-4 text-sm font-semibold focus:ring-2 focus:ring-blue-500/50 outline-none border transition-all placeholder-gray-500 ${
+                hasInteracted && !inputVal ? 'border-red-500/50 bg-red-500/10' : 'border-white/10'
               }`}
             />
           </motion.div>
@@ -247,7 +248,7 @@ const InterestCalculator = () => {
   const [rate, setRate] = useState('');
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [endDate, setEndDate] = useState('');
-  const [type, setType] = useState<'SI' | 'CI'>('CI');
+  const [type, setType] = useState<'SI' | 'CI'>('SI');
   const [history, setHistory] = useState<any[]>([]);
   const [error, setError] = useState('');
   const [hasInteracted, setHasInteracted] = useState({ principal: false, rate: false, dates: false });
@@ -356,7 +357,7 @@ const InterestCalculator = () => {
   const handleExportPDF = () => {
     if (history.length === 0) return;
     const headers = ['Type', 'Principal', 'Rate', 'Years', 'Interest', 'Total'];
-    const body = history.map(item => [item.type, `₹${item.principal}`, `${item.rate}%`, item.years, `₹${item.interest}`, `₹${item.total}`]);
+    const body = history.map(item => [item.type, formatIndianCurrency(item.principal), `${item.rate}%`, item.years, formatIndianCurrency(item.interest), formatIndianCurrency(item.total)]);
     exportToPDF('Interest Calculation History', headers, body, 'Interest_Calculation_History');
   };
 
@@ -365,37 +366,40 @@ const InterestCalculator = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="bg-white dark:bg-white/5 rounded-2xl shadow-md p-5 space-y-6 border border-gray-200 dark:border-white/10 transition-all hover:shadow-lg"
+      className="bg-card border border-border rounded-2xl p-6 space-y-6 backdrop-blur-xl shadow-lg transition-all"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+        <h3 className="text-base font-semibold text-white flex items-center gap-2">
           <Calculator className="w-5 h-5 text-blue-500" />
-          Interest Stats
+          Interest Calculator
         </h3>
-        <div className="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+        <div className="flex bg-white/10 p-1 rounded-xl">
           <button 
             onClick={() => setType('SI')}
-            className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${type === 'SI' ? 'bg-white dark:bg-white/10 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-400'}`}
+            className={`px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all ${type === 'SI' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400'}`}
           >
             Simple
           </button>
           <button 
             onClick={() => setType('CI')}
-            className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${type === 'CI' ? 'bg-white dark:bg-white/10 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-400'}`}
+            className={`px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all ${type === 'CI' ? 'bg-blue-600 text-white shadow-md' : 'text-gray-400'}`}
           >
             Compound
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4">
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Principal (₹)</label>
+      <div className="grid grid-cols-1 gap-5">
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-gray-400 flex items-center gap-2">
+            <Target size={14} />
+            Principal Amount (₹)
+          </label>
           <motion.div whileFocus={{ scale: 1.01 }}>
             <input
               type="number"
               value={principal}
-              placeholder="Enter principal amount"
+              placeholder="Principal ₹"
               onChange={(e) => {
                 const val = e.target.value;
                 if (parseFloat(val) < 0) return;
@@ -404,8 +408,8 @@ const InterestCalculator = () => {
               }}
               onBlur={() => setHasInteracted(prev => ({ ...prev, principal: true }))}
               autoComplete="off"
-              className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold outline-none border transition-all focus:ring-2 focus:ring-blue-500 ${
-                hasInteracted.principal && !principal ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+              className={`w-full h-12 bg-white/10 text-white rounded-xl px-4 text-sm font-semibold outline-none border transition-all focus:ring-2 focus:ring-blue-500/50 ${
+                hasInteracted.principal && !principal ? 'border-red-500/50 bg-red-500/10' : 'border-white/10'
               }`}
             />
           </motion.div>
@@ -413,20 +417,24 @@ const InterestCalculator = () => {
             <motion.p 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-[10px] font-bold text-blue-500 italic px-1"
+              className="text-[10px] font-bold text-blue-400 italic px-1"
             >
               {numberToIndianWords(parseFloat(principal))}
             </motion.p>
           )}
         </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Annual Rate (%)</label>
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-gray-400 flex items-center gap-2">
+              <Percent size={14} />
+              Interest Rate (%)
+            </label>
             <motion.div whileFocus={{ scale: 1.01 }}>
               <input
                 type="number"
                 value={rate}
-                placeholder="e.g. 5"
+                placeholder="Rate %"
                 onChange={(e) => {
                   const val = e.target.value;
                   if (parseFloat(val) < 0) return;
@@ -435,95 +443,71 @@ const InterestCalculator = () => {
                 }}
                 onBlur={() => setHasInteracted(prev => ({ ...prev, rate: true }))}
                 autoComplete="off"
-                className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold outline-none border transition-all focus:ring-2 focus:ring-blue-500 ${
-                  hasInteracted.rate && !rate ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+                className={`w-full h-12 bg-white/10 text-white rounded-xl px-4 text-sm font-semibold outline-none border transition-all focus:ring-2 focus:ring-blue-500/50 ${
+                  hasInteracted.rate && !rate ? 'border-red-500/50 bg-red-500/10' : 'border-white/10'
                 }`}
               />
             </motion.div>
           </div>
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Start Date</label>
+          <div className="space-y-2">
+            <label className="text-xs font-semibold text-gray-400">Start Date</label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => { setStartDate(e.target.value); setIsCalculated(false); }}
-              className="w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold border border-transparent dark:border-white/10 focus:ring-2 focus:ring-blue-500"
+              className="w-full h-12 bg-white/10 text-white rounded-xl px-4 text-sm font-semibold border border-white/10 outline-none focus:ring-2 focus:ring-blue-500/50"
             />
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">End Date</label>
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-gray-400">End Date</label>
           <input
             type="date"
             value={endDate}
             min={startDate}
             onChange={(e) => { setEndDate(e.target.value); setIsCalculated(false); }}
-            className="w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold border border-transparent dark:border-white/10 focus:ring-2 focus:ring-blue-500"
+            className="w-full h-12 bg-white/10 text-white rounded-xl px-4 text-sm font-semibold border border-white/10 outline-none focus:ring-2 focus:ring-blue-500/50"
           />
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         <AnimatePresence>
           {error && (
             <motion.p 
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="text-[10px] font-bold text-red-500 bg-red-500/10 p-2 rounded-lg text-center"
+              className="text-[10px] font-bold text-red-400 bg-red-500/10 p-3 rounded-xl text-center border border-red-500/20"
             >
               {error}
             </motion.p>
           )}
         </AnimatePresence>
 
-        {isCalculated && (
-          <motion.div 
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-center gap-2 py-1 px-3 bg-blue-500/10 rounded-full w-fit mx-auto"
-          >
-            <Zap className="w-3 h-3 text-blue-500" />
-            <span className="text-[9px] font-black text-blue-500 uppercase tracking-widest whitespace-nowrap">
-              Calculation Active
-            </span>
-          </motion.div>
-        )}
         <motion.button 
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={handleCalculate}
-          className={`w-full h-11 text-white text-sm font-black rounded-xl transition-all shadow-md flex items-center justify-center gap-2 ${
-            !principal || !rate || !startDate || !endDate ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+          className={`w-full h-12 text-white text-sm font-bold rounded-xl transition-all shadow-glow flex items-center justify-center gap-2 ${
+            !principal || !rate || !startDate || !endDate ? 'bg-white/10 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:brightness-110 active:scale-[0.97]'
           }`}
         >
            <Calculator className="w-4 h-4" />
-           CALCULATE GROWTH
+           Calculate
         </motion.button>
 
-        <div className={`grid grid-cols-2 gap-3 transition-all duration-300 ${isCalculated ? 'opacity-100' : 'opacity-40 scale-[0.98]'}`}>
-          <motion.div 
-            animate={isCalculated ? { scale: [1, 1.05, 1] } : {}}
-            className="p-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-xl"
-          >
-            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest block mb-1">Interest</span>
-            <span className="text-base font-extrabold text-gray-900 dark:text-white">₹{isCalculated && stats ? stats.totalInterest.toLocaleString() : '0'}</span>
-            {isCalculated && stats && stats.totalInterest > 0 && (
-              <span className="text-[8px] font-bold text-emerald-500/80 italic block mt-1 leading-tight">{numberToIndianWords(stats.totalInterest)}</span>
-            )}
-          </motion.div>
-          <motion.div 
-            animate={isCalculated ? { scale: [1, 1.05, 1] } : {}}
-            transition={{ delay: 0.1 }}
-            className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl"
-          >
-            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest block mb-1">Maturity</span>
-            <span className="text-base font-extrabold text-gray-900 dark:text-white">₹{isCalculated && stats ? stats.totalAmount.toLocaleString() : '0'}</span>
-            {isCalculated && stats && stats.totalAmount > 0 && (
-              <span className="text-[8px] font-bold text-blue-500/80 italic block mt-1 leading-tight">{numberToIndianWords(stats.totalAmount)}</span>
-            )}
-          </motion.div>
+        <div className={`grid grid-cols-2 gap-4 transition-all duration-300 ${isCalculated ? 'opacity-100' : 'opacity-40 scale-[0.98]'}`}>
+          <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-xl text-center">
+            <p className="text-xs text-gray-400 mb-1">Interest</p>
+            <p className="font-bold text-green-400 text-lg">{isCalculated && stats ? formatIndianCurrency(stats.totalInterest) : '₹0'}</p>
+          </div>
+
+          <div className="bg-blue-500/10 border border-blue-500/20 p-4 rounded-xl text-center">
+            <p className="text-xs text-gray-400 mb-1">Total Amount</p>
+            <p className="font-bold text-blue-400 text-lg">{isCalculated && stats ? formatIndianCurrency(stats.totalAmount) : '₹0'}</p>
+          </div>
         </div>
         {isCalculated && (
           <motion.button 
@@ -577,13 +561,13 @@ const InterestCalculator = () => {
                   <div className="flex flex-col gap-0.5">
                     <div className="flex items-center gap-2">
                       <span className="text-[8px] font-black px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded uppercase">{item.type}</span>
-                      <span className="text-[9px] font-bold text-gray-400 italic">P: ₹{item.principal.toLocaleString()} @ {item.rate}% p.a.</span>
+                      <span className="text-[9px] font-bold text-gray-400 italic">P: {formatIndianCurrency(item.principal)} @ {item.rate}% p.a.</span>
                     </div>
                     <span className="text-[9px] font-extrabold text-blue-500/80 uppercase tracking-tighter block mb-0.5">{item.durationLabel}</span>
-                    <span className="text-sm font-black text-gray-900 dark:text-white">₹{item.total.toLocaleString()}</span>
+                    <span className="text-sm font-black text-gray-900 dark:text-white">{formatIndianCurrency(item.total)}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 block">+₹{item.interest.toLocaleString()}</span>
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 block">+{formatIndianCurrency(item.interest)}</span>
                     <span className="text-[8px] font-medium text-gray-400 uppercase tracking-tighter">{item.date}</span>
                   </div>
                 </motion.div>
@@ -618,7 +602,7 @@ const InterestCalculator = () => {
                 axisLine={false} 
                 tickLine={false} 
                 tick={{ fill: '#64748b', fontWeight: 'bold' }} 
-                tickFormatter={(v) => `₹${v >= 100000 ? (v/100000).toFixed(1) + 'L' : (v/1000).toFixed(0) + 'k'}`} 
+                tickFormatter={(v) => formatIndianShorthand(v)} 
               />
               <Tooltip 
                 cursor={{ fill: '#3b82f6', opacity: 0.05 }}
@@ -632,7 +616,7 @@ const InterestCalculator = () => {
                   color: '#f8fafc'
                 }}
                 itemStyle={{ color: '#60a5fa' }}
-                formatter={(value: number) => [`₹${value.toLocaleString()}`, 'Amount']}
+                formatter={(value: number) => [formatIndianCurrency(value), 'Amount']}
               />
               <Bar dataKey="amount" radius={[6, 6, 0, 0]}>
                 {stats?.chartData?.map((_entry: any, index: number) => {
@@ -665,21 +649,21 @@ const DiscountCalculator = () => {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="bg-white dark:bg-white/5 rounded-2xl shadow-md p-5 space-y-4 border border-gray-200 dark:border-white/10 transition-all hover:shadow-lg"
+      className="bg-card border border-border rounded-2xl p-6 space-y-6 backdrop-blur-xl shadow-lg transition-all"
     >
       <div className="flex items-center gap-2">
         <Tag className="w-5 h-5 text-blue-500" />
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Discount Saver</h3>
+        <h3 className="text-base font-semibold text-white tracking-tight">Discount Calculator</h3>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Base Price (₹)</label>
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-gray-400">Price ₹</label>
           <motion.div whileFocus={{ scale: 1.01 }}>
             <input
               type="number"
               value={price}
-              placeholder="Item price"
+              placeholder="Price ₹"
               onChange={(e) => {
                 const val = e.target.value;
                 if (parseFloat(val) < 0) return;
@@ -687,14 +671,14 @@ const DiscountCalculator = () => {
               }}
               onBlur={() => setHasInteracted(prev => ({ ...prev, price: true }))}
               autoComplete="off"
-              className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none border transition-all ${
-                hasInteracted.price && !price ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+              className={`w-full h-12 bg-white/10 text-white rounded-xl px-4 text-sm font-semibold focus:ring-2 focus:ring-blue-500/50 outline-none border transition-all ${
+                hasInteracted.price && !price ? 'border-red-500/50 bg-red-500/10' : 'border-white/10'
               }`}
             />
           </motion.div>
         </div>
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Discount (%)</label>
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-gray-400">Discount %</label>
           <motion.div whileFocus={{ scale: 1.01 }}>
             <input
               type="number"
@@ -707,8 +691,8 @@ const DiscountCalculator = () => {
               }}
               onBlur={() => setHasInteracted(prev => ({ ...prev, discount: true }))}
               autoComplete="off"
-              className={`w-full h-11 bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none border transition-all ${
-                hasInteracted.discount && !discountPct ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+              className={`w-full h-12 bg-white/10 text-white rounded-xl px-4 text-sm font-semibold focus:ring-2 focus:ring-blue-500/50 outline-none border transition-all ${
+                hasInteracted.discount && !discountPct ? 'border-red-500/50 bg-red-500/10' : 'border-white/10'
               }`}
             />
           </motion.div>
@@ -721,7 +705,7 @@ const DiscountCalculator = () => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="text-[10px] font-bold text-red-500 bg-red-500/10 p-2 rounded-lg text-center"
+            className="text-[10px] font-bold text-red-400 bg-red-500/10 p-3 rounded-xl text-center border border-red-500/20"
           >
             Please enter all required values
           </motion.div>
@@ -730,82 +714,65 @@ const DiscountCalculator = () => {
 
       <motion.div 
         animate={isValid ? { scale: [1, 1.02, 1], opacity: 1 } : { scale: 0.98, opacity: 0.4 }}
-        className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 flex flex-col gap-3 transition-opacity"
+        className="mt-4 bg-white/10 p-4 rounded-xl border border-white/10 backdrop-blur-xl"
       >
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-500 font-medium tracking-tight">You Save:</span>
-          <span className="font-bold text-emerald-600 dark:text-emerald-400">₹{isValid ? discountAmount.toLocaleString() : '0'}</span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-700 dark:text-gray-200 font-bold tracking-tight">Final Price:</span>
-          <span className="text-xl font-black text-blue-600 dark:text-blue-400">₹{isValid ? finalPrice.toLocaleString() : '0'}</span>
+        <div className="flex flex-col gap-1">
+          <p className="text-sm text-gray-400">Final Price</p>
+          <p className="font-bold text-green-400 text-2xl tracking-tight">{isValid ? formatIndianCurrency(finalPrice) : '₹0'}</p>
+          {isValid && discountAmount > 0 && (
+            <p className="text-[10px] text-gray-500 font-medium">You saved {formatIndianCurrency(discountAmount)}</p>
+          )}
         </div>
       </motion.div>
     </motion.div>
   );
 };
 
-/**
- * CALCULATION LOG / STEP TRACKER
- */
 export default function FinanceHub() {
   return (
-    <div className="space-y-6 pb-28 pt-4 animate-in fade-in slide-in-from-bottom-2 duration-500" id="finance-hub-content">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter flex items-center gap-2">
-          <Wallet className="w-8 h-8 text-blue-500" />
-          Finance
-        </h2>
-        <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Financial calculators & tools</p>
-        <span className="text-[8px] font-bold text-gray-400/50 uppercase tracking-[0.2em] mt-1">CRAFTED BY PATEL VAMSHIDHAR REDDY</span>
+    <div className="min-h-screen text-white px-4 pt-6 pb-24 space-y-8 animate-in fade-in duration-500">
+      {/* HEADER TITLE */}
+      <div className="space-y-1">
+        <h1 className="text-xl font-semibold flex items-center gap-3">
+          Finance Tools
+        </h1>
+        <p className="text-sm text-gray-400">
+          Smart tools for smarter financial decisions.
+        </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         <section className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">01. Rate Analysis</h3>
-            <span className="w-8 h-px bg-gray-200 dark:bg-gray-700 flex-1 mx-4" />
-          </div>
           <RateConverter />
         </section>
 
         <section className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">02. Growth Engine</h3>
-            <span className="w-8 h-px bg-gray-200 dark:bg-gray-700 flex-1 mx-4" />
-          </div>
           <InterestCalculator />
         </section>
 
         <section className="space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">03. Savings Tool</h3>
-            <span className="w-8 h-px bg-gray-200 dark:bg-gray-700 flex-1 mx-4" />
-          </div>
           <DiscountCalculator />
         </section>
 
-        <section className="space-y-4 pt-6 border-t border-gray-100 dark:border-gray-800">
-          <div className="flex items-center justify-between px-1">
-            <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Financial Insights</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4" id="financial-insights">
+        <section className="space-y-4 pt-4">
+          <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.3em] px-1">Financial Insights</h3>
+          <div className="grid grid-cols-1 gap-4" id="financial-insights">
             {[
-              { title: 'Rate Analysis', desc: 'Analyze rate changes and trends.', icon: <Zap className="w-5 h-5 text-blue-500" /> },
-              { title: 'Growth Engine', desc: 'Visualize growth over time.', icon: <Target className="w-5 h-5 text-emerald-500" /> },
-              { title: 'Savings Tool', desc: 'Calculate and track savings.', icon: <ShieldCheck className="w-5 h-5 text-indigo-500" /> },
+              { title: 'Rate Analysis', desc: 'Detailed breakdown of annual vs monthly interest rates.', icon: <Zap className="w-5 h-5 text-blue-500" /> },
+              { title: 'Compound Power', desc: 'Visualize how your wealth grows exponentially over time.', icon: <TrendingUp className="w-5 h-5 text-emerald-500" /> },
+              { title: 'Asset Shield', desc: 'Secure calculations for your property and metal assets.', icon: <ShieldCheck className="w-5 h-5 text-indigo-500" /> },
             ].map((item, idx) => (
               <motion.div 
                 key={idx}
-                whileHover={{ translateY: -5, boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                className="bg-white dark:bg-white/5 p-5 rounded-2xl shadow-md border border-gray-200 dark:border-white/10 space-y-3 transition-all group"
+                whileHover={{ translateY: -2 }}
+                className="bg-card border border-border p-5 rounded-2xl flex items-center gap-4 backdrop-blur-xl group"
               >
-                <div className="w-10 h-10 bg-gray-50 dark:bg-gray-900/50 rounded-xl flex items-center justify-center transition-colors group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30">
+                <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center shrink-0 border border-white/5 transition-colors group-hover:bg-blue-500/10 group-hover:border-blue-500/20">
                   {item.icon}
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tight">{item.title}</h4>
-                  <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{item.desc}</p>
+                  <h4 className="text-sm font-bold text-white tracking-tight uppercase">{item.title}</h4>
+                  <p className="text-[11px] font-medium text-gray-500 mt-0.5 leading-relaxed">{item.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -813,10 +780,10 @@ export default function FinanceHub() {
         </section>
       </div>
 
-      <div className="bg-blue-600/10 dark:bg-blue-600/5 p-4 rounded-2xl border border-blue-600/10 flex items-start gap-3">
-        <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-        <p className="text-[10px] leading-relaxed text-blue-800 dark:text-blue-300 font-bold uppercase tracking-wider">
-          Market rates are updated in real-time. All calculations are approximate and should be verified with your financial advisor.
+      <div className="bg-blue-500/5 p-5 rounded-2xl border border-blue-500/10 flex items-start gap-4 backdrop-blur-md">
+        <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" />
+        <p className="text-[10px] leading-relaxed text-blue-300 font-bold uppercase tracking-wider">
+          Market rates are updated periodically. All calculations are approximate and should be used for informational purposes only. Verified results should be sourced from professional financial institutions.
         </p>
       </div>
     </div>

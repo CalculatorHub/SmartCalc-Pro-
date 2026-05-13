@@ -1,6 +1,7 @@
 import React from 'react';
 import { IndianRupee, MapPin, Droplets, Target } from 'lucide-react';
 import { motion } from 'motion/react';
+import { formatIndianCurrency } from '../../lib/financeUtils';
 
 interface EstimationCardProps {
   distance: number;
@@ -15,7 +16,7 @@ export default function EstimationCard({ distance, mileage, fuelPrice }: Estimat
 
   const stats = [
     { label: 'Fuel Needed', value: `${fuelNeeded.toFixed(2)} Liters`, icon: <Droplets className="w-4 h-4" />, color: 'text-blue-500' },
-    { label: 'Cost / KM', value: `₹${costPerKm.toFixed(2)}`, icon: <Target className="w-4 h-4" />, color: 'text-emerald-500' },
+    { label: 'Cost / KM', value: formatIndianCurrency(costPerKm, 2), icon: <Target className="w-4 h-4" />, color: 'text-emerald-500' },
   ];
 
   return (
@@ -23,7 +24,7 @@ export default function EstimationCard({ distance, mileage, fuelPrice }: Estimat
       <div className="space-y-1">
         <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em]">Estimated Trip Cost</h3>
         <div className="flex items-center justify-center gap-2">
-            <span className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter italic">₹{totalCost.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+            <span className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter italic">{formatIndianCurrency(totalCost)}</span>
         </div>
       </div>
 

@@ -6,37 +6,43 @@ import {
   CheckCircle,
   ArrowRight,
   Wallet,
-  TrendingUp,
+  Coins,
   Fuel,
-  Building,
+  Home,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { motion } from 'motion/react';
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const features = [
     {
-      title: "Financial Calculators",
-      desc: "EMI, Loan, SIP and more",
+      title: "Financial Hub",
+      desc: "EMI, Loan & Rates",
       icon: Wallet,
       color: "from-blue-500 to-blue-700",
+      path: "/finance"
     },
     {
-      title: "Gold & Silver Prices",
-      desc: "Live metal price tools",
-      icon: TrendingUp,
+      title: "Metal Calculators",
+      desc: "Manual Gold & Silver Tools",
+      icon: Coins,
       color: "from-yellow-500 to-orange-600",
+      path: "/gold"
     },
     {
-      title: "Fuel Cost Calculator",
-      desc: "Trip & fuel estimation",
+      title: "Fuel & Vehicle",
+      desc: "Trip & Fuel estimation",
       icon: Fuel,
       color: "from-green-500 to-green-700",
+      path: "/vehicle"
     },
     {
-      title: "Property Calculators",
-      desc: "Value & loan estimation",
-      icon: Building,
+      title: "Estate & Property",
+      desc: "Value & Loan estimation",
+      icon: Home,
       color: "from-purple-500 to-purple-700",
+      path: "/estate"
     },
   ];
 
@@ -50,7 +56,7 @@ export default function HomePage() {
           animate={{ opacity: 1, x: 0 }}
         >
           <h1 className="text-xl font-semibold">
-            Hello, Vamshi 👋
+            Hello User 👋
           </h1>
           <p className="text-sm text-gray-400">
             Smart tools for smarter financial decisions.
@@ -119,6 +125,7 @@ export default function HomePage() {
                 transition={{ delay: 0.3 + i * 0.1 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => navigate(item.path)}
                 className="bg-card border border-border rounded-xl p-4 flex items-center justify-between backdrop-blur-xl cursor-pointer"
               >
                 <div className="flex items-center gap-4">
