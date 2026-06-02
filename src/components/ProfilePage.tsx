@@ -5,67 +5,63 @@ import { User, Mail, Shield, Settings, ChevronRight, LayoutDashboard } from "luc
 export default function ProfilePage() {
   const navigate = useNavigate();
   return (
-    <div className="px-5 pt-6 pb-32 font-sans">
-      <h1 className="text-2xl font-black italic tracking-tight mb-8 uppercase">Profile</h1>
+    <div className="min-h-screen text-white px-5 pt-8 pb-32 space-y-10">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-black tracking-tighter uppercase italic">User Identity</h1>
+        <p className="text-xs font-bold text-[#8fa3c7] uppercase tracking-widest">System permission protocols</p>
+      </div>
 
-      <div className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 border border-white/10 rounded-3xl p-6 mb-8 shadow-2xl flex items-center gap-5">
-        <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-          <User className="w-8 h-8 text-white" />
+      <div className="premium-card p-6 flex items-center gap-6 rounded-[30px] border border-blue-500/20 shadow-glow/10">
+        <div className="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center shadow-lg shadow-blue-500/30 ring-4 ring-blue-500/10">
+          <User className="w-10 h-10 text-white" />
         </div>
         <div>
-          <h2 className="text-xl font-black tracking-tight italic">User 👋</h2>
-          <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mt-1">Matrix Protocol Access Level: Core</p>
+          <h2 className="text-2xl font-black tracking-tighter italic">MASTER 01 👋</h2>
+          <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mt-1 bg-blue-500/10 w-fit px-3 py-1 rounded-full border border-blue-500/20">Access: Level Alpha</p>
         </div>
       </div>
 
-      <div className="space-y-4">
-        <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] px-2">Account Details</h3>
-        <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-xl">
-          <div className="p-4 flex items-center justify-between border-b border-white/5">
-            <div className="flex items-center gap-3">
-              <Mail className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-bold text-gray-300">Email Address</span>
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <h3 className="text-[10px] font-black text-[#8fa3c7] uppercase tracking-[0.4em] px-2 italic">Secured Data</h3>
+          <div className="bg-white/5 border border-white/5 rounded-[25px] overflow-hidden backdrop-blur-md">
+            <div className="p-5 flex items-center justify-between border-b border-white/5 group hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-4">
+                <Mail className="w-5 h-5 text-blue-500" />
+                <span className="text-xs font-bold text-gray-400">Communication Node</span>
+              </div>
+              <span className="text-[10px] font-black text-[#8fa3c7] font-mono italic">user@legacy.hub</span>
             </div>
-            <span className="text-[11px] font-black text-gray-500">user@example.com</span>
-          </div>
-          <div className="p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Shield className="w-4 h-4 text-purple-500" />
-              <span className="text-sm font-bold text-gray-300">Security Status</span>
+            <div className="p-5 flex items-center justify-between group hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-4">
+                <Shield className="w-5 h-5 text-emerald-500" />
+                <span className="text-xs font-bold text-gray-400">Encryption Status</span>
+              </div>
+              <span className="text-[10px] font-black text-emerald-400 uppercase font-mono italic">Enabled Secure</span>
             </div>
-            <span className="text-[11px] font-black text-emerald-500 uppercase">AES-256 Active</span>
           </div>
         </div>
 
-        <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.3em] px-2 pt-4">Global Settings</h3>
-        <div className="bg-white/5 border border-white/10 rounded-3xl shadow-xl">
-          <button className="w-full p-4 flex items-center justify-between border-b border-white/5 hover:bg-white/5 transition-colors">
-            <div className="flex items-center gap-3">
-              <Settings className="w-4 h-4 text-gray-400" />
-              <span className="text-sm font-bold text-gray-300">Preferences</span>
-            </div>
-            <ChevronRight className="w-4 h-4 text-gray-600" />
-          </button>
-          <button className="w-full p-4 flex items-center justify-between border-b border-white/5 hover:bg-white/5 transition-colors">
-            <div className="flex items-center gap-3">
-              <Shield className="w-4 h-4 text-gray-400" />
-              <span className="text-sm font-bold text-gray-300">Privacy Policy</span>
-            </div>
-            <ChevronRight className="w-4 h-4 text-gray-600" />
-          </button>
-          <button 
-            onClick={() => navigate('/admin')}
-            className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors group"
-          >
-            <div className="flex items-center gap-3">
-              <LayoutDashboard className="w-4 h-4 text-emerald-500 group-hover:scale-110 transition-transform" />
-              <span className="text-sm font-bold text-gray-300">Admin Protocol</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[9px] font-black italic text-emerald-500/50 uppercase tracking-tighter">System Access</span>
-              <ChevronRight className="w-4 h-4 text-gray-600" />
-            </div>
-          </button>
+        <div className="space-y-3">
+          <h3 className="text-[10px] font-black text-[#8fa3c7] uppercase tracking-[0.4em] px-2 italic">Control Matrix</h3>
+          <div className="bg-white/5 border border-white/5 rounded-[25px] overflow-hidden backdrop-blur-md">
+            {[
+              { label: 'System Prefs', icon: <Settings className="w-5 h-5 text-indigo-500" />, path: '#' },
+              { label: 'Admin Terminal', icon: <LayoutDashboard className="w-5 h-5 text-emerald-500" />, path: '/admin', highlight: true },
+            ].map((item, idx) => (
+              <button 
+                key={idx}
+                onClick={() => item.path !== '#' && navigate(item.path)}
+                className={`w-full p-5 flex items-center justify-between border-b last:border-b-0 border-white/5 hover:bg-white/5 transition-all group ${item.highlight ? 'bg-blue-500/5' : ''}`}
+              >
+                <div className="flex items-center gap-4">
+                  {item.icon}
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{item.label}</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-blue-500 transition-colors" />
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -13,23 +13,23 @@ export default function DistanceEconomyCard({ distance, setDistance, mileage, se
   const [hasInteracted, setHasInteracted] = useState({ distance: false, mileage: false });
 
   return (
-    <div className="bg-white dark:bg-white/5 p-5 rounded-2xl shadow-md border border-gray-200 dark:border-white/10 space-y-4" id="distance-economy-card">
+    <div className="premium-card rounded-[25px] p-6 space-y-6" id="distance-economy-card">
       <div className="flex items-center gap-3">
-        <div className="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl">
-          <Route className="w-5 h-5 text-emerald-600" />
+        <div className="p-2 bg-emerald-500/10 rounded-xl">
+          <Route className="w-5 h-5 text-emerald-500" />
         </div>
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-tight italic">Distance & Economy</h3>
+        <h3 className="text-sm font-black text-white uppercase tracking-widest italic">Logistics Hub</h3>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <label className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1">Distance (KM)</label>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1">Distance (KM)</label>
           <div className="relative">
-             <Route className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+             <Route className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8fa3c7]" />
              <input
                 type="number"
                 value={distance}
-                placeholder="Enter distance"
+                placeholder="0.00"
                 onBlur={() => setHasInteracted(prev => ({ ...prev, distance: true }))}
                 onChange={(e) => {
                   const val = e.target.value;
@@ -37,21 +37,21 @@ export default function DistanceEconomyCard({ distance, setDistance, mileage, se
                   setDistance(val);
                 }}
                 autoComplete="off"
-                className={`w-full h-12 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none border transition-all ${
-                  hasInteracted.distance && !distance ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+                className={`w-full h-14 bg-white/5 text-white rounded-2xl pl-12 pr-4 text-sm font-bold outline-none border transition-all font-mono ${
+                  hasInteracted.distance && !distance ? 'border-red-500/50 bg-red-500/5' : 'border-white/5 focus:border-emerald-500/50'
                 }`}
              />
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1">Avg. Mileage (KMPL)</label>
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1">Avg. Mileage (KMPL)</label>
           <div className="relative">
-             <Gauge className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+             <Gauge className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8fa3c7]" />
              <input
                 type="number"
                 value={mileage}
-                placeholder="Enter mileage"
+                placeholder="0.00"
                 onBlur={() => setHasInteracted(prev => ({ ...prev, mileage: true }))}
                 onChange={(e) => {
                   const val = e.target.value;
@@ -59,8 +59,8 @@ export default function DistanceEconomyCard({ distance, setDistance, mileage, se
                   setMileage(val);
                 }}
                 autoComplete="off"
-                className={`w-full h-12 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none border transition-all ${
-                  hasInteracted.mileage && (parseFloat(mileage) <= 0 || !mileage) ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+                className={`w-full h-14 bg-white/5 text-white rounded-2xl pl-12 pr-4 text-sm font-bold outline-none border transition-all font-mono ${
+                  hasInteracted.mileage && (parseFloat(mileage) <= 0 || !mileage) ? 'border-red-500/50 bg-red-500/5' : 'border-white/5 focus:border-emerald-500/50'
                 }`}
              />
              <AnimatePresence mode="wait">
@@ -69,10 +69,10 @@ export default function DistanceEconomyCard({ distance, setDistance, mileage, se
                    initial={{ opacity: 0, scale: 0.9 }}
                    animate={{ opacity: 1, scale: 1 }}
                    exit={{ opacity: 0, scale: 0.9 }}
-                   className="absolute -bottom-2 right-0 bg-red-500 text-white px-2 py-0.5 rounded-md shadow-lg z-10"
+                   className="absolute -top-6 right-0 bg-red-500 text-white px-2 py-0.5 rounded shadow-lg z-10"
                  >
-                   <span className="text-[9px] font-black uppercase tracking-tighter">
-                     {!mileage ? "Required" : parseFloat(mileage) === 0 ? "Zero Error" : "Positive Only"}
+                   <span className="text-[8px] font-black uppercase tracking-tighter">
+                     {!mileage ? "Required" : parseFloat(mileage) === 0 ? "Zero Error" : "Invalid"}
                    </span>
                  </motion.div>
                )}

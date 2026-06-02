@@ -4,15 +4,15 @@ import SilverCard from './SilverCard';
 
 export default function MetalsPage({ mode = 'gold' }: { mode?: 'gold' | 'silver' }) {
   return (
-    <div className="space-y-6 pb-28 pt-4 animate-in fade-in duration-500">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
-          {mode === 'gold' ? 'Gold Calculator' : 'Silver Calculator'}
-        </h2>
-        <p className="text-sm text-gray-400">
+    <div className="min-h-screen text-white px-5 pt-8 pb-32 space-y-8 animate-in fade-in duration-500">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-black tracking-tighter uppercase italic">
+          {mode === 'gold' ? 'Gold Protocol' : 'Silver Protocol'}
+        </h1>
+        <p className="text-xs font-bold text-[#8fa3c7] uppercase tracking-widest">
           {mode === 'gold' 
-            ? 'Professional tools for gold valuation.' 
-            : 'Accurate silver price estimation tools.'}
+            ? 'Professional systems for gold valuation' 
+            : 'Accurate metal price estimation nodes'}
         </p>
       </div>
 

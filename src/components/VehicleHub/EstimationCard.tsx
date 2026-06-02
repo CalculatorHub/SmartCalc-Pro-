@@ -15,37 +15,37 @@ export default function EstimationCard({ distance, mileage, fuelPrice }: Estimat
   const costPerKm = distance > 0 ? totalCost / distance : 0;
 
   const stats = [
-    { label: 'Fuel Needed', value: `${fuelNeeded.toFixed(2)} Liters`, icon: <Droplets className="w-4 h-4" />, color: 'text-blue-500' },
-    { label: 'Cost / KM', value: formatIndianCurrency(costPerKm, 2), icon: <Target className="w-4 h-4" />, color: 'text-emerald-500' },
+    { label: 'Fuel Needed', value: `${fuelNeeded.toFixed(2)} L`, icon: <Droplets className="w-4 h-4 text-blue-500" /> },
+    { label: 'Cost / KM', value: formatIndianCurrency(costPerKm, 2), icon: <Target className="w-4 h-4 text-emerald-500" /> },
   ];
 
   return (
-    <div className="bg-white dark:bg-white/5 p-6 rounded-2xl shadow-md border border-gray-200 dark:border-white/10 flex flex-col items-center text-center space-y-6 h-full" id="vehicle-estimation-card">
-      <div className="space-y-1">
-        <h3 className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em]">Estimated Trip Cost</h3>
+    <div className="premium-card p-8 rounded-[25px] flex flex-col items-center text-center space-y-8" id="vehicle-estimation-card">
+      <div className="space-y-2">
+        <h3 className="text-[10px] font-black text-[#8fa3c7] uppercase tracking-[0.4em]">Estimated Trip Cost</h3>
         <div className="flex items-center justify-center gap-2">
-            <span className="text-5xl font-black text-gray-900 dark:text-white tracking-tighter italic">{formatIndianCurrency(totalCost)}</span>
+            <span className="text-6xl font-black text-white tracking-tighter italic font-mono">{formatIndianCurrency(totalCost)}</span>
         </div>
       </div>
 
-      <div className="w-full grid grid-cols-2 gap-3">
+      <div className="w-full grid grid-cols-2 gap-4">
         {stats.map((stat, idx) => (
-          <div key={idx} className="bg-gray-50 dark:bg-white/5 p-4 rounded-3xl border border-gray-100 dark:border-white/10 space-y-2">
-             <div className={`${stat.color} p-2 bg-white dark:bg-white/10 rounded-xl w-fit mx-auto shadow-sm`}>
+          <div key={idx} className="bg-white/5 p-5 rounded-[22px] border border-white/5 space-y-3">
+             <div className="p-2 bg-white/5 rounded-xl w-fit mx-auto shadow-sm">
                 {stat.icon}
              </div>
              <div>
-                <div className="text-[9px] font-black uppercase tracking-widest text-gray-400">{stat.label}</div>
-                <div className="text-sm font-black text-gray-900 dark:text-white italic">{stat.value}</div>
+                <div className="text-[9px] font-bold uppercase tracking-widest text-[#8fa3c7]">{stat.label}</div>
+                <div className="text-sm font-black text-white italic font-mono">{stat.value}</div>
              </div>
           </div>
         ))}
       </div>
 
-      <div className="w-full pt-4 border-t border-gray-50 dark:border-gray-700">
-         <button className="w-full h-12 bg-gray-900 dark:bg-blue-600 text-white font-black rounded-full flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-transform">
+      <div className="w-full pt-4">
+         <button className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-black rounded-[20px] uppercase tracking-widest flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-blue-500/20">
             <MapPin className="w-4 h-4" />
-            EXPAND LOGISTICS
+            Launch Route Analytics
          </button>
       </div>
     </div>

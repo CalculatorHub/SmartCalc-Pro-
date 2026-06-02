@@ -116,67 +116,67 @@ export default function AdminPanel() {
   }
 
   return (
-    <div className="space-y-6 pb-28 pt-4 animate-in slide-in-from-bottom duration-300" id="admin-dashboard">
+    <div className="min-h-screen text-white px-5 pt-8 pb-32 space-y-8" id="admin-dashboard">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-600 rounded-xl text-white">
-            <LayoutDashboard className="w-5 h-5" />
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-500/20 ring-4 ring-blue-500/10">
+            <LayoutDashboard className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Feedback Hub</h2>
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
-              Admin Controller <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            <h2 className="text-2xl font-black text-white tracking-tighter uppercase italic">Control Room</h2>
+            <div className="text-[9px] font-black text-[#8fa3c7] uppercase tracking-[0.3em] flex items-center gap-2">
+              System Active <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
             </div>
           </div>
         </div>
         <button 
           onClick={handleLogout}
-          className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+          className="w-12 h-12 flex items-center justify-center bg-white/5 rounded-2xl text-[#8fa3c7] hover:text-red-500 transition-all border border-white/5 active:scale-90"
           title="Logout"
         >
           <LogOut className="w-5 h-5" />
         </button>
       </div>
 
-      <div className="bg-white dark:bg-white/5 p-2 rounded-2xl border border-gray-200 dark:border-white/10 flex flex-wrap items-center gap-2" id="admin-filters">
-        <div className="px-3 flex items-center gap-2 border-r border-gray-200 dark:border-white/10 mr-2">
-           <Filter className="w-3.5 h-3.5 text-gray-400" />
-           <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Filter</span>
+      <div className="premium-card p-3 rounded-[22px] flex items-center gap-2 overflow-x-auto no-scrollbar" id="admin-filters">
+        <div className="px-4 flex items-center gap-2 border-r border-white/10 shrink-0">
+           <Filter className="w-4 h-4 text-blue-500" />
+           <span className="text-[10px] font-black text-[#8fa3c7] uppercase tracking-widest font-mono">Filter</span>
         </div>
         {['All', 'Bug', 'Suggestion', 'UI/UX'].map(type => (
           <button
             key={type}
             onClick={() => setFilterType(type)}
-            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
+            className={`px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shrink-0 font-mono ${
               filterType === type 
-                ? 'bg-blue-600 text-white shadow-md' 
-                : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'
+                ? 'bg-blue-600 text-white shadow-glow/20 ring-4 ring-blue-500/10' 
+                : 'text-[#8fa3c7] hover:bg-white/5'
             }`}
           >
             {type}
           </button>
         ))}
         
-        <div className="ml-auto pr-2">
+        <div className="ml-auto pr-3">
             <button 
               onClick={clearAll}
-              className="text-[10px] font-black text-red-500 uppercase tracking-widest hover:underline"
+              className="text-[9px] font-black text-red-500 uppercase tracking-[0.2em] italic hover:scale-105 active:scale-95 transition-all"
             >
-              Clear All
+              Purge All
             </button>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <AnimatePresence mode="popLayout">
           {filteredFeedback.length === 0 ? (
             <motion.div 
                initial={{ opacity: 0 }}
                animate={{ opacity: 1 }}
-               className="h-40 flex flex-col items-center justify-center text-center p-8 bg-gray-50 dark:bg-gray-900/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-800"
+               className="h-60 flex flex-col items-center justify-center text-center p-10 bg-white/5 rounded-[30px] border-2 border-dashed border-white/5"
             >
-               <MessageSquare className="w-8 h-8 text-gray-300 dark:text-gray-700 mb-2" />
-               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">No feedback found</p>
+               <MessageSquare className="w-12 h-12 text-[#8fa3c7]/20 mb-4" />
+               <p className="text-[10px] font-black text-[#8fa3c7] uppercase tracking-[0.4em] italic">Zero entries detected</p>
             </motion.div>
           ) : (
             filteredFeedback.map((item) => (
@@ -186,36 +186,38 @@ export default function AdminPanel() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white dark:bg-white/5 p-5 rounded-2xl shadow-sm border border-gray-200 dark:border-white/10 space-y-4"
+                className="premium-card p-6 rounded-[25px] space-y-5 group"
               >
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${
-                      item.type === 'Bug' ? 'bg-red-50 text-red-600' : 
-                      item.type === 'Suggestion' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'
+                  <div className="flex items-center gap-4">
+                    <div className={`p-3 rounded-2xl border ${
+                      item.type === 'Bug' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 
+                      item.type === 'Suggestion' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                     }`}>
-                      <MessageSquare className="w-4 h-4" />
+                      <MessageSquare className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tight">{item.name}</h4>
-                        <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                        <span className="text-[10px] font-bold text-gray-400">{new Date(item.date).toLocaleDateString()}</span>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="text-[13px] font-black text-white uppercase tracking-tight italic">{item.name}</h4>
+                        <span className="w-1 h-1 bg-white/20 rounded-full" />
+                        <span className="text-[9px] font-bold text-[#8fa3c7] font-mono">{new Date(item.date).toLocaleDateString()}</span>
                       </div>
-                      <span className={`text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border ${
-                        item.type === 'Bug' ? 'bg-red-50 text-red-600 border-red-100' : 
-                        item.type === 'Suggestion' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-blue-50 text-blue-600 border-blue-100'
+                      <span className={`text-[8px] font-black uppercase tracking-[0.3em] px-2 py-0.5 rounded-full border ${
+                        item.type === 'Bug' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 
+                        item.type === 'Suggestion' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                       }`}>
                         {item.type}
                       </span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
                     <button 
                       onClick={() => updateStatus(item.id, item.status === 'Resolved' ? 'Pending' : 'Resolved')}
-                      className={`p-2 rounded-xl transition-all ${
-                        item.status === 'Resolved' ? 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : 'text-gray-400 hover:text-emerald-500 hover:bg-emerald-50'
+                      className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all border ${
+                        item.status === 'Resolved' 
+                        ? 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30 shadow-glow-sm' 
+                        : 'text-[#8fa3c7] bg-white/5 border-white/5 hover:bg-white/10'
                       }`}
                       title={item.status === 'Resolved' ? 'Mark as Pending' : 'Mark as Resolved'}
                     >
@@ -223,7 +225,7 @@ export default function AdminPanel() {
                     </button>
                     <button 
                       onClick={() => deleteFeedback(item.id)}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                      className="w-10 h-10 flex items-center justify-center text-[#8fa3c7] bg-white/5 border border-white/5 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -231,19 +233,19 @@ export default function AdminPanel() {
                   </div>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-900/50 p-4 rounded-xl text-sm text-gray-600 dark:text-gray-300 font-medium leading-relaxed italic">
+                <div className="bg-white/5 p-5 rounded-2xl text-[11px] text-gray-300 font-bold leading-relaxed italic border border-white/5 font-mono">
                   "{item.message}"
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
                    <div className="flex items-center gap-2">
-                      <Clock className="w-3.5 h-3.5 text-gray-400" />
-                      <span className={`text-[10px] font-bold uppercase tracking-widest ${item.status === 'Resolved' ? 'text-emerald-500' : 'text-amber-500'}`}>
+                      <Clock className="w-4 h-4 text-[#8fa3c7]" />
+                      <span className={`text-[9px] font-black uppercase tracking-[0.3em] font-mono ${item.status === 'Resolved' ? 'text-emerald-400' : 'text-amber-500'}`}>
                         {item.status}
                       </span>
                    </div>
-                   <div className="flex items-center gap-1 text-[10px] font-bold text-blue-600 opacity-60">
-                      ID: {item.id.slice(-6)}
+                   <div className="text-[8px] font-black text-[#8fa3c7]/30 uppercase font-mono italic">
+                      Entry Trace: {item.id.slice(-8)}
                    </div>
                 </div>
               </motion.div>

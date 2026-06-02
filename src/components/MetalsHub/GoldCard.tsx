@@ -26,6 +26,8 @@ export default function GoldCard() {
     const saved = localStorage.getItem('goldRate');
     if (saved) {
       setRate(saved);
+    } else {
+      setRate('16798');
     }
   }, []);
 
@@ -75,25 +77,25 @@ export default function GoldCard() {
   };
 
   return (
-    <div className="bg-card border border-border rounded-2xl p-5 space-y-6 backdrop-blur-xl shadow-lg" id="gold-valuation-card">
+    <div className="premium-card rounded-[22px] p-6 space-y-6" id="gold-valuation-card">
       {/* Header */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-orange-500 rounded-full" />
-          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Manual Valuation</span>
+          <div className="w-1.5 h-1.5 bg-orange-500 rounded-full" />
+          <span className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-widest">Manual Gold Valuation</span>
         </div>
       </div>
 
       {/* Purity Tabs */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 p-1 bg-white/5 rounded-xl border border-white/5">
         {PURITIES.map((p) => (
           <button
             key={p.label}
             onClick={() => setPurity(p)}
-            className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`flex-1 px-4 py-2.5 rounded-lg text-xs font-bold transition-all ${
               purity.label === p.label 
                 ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-lg' 
-                : 'bg-white/10 text-gray-400 hover:bg-white/15'
+                : 'text-gray-500 hover:text-gray-300'
             }`}
           >
             {p.label}
@@ -103,32 +105,30 @@ export default function GoldCard() {
 
       <div className="space-y-4">
         {/* Main Inputs Grid */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">Weight (g)</label>
+            <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-widest px-1">Weight (g)</label>
             <input
               type="number"
               value={weight}
-              placeholder="Weight (g)"
+              placeholder="0.00"
               onBlur={() => setHasInteracted(prev => ({ ...prev, weight: true }))}
               onChange={(e) => setWeight(e.target.value)}
-              className={`w-full bg-white/10 text-white p-3 rounded-xl outline-none border transition-all ${
-                isFieldInvalid(weight, 'weight') ? 'border-red-500/50 bg-red-500/10' : 'border-white/10'
+              className={`w-full bg-white/5 text-white p-4 rounded-xl outline-none border transition-all text-sm font-bold ${
+                isFieldInvalid(weight, 'weight') ? 'border-red-500/50 bg-red-500/5' : 'border-white/5 focus:border-orange-500/50 focus:bg-white/10'
               }`}
             />
           </div>
           <div className="space-y-2">
-            <div className="flex justify-between px-1">
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Rate ₹/g</label>
-            </div>
+            <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-widest px-1">Rate ₹/g</label>
             <input
               type="number"
               value={rate}
-              placeholder="Rate ₹"
+              placeholder="0.00"
               onBlur={() => setHasInteracted(prev => ({ ...prev, rate: true }))}
               onChange={(e) => setRate(e.target.value)}
-              className={`w-full bg-white/10 text-white p-3 rounded-xl outline-none border transition-all ${
-                isFieldInvalid(rate, 'rate') ? 'border-red-500/50 bg-red-500/10' : 'border-white/10'
+              className={`w-full bg-white/5 text-white p-4 rounded-xl outline-none border transition-all text-sm font-bold ${
+                isFieldInvalid(rate, 'rate') ? 'border-red-500/50 bg-red-500/5' : 'border-white/5 focus:border-orange-500/50 focus:bg-white/10'
               }`}
             />
           </div>
@@ -136,37 +136,38 @@ export default function GoldCard() {
 
         {/* Making Charges */}
         <div className="space-y-2">
-          <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-1">Making Charges (%)</label>
+          <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-widest px-1">Making Charges (%)</label>
           <input
             type="number"
             value={making}
-            placeholder="Making Charges %"
+            placeholder="0"
             onBlur={() => setHasInteracted(prev => ({ ...prev, making: true }))}
             onChange={(e) => setMaking(e.target.value)}
-            className={`w-full bg-white/10 text-white p-3 rounded-xl outline-none border transition-all ${
-              isFieldInvalid(making, 'making') ? 'border-red-500/50 bg-red-500/10' : 'border-white/10'
+            className={`w-full bg-white/5 text-white p-4 rounded-xl outline-none border transition-all text-sm font-bold ${
+              isFieldInvalid(making, 'making') ? 'border-red-500/50 bg-red-500/5' : 'border-white/5 focus:border-orange-500/50 focus:bg-white/10'
             }`}
           />
         </div>
 
         {/* Result Container */}
-        <div className={`mt-4 bg-gradient-to-r from-green-500/10 to-blue-500/10 border border-white/10 rounded-2xl p-5 text-center transition-all duration-500 ${results.isValid ? 'opacity-100 scale-100' : 'opacity-40 scale-[0.98]'}`}>
-          <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-1">Total Valuation</div>
-          <div className="text-2xl font-black text-green-400 tracking-tight">
-            {formatIndianCurrency(results.totalPrice, 2)}
-          </div>
-          {results.isValid && (
-            <div className="mt-3 pt-3 border-t border-white/5 grid grid-cols-2 gap-2 text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-              <div className="flex flex-col text-left">
-                <span className="text-gray-600">Adj. Rate</span>
-                <span className="text-white">{formatIndianCurrency(results.adjustedRate, 2)}/g</span>
-              </div>
-              <div className="flex flex-col text-right">
-                <span className="text-gray-600">Making Val</span>
-                <span className="text-white">+{formatIndianCurrency(results.makingCharges, 2)}</span>
-              </div>
+        <div className="mt-8 pt-6 border-t border-white/5">
+          <div className="flex gap-3 mb-6">
+            <div className={`flex-1 p-4 rounded-[18px] transition-all bg-white/5 text-center ${results.isValid ? 'opacity-100 scale-100' : 'opacity-40 scale-[0.98]'}`}>
+              <div className="text-[10px] font-medium text-[#8fa3c7] mb-1">Adj. Rate</div>
+              <div className="text-sm font-bold">{formatIndianCurrency(results.adjustedRate, 2)}</div>
             </div>
-          )}
+            <div className={`flex-1 p-4 rounded-[18px] transition-all bg-white/5 text-center ${results.isValid ? 'opacity-100 scale-100' : 'opacity-40 scale-[0.98]'}`}>
+              <div className="text-[10px] font-medium text-[#8fa3c7] mb-1">Making</div>
+              <div className="text-sm font-bold">₹{results.makingCharges.toLocaleString()}</div>
+            </div>
+          </div>
+
+          <div className={`bg-gradient-to-br from-green-500 to-emerald-600 rounded-[22px] p-6 shadow-lg shadow-green-500/20 text-center transition-all duration-500 ${results.isValid ? 'opacity-100 scale-100 translate-y-0' : 'opacity-20 scale-95 translate-y-2'}`}>
+            <div className="text-[10px] font-black text-white/70 uppercase tracking-[0.2em] mb-1">Total Valuation</div>
+            <div className="text-3xl font-black text-white tracking-tight">
+              {formatIndianCurrency(results.totalPrice, 2)}
+            </div>
+          </div>
         </div>
       </div>
     </div>

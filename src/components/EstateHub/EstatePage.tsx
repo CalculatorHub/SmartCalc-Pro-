@@ -38,33 +38,25 @@ export default function EstatePage() {
   }, [length, width, unit, rate, rateUnit]);
 
   return (
-    <div className="space-y-6 pb-28 pt-4 animate-in fade-in slide-in-from-bottom-2 duration-500" id="estate-hub">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter flex items-center gap-2">
-          <Landmark className="w-8 h-8 text-emerald-600" />
-          Land
-        </h2>
-        <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Real estate calculators</p>
-        <span className="text-[8px] font-bold text-gray-400/50 uppercase tracking-[0.2em] mt-1">CRAFTED BY PATEL VAMSHIDHAR REDDY</span>
+    <div className="min-h-screen text-white px-5 pt-8 pb-32 space-y-10 animate-in fade-in duration-700">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-black tracking-tighter uppercase italic">Estate Matrix</h1>
+        <p className="text-xs font-bold text-[#8fa3c7] uppercase tracking-widest italic">Precision real estate analytics hub</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          <DimensionsCard 
+      <div className="space-y-8">
+        <DimensionsCard 
             length={length} setLength={setLength}
             width={width} setWidth={setWidth}
             unit={unit} setUnit={setUnit}
-          />
-          <ValuationCard 
+        />
+        <ValuationCard 
             rate={rate} setRate={setRate}
             rateUnit={rateUnit} setRateUnit={setRateUnit}
             onReset={() => { setLength(''); setWidth(''); setRate(''); }}
-          />
-        </div>
-        <div className="space-y-6">
-          <EstimationCard area={stats.area} totalPrice={stats.totalPrice} unit={stats.displayUnit} />
-          <ConversionCard />
-        </div>
+        />
+        <EstimationCard area={stats.area} totalPrice={stats.totalPrice} unit={stats.displayUnit} />
+        <ConversionCard />
       </div>
     </div>
   );

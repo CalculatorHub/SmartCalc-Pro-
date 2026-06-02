@@ -3,12 +3,19 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --color-primary: #2563EB;
-  --color-secondary: #7C3AED;
-  --color-darkBg: #0B0F1A;
-  --color-card: rgba(255, 255, 255, 0.05);
-  --color-border: rgba(255, 255, 255, 0.1);
-  --shadow-glow: 0 0 40px rgba(37, 99, 235, 0.25);
+  --color-primary: #3b82f6;
+  --color-secondary: #6366f1;
+  --color-bg-dark: #060b1a;
+  --color-card-premium: rgba(20, 28, 48, 0.65);
+  --color-premium-border: rgba(255, 255, 255, 0.08);
+  --shadow-glow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+@utility premium-card {
+  background: var(--color-card-premium);
+  border: 1px solid var(--color-premium-border);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 0.5px rgba(255,255,255,0.2);
 }
 
 @utility hide-scrollbar {
@@ -21,11 +28,11 @@
 
 @layer base {
   * {
-    @apply border-white/10;
+    @apply border-white/5;
   }
   body {
-    @apply font-sans antialiased text-white;
-    background: radial-gradient(circle at top, #111827, #020617);
+    @apply font-sans antialiased text-[#e6ecff];
+    background: radial-gradient(circle at top, #0b1226, #020617);
     min-height: 100vh;
   }
 }

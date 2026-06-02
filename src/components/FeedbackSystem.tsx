@@ -49,76 +49,75 @@ export default function FeedbackSystem() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-gray-900/90 dark:bg-black/90 backdrop-blur-sm z-10 flex flex-col items-center justify-center text-center p-6"
+            className="absolute inset-0 bg-blue-950/90 backdrop-blur-md z-30 flex flex-col items-center justify-center text-center p-6 rounded-[22px]"
           >
-            <CheckCircle2 className="w-12 h-12 text-emerald-500 mb-4" />
-            <h4 className="text-xl font-bold text-white">Feedback Received!</h4>
-            <p className="text-sm text-gray-400 mt-2">Thank you for helping us improve CalHub. Our team will review it shortly.</p>
+            <CheckCircle2 className="w-16 h-16 text-emerald-500 mb-4" />
+            <h4 className="text-xl font-black text-white italic uppercase tracking-tighter">Sync Successful</h4>
+            <p className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-widest mt-3 leading-relaxed">Pulse data captured. The core unit will analyze your input shortly.</p>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-blue-500/10 rounded-xl">
-          <MessageSquare className="w-5 h-5 text-blue-500" />
+      <div className="flex items-center gap-3 mb-8">
+        <div className="p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20">
+          <MessageSquare className="w-6 h-6 text-blue-500" />
         </div>
         <div>
-          <h3 className="text-lg font-black text-gray-900 dark:text-white tracking-tight">Share Feedback</h3>
-          <p className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mt-0.5">Help us evolve</p>
+          <h3 className="text-xl font-black text-white tracking-tighter uppercase italic">Pulse Feed</h3>
+          <p className="text-[9px] font-black text-[#8fa3c7] uppercase tracking-[0.3em] font-mono">Contribute to the evolution</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-1">Your Name (Optional)</label>
-            <div className="relative">
-              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1 font-mono italic">Identity Hub</label>
+            <div className="relative group">
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8fa3c7] font-mono" />
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Name"
-                className="w-full h-12 bg-white/50 dark:bg-white/5 border border-white/20 dark:border-gray-800 text-gray-900 dark:text-white rounded-xl pl-12 pr-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400"
+                placeholder="ANONYMOUS"
+                className="w-full h-14 bg-white/5 border border-white/5 text-white rounded-2xl pl-12 pr-4 text-sm font-bold focus:border-blue-500/50 outline-none transition-all placeholder-gray-600 font-mono"
               />
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-1">Feedback Type</label>
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1 font-mono italic">Node Type</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value as any)}
-              className="w-full h-12 bg-white/50 dark:bg-white/5 border border-white/20 dark:border-gray-800 text-gray-900 dark:text-white rounded-xl px-4 text-sm font-bold outline-none cursor-pointer appearance-none focus:ring-2 focus:ring-blue-500"
+              className="w-full h-14 bg-white/5 border border-white/5 text-white rounded-2xl px-4 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer appearance-none focus:border-blue-500/50 font-mono"
             >
-              <option>Suggestion</option>
-              <option>Bug</option>
+              <option>SUGGESTION</option>
+              <option>BUG</option>
               <option>UI/UX</option>
             </select>
           </div>
         </div>
 
-        <div className="space-y-1.5">
-          <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider px-1">Your Message</label>
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1 font-mono italic">Inquiry Data</label>
           <textarea
             required
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="What's on your mind?"
+            placeholder="Input transmission details..."
             rows={4}
-            className="w-full bg-white/50 dark:bg-white/5 border border-white/20 dark:border-gray-800 text-gray-900 dark:text-white rounded-xl p-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder-gray-400 resize-none"
+            className="w-full bg-white/5 border border-white/5 text-white rounded-2xl p-5 text-sm font-bold focus:border-blue-500/50 outline-none transition-all placeholder-gray-600 resize-none font-mono"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-500 hover:scale-[1.02] text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-500/20 active:scale-95"
+          className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl flex items-center justify-center gap-3 transition-all shadow-lg active:scale-95 font-mono italic"
         >
           <Send className="w-4 h-4" />
-          Submit Feedback
+          Broadcast Sync
         </button>
       </form>
-
       <div className="mt-6 flex items-start gap-2 text-orange-500 bg-orange-500/5 p-3 rounded-xl border border-orange-500/10">
         <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
         <p className="text-[10px] font-bold uppercase tracking-wider leading-relaxed">

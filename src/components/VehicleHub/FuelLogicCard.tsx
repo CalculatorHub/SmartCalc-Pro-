@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Fuel, IndianRupee, Zap } from 'lucide-react';
+import { Fuel, Zap } from 'lucide-react';
 
 interface FuelLogicCardProps {
   fuelPrice: string;
@@ -10,19 +10,19 @@ export default function FuelLogicCard({ fuelPrice, setFuelPrice }: FuelLogicCard
   const [hasInteracted, setHasInteracted] = useState(false);
 
   return (
-    <div className="bg-white dark:bg-white/5 p-5 rounded-2xl shadow-md border border-gray-200 dark:border-white/10 space-y-4" id="fuel-logic-card">
+    <div className="premium-card rounded-[25px] p-6 space-y-6" id="fuel-logic-card">
       <div className="flex items-center gap-3">
-        <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
-          <Fuel className="w-5 h-5 text-blue-600" />
+        <div className="p-2 bg-blue-500/10 rounded-xl">
+          <Fuel className="w-5 h-5 text-blue-500" />
         </div>
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white uppercase tracking-tight italic">Fuel Logic</h3>
+        <h3 className="text-sm font-black text-white uppercase tracking-widest italic">Fuel Protocol</h3>
       </div>
 
       <div className="space-y-4">
-        <div className="space-y-1.5">
-          <label className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest px-1">Current Fuel Price (₹)</label>
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1">Fuel Price (₹/L)</label>
           <div className="relative group">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">₹</span>
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8fa3c7] font-bold">₹</span>
             <input
               type="number"
               value={fuelPrice}
@@ -33,21 +33,18 @@ export default function FuelLogicCard({ fuelPrice, setFuelPrice }: FuelLogicCard
                 setFuelPrice(val);
               }}
               autoComplete="off"
-              className={`w-full h-12 bg-gray-50 dark:bg-white/5 text-gray-900 dark:text-white rounded-xl pl-10 pr-4 text-sm font-bold focus:ring-2 focus:ring-blue-500 outline-none border transition-all ${
-                hasInteracted && !fuelPrice ? 'border-red-500/50 bg-red-50/50 dark:bg-red-500/5' : 'border-transparent dark:border-white/10'
+              className={`w-full h-14 bg-white/5 text-white rounded-2xl pl-10 pr-4 text-sm font-bold outline-none border transition-all font-mono ${
+                hasInteracted && !fuelPrice ? 'border-red-500/50 bg-red-500/5' : 'border-white/5 focus:border-blue-500/50'
               }`}
-              placeholder="Enter fuel price"
+              placeholder="0.00"
             />
           </div>
-          {hasInteracted && !fuelPrice && (
-            <p className="text-[10px] font-bold text-red-500">Please enter fuel price</p>
-          )}
         </div>
 
-        <div className="p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-800 flex items-start gap-3">
+        <div className="p-4 bg-blue-500/5 rounded-xl border border-blue-500/10 flex items-start gap-3">
             <Zap className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
-            <p className="text-[10px] font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wider leading-relaxed">
-                Fuel rates are indexed locally. This value affects total trip estimation cost.
+            <p className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-wider leading-relaxed">
+                Rates are indexed to regional averages. Delta influences trip projections.
             </p>
         </div>
       </div>

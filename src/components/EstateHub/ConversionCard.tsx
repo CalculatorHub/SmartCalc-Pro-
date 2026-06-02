@@ -9,13 +9,13 @@ const CONVERSIONS = [
 
 export default function ConversionCard() {
   return (
-    <div className="bg-gray-100 dark:bg-gray-900/50 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 space-y-4" id="estate-conversion-card">
-       <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] px-1">Reference Matrix</h4>
+    <div className="premium-card rounded-[22px] p-6 space-y-6" id="estate-conversion-card">
+       <h4 className="text-[10px] font-black text-[#8fa3c7] uppercase tracking-[0.3em] px-1 italic">Knowledge Matrix</h4>
        <div className="space-y-3">
           {CONVERSIONS.map((item, idx) => (
-            <div key={idx} className="flex justify-between items-center bg-white/50 dark:bg-gray-800/40 p-2.5 rounded-xl border border-white/50 dark:border-gray-700/50">
-               <span className="text-[10px] font-black text-gray-600 dark:text-gray-300 uppercase tracking-wider">{item.label}</span>
-               <span className="text-[9px] font-medium text-gray-400 dark:text-gray-500 italic">{item.val}</span>
+            <div key={idx} className="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5 font-mono group hover:bg-white/10 transition-colors">
+               <span className="text-[10px] font-black text-white uppercase tracking-widest">{item.label}</span>
+               <span className="text-[9px] font-bold text-[#8fa3c7] italic">{item.val}</span>
             </div>
           ))}
        </div>
