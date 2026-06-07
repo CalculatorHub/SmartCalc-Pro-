@@ -1,8 +1,6 @@
 {
-  "name": "CalHub Finance",
-  "description": "A professional financial and value calculation suite featuring Tools for Finance (EMI/Loans), Gold & Silver valuation with live rates, Vehicle fuel costs, and Estate property estimation.",
+  "name": "Smart Finance",
+  "description": "All your financial calculators in one place: Simple & Compound Interest, Fuel, Gold & Silver valuations, and Real Estate planners.",
   "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

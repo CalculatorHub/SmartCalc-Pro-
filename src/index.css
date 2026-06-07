@@ -1,39 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;550;700&display=swap');
 @import "tailwindcss";
-@import "./styles/global.css";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --color-primary: #3b82f6;
-  --color-secondary: #6366f1;
-  --color-bg-dark: #060b1a;
-  --color-card-premium: rgba(20, 28, 48, 0.65);
-  --color-premium-border: rgba(255, 255, 255, 0.08);
-  --shadow-glow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Vibrant Palette theme colors */
+  --color-brand-primary: #3A5BFF;
+  --color-brand-secondary: #6C63FF;
+  --color-brand-accent: #3A5BFF;
+  --color-brand-bg: #F5F7FB;
 }
 
-@utility premium-card {
-  background: var(--color-card-premium);
-  border: 1px solid var(--color-premium-border);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 0.5px rgba(255,255,255,0.2);
-}
-
-@utility hide-scrollbar {
-  &::-webkit-scrollbar {
-    display: none;
-  }
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-@layer base {
-  * {
-    @apply border-white/5;
-  }
-  body {
-    @apply font-sans antialiased text-[#e6ecff];
-    background: radial-gradient(circle at top, #0b1226, #020617);
-    min-height: 100vh;
-  }
-}
