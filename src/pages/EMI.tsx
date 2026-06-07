@@ -4,6 +4,7 @@ import Input from '../components/Input';
 import Button from '../components/Button';
 import { saveHistory } from '../lib/historyUtils';
 import { CreditCard, ShieldCheck, Landmark, Percent, Calendar } from 'lucide-react';
+import { triggerHaptic } from '../lib/haptic';
 
 export default function EMI() {
   const [loan, setLoan] = useState("");
@@ -40,12 +41,15 @@ export default function EMI() {
     const N = parseFloat(months) || 0;
 
     if (P > 0 && r > 0 && N > 0) {
+      triggerHaptic('success');
       const emiCalculated = (P * r * Math.pow(1 + r, N)) / (Math.pow(1 + r, N) - 1);
       saveHistory(
         'EMI Loan Calculation',
         emiCalculated,
         `Principal: ₹${P.toLocaleString('en-IN')}, Rate: ${rate}%, Tenure: ${N} Months (Total Pay: ₹${(emiCalculated * N).toFixed(2)})`
       );
+    } else {
+      triggerHaptic('warning');
     }
   };
 

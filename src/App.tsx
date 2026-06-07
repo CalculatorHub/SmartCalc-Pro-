@@ -22,6 +22,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 import Logo from './components/ui/Logo';
+import { triggerHaptic } from './lib/haptic';
 
 function Layout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -147,14 +148,14 @@ function Layout({ children }: { children: React.ReactNode }) {
         <div className="flex items-center gap-5">
           {!onHome && (
             <button 
-              onClick={() => navigate(-1)}
+              onClick={() => { triggerHaptic('light'); navigate(-1); }}
               className="w-10 h-10 bg-white/5 rounded-2xl flex items-center justify-center text-[#8fa3c7] hover:text-white border border-white/5 transition-all cursor-pointer active:scale-90"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
           )}
           
-          <button onClick={() => navigate('/')} className="cursor-pointer group">
+          <button onClick={() => { triggerHaptic('light'); navigate('/'); }} className="cursor-pointer group">
             <span className="font-black text-[15px] tracking-tighter italic uppercase group-hover:text-blue-500 transition-colors">CALHUB</span>
           </button>
         </div>
@@ -162,7 +163,7 @@ function Layout({ children }: { children: React.ReactNode }) {
         <div className="flex items-center gap-2">
           {/* Feedback Button */}
           <button 
-            onClick={() => setShowFeedbackModal(true)}
+            onClick={() => { triggerHaptic('medium'); setShowFeedbackModal(true); }}
             className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-2xl border border-white/5 text-[#8fa3c7] hover:text-blue-500 transition-all active:scale-95"
             title="Feedback"
           >
@@ -172,6 +173,7 @@ function Layout({ children }: { children: React.ReactNode }) {
           {/* Notifications Button 🔔 */}
           <button 
             onClick={() => {
+              triggerHaptic('medium');
               setShowNotificationToast(true);
               setTimeout(() => setShowNotificationToast(false), 4000);
             }}
@@ -185,7 +187,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 
           {/* Security / Admin Button 🛡️ */}
           <button 
-            onClick={() => navigate('/admin')}
+            onClick={() => { triggerHaptic('light'); navigate('/admin'); }}
             className="w-10 h-10 flex items-center justify-center bg-white/5 rounded-2xl border border-white/5 text-[#8fa3c7] hover:text-emerald-500 transition-all active:scale-95"
             title="Security / Admin Portal"
           >
@@ -234,25 +236,19 @@ function Layout({ children }: { children: React.ReactNode }) {
       {/* Bottom Navigation wrap & custom styled layout bar */}
       <div style={customNavStyles.navWrap}>
         <div style={{ ...customNavStyles.navBar, ...getNavColorConfig() }}>
-          <Link to="/" style={getNavItemStyle('/')}>
+          <Link to="/" style={getNavItemStyle('/')} onClick={() => triggerHaptic('light')}>
             <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
               🏠
             </motion.div>
           </Link>
 
-          <Link to="/tools" style={getNavItemStyle('/tools')}>
+          <Link to="/tools" style={getNavItemStyle('/tools')} onClick={() => triggerHaptic('light')}>
             <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
               🧩
             </motion.div>
           </Link>
 
-          <Link to="/history" style={getNavItemStyle('/history')}>
-            <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
-              🕘
-            </motion.div>
-          </Link>
-
-          <Link to="/profile" style={getNavItemStyle('/profile')}>
+          <Link to="/profile" style={getNavItemStyle('/profile')} onClick={() => triggerHaptic('light')}>
             <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
               👤
             </motion.div>
@@ -278,7 +274,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               className="relative w-full max-w-lg bg-[#020617] rounded-[30px] shadow-glow border border-blue-500/20 overflow-hidden"
             >
                <button 
-                onClick={() => setShowFeedbackModal(false)}
+                onClick={() => { triggerHaptic('light'); setShowFeedbackModal(false); }}
                 className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 text-[#8fa3c7] hover:text-white transition-all z-20 border border-white/5 active:scale-90"
                >
                  <X className="w-5 h-5" />

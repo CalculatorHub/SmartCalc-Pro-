@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import Card from '../components/Card';
 import { annualToMonthlyRate, monthlyToAnnualRate, formatIndianCurrency, formatIndianShorthand } from '../lib/financeUtils';
 import { saveHistory } from '../lib/historyUtils';
-import { ArrowRightLeft, Calculator, TrendingUp, Coins, Save, Check, RefreshCw, Sparkles, HelpCircle, Calendar } from 'lucide-react';
+import { ArrowRightLeft, Calculator, TrendingUp, Coins, Save, Check, RefreshCw, Sparkles, HelpCircle, Calendar, Share2, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { triggerHaptic } from '../lib/haptic';
+import { jsPDF } from 'jspdf';
 
 /* ---------- Traditional Rate Converter ---------- */
 function TraditionalConverter() {
@@ -44,6 +46,7 @@ function TraditionalConverter() {
         </h3>
         <button
           onClick={() => {
+            triggerHaptic('medium');
             setMode(prev => prev === 'pctToRs' ? 'rsToPct' : 'pctToRs');
             setInputVal('');
           }}
@@ -168,6 +171,7 @@ function InterestByDates() {
   const [manualSaved, setManualSaved] = useState(false);
   const handleManualSave = () => {
     if (!dur || p <= 0 || r <= 0) return;
+    triggerHaptic('success');
     saveHistory(
       'Date-to-Date Interest',
       total,
@@ -175,6 +179,75 @@ function InterestByDates() {
     );
     setManualSaved(true);
     setTimeout(() => setManualSaved(false), 2000);
+  };
+
+  const handleShare = () => {
+    triggerHaptic('medium');
+    const shareText = `Date-to-Date Interest Calculation on CalHub:
+- Principal: ₹${p.toLocaleString('en-IN')}
+- Mode: ${mode === 'CI' ? 'Compound Interest' : 'Simple Interest'} (${rateType === 'rural' ? 'Rural Rate' : 'Annual Rate'})
+- Interest Rate: ${r}${rateType === 'rural' ? ' ₹/month/₹100' : '% annual'}
+- Duration: ${textTime} (${dur?.totalDays} Days)
+- Interest Earned: ₹${interest.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+- Projected Future Value: ₹${total.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: "CalHub Interest Result",
+        text: shareText,
+      }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(shareText);
+      alert("Results copied to your clipboard!");
+    }
+  };
+
+  const handleExportPDF = () => {
+    triggerHaptic('success');
+    const doc = new jsPDF();
+    
+    // Custom styled PDF layout
+    doc.setFillColor(15, 23, 42); // slate background color for headers
+    doc.rect(0, 0, 210, 40, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("CALHUB FINANCE REPORT", 14, 25);
+    doc.setFontSize(10);
+    doc.text("Premium Financial Calculators", 14, 33);
+    
+    doc.setTextColor(50, 50, 50);
+    doc.setFontSize(14);
+    doc.text("Date-to-Date Interest Statement", 14, 55);
+    
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(220, 220, 220);
+    doc.line(14, 60, 196, 60);
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text(`Principal Amount: Rs. ${p.toLocaleString('en-IN')}`, 14, 75);
+    doc.text(`Interest Rate: ${r}${rateType === 'rural' ? ' Paise/Rs/Month' : '% Annual'}`, 14, 85);
+    doc.text(`Calculation Mode: ${mode === 'CI' ? 'Compound Interest' : 'Simple Interest'}`, 14, 95);
+    doc.text(`Duration: ${textTime} (${dur?.totalDays} Days)`, 14, 105);
+    doc.text(`Dates: From ${startStr} to ${endStr}`, 14, 115);
+    
+    doc.setDrawColor(34, 197, 94);
+    doc.line(14, 125, 196, 125);
+    
+    doc.setFont("helvetica", "bold");
+    doc.text(`Interest Amount: Rs. ${interest.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`, 14, 140);
+    doc.setFontSize(16);
+    doc.setTextColor(34, 197, 94);
+    doc.text(`Total Projected Value: Rs. ${total.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`, 14, 155);
+    
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+    doc.text("Generated securely via CalHub mobile application", 14, 280);
+    
+    doc.save(`calhub-interest-${Date.now()}.pdf`);
   };
 
   return (
@@ -201,7 +274,7 @@ function InterestByDates() {
           <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 select-none font-mono mt-2 sm:mt-0">
             <button 
               type="button"
-              onClick={() => setMode('SI')} 
+              onClick={() => { triggerHaptic('light'); setMode('SI'); }} 
               className={`px-3 py-1.5 text-[9px] font-black rounded-lg transition-all cursor-pointer ${
                 mode === 'SI' ? 'bg-indigo-600 text-white font-black' : 'text-[#8fa3c7] hover:text-white'
               }`}
@@ -210,7 +283,7 @@ function InterestByDates() {
             </button>
             <button 
               type="button"
-              onClick={() => setMode('CI')} 
+              onClick={() => { triggerHaptic('light'); setMode('CI'); }} 
               className={`px-3 py-1.5 text-[9px] font-black rounded-lg transition-all cursor-pointer ${
                 mode === 'CI' ? 'bg-indigo-600 text-white font-black' : 'text-[#8fa3c7] hover:text-white'
               }`}
@@ -259,14 +332,14 @@ function InterestByDates() {
                 <div className="flex bg-white/5 px-1.5 py-0.5 rounded-lg border border-white/5">
                   <button
                     type="button"
-                    onClick={() => { setRateType('rural'); setR(2); }}
+                    onClick={() => { triggerHaptic('light'); setRateType('rural'); setR(2); }}
                     className={`text-[8px] px-1.5 py-0.5 rounded font-bold ${rateType === 'rural' ? 'bg-indigo-500/20 text-indigo-400 font-black' : 'text-gray-400'}`}
                   >
                     Rural (₹)
                   </button>
                   <button
                     type="button"
-                    onClick={() => { setRateType('annual'); setR(12); }}
+                    onClick={() => { triggerHaptic('light'); setRateType('annual'); setR(12); }}
                     className={`text-[8px] px-1.5 py-0.5 rounded font-bold ${rateType === 'annual' ? 'bg-indigo-500/20 text-indigo-400 font-black' : 'text-gray-400'}`}
                   >
                     Annual (%)
@@ -367,6 +440,25 @@ function InterestByDates() {
             {manualSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
             {manualSaved ? 'Saved to Ledger ✓' : 'Save To Local History'}
           </button>
+
+          <div className="grid grid-cols-2 gap-3 mt-1">
+            <button
+              type="button"
+              onClick={handleShare}
+              className="h-11 bg-white/5 border border-white/5 hover:bg-white/10 text-gray-300 font-black rounded-xl text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95"
+            >
+              <Share2 className="w-3.5 h-3.5 text-blue-400" />
+              Share
+            </button>
+            <button
+              type="button"
+              onClick={handleExportPDF}
+              className="h-11 bg-white/5 border border-white/5 hover:bg-white/10 text-gray-300 font-black rounded-xl text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              Export PDF
+            </button>
+          </div>
         </div>
       ) : (
         <div className="p-8 bg-white/5 border border-dashed border-white/10 rounded-2xl text-center">

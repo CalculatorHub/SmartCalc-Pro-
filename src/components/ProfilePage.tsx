@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
 import { User, Mail, Shield, Settings, ChevronRight, LayoutDashboard } from "lucide-react";
+import { triggerHaptic } from "../lib/haptic";
 
 export default function ProfilePage() {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ export default function ProfilePage() {
             ].map((item, idx) => (
               <button 
                 key={idx}
-                onClick={() => item.path !== '#' && navigate(item.path)}
+                onClick={() => { triggerHaptic('light'); item.path !== '#' && navigate(item.path); }}
                 className={`w-full p-5 flex items-center justify-between border-b last:border-b-0 border-white/5 hover:bg-white/5 transition-all group ${item.highlight ? 'bg-blue-500/5' : ''}`}
               >
                 <div className="flex items-center gap-4">

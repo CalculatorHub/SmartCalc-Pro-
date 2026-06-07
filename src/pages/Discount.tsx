@@ -5,6 +5,7 @@ import Button from '../components/Button';
 import { saveHistory } from '../lib/historyUtils';
 import { Tag, Percent, Receipt, Undo, Landmark } from 'lucide-react';
 import { motion } from 'motion/react';
+import { triggerHaptic } from '../lib/haptic';
 
 export default function Discount() {
   const [price, setPrice] = useState("");
@@ -42,6 +43,7 @@ export default function Discount() {
     const rawTax = parseFloat(tax) || 0;
 
     if (rawPrice > 0) {
+      triggerHaptic('success');
       const discountVal = (rawPrice * rawDiscount) / 100;
       const priceAfterDiscount = rawPrice - discountVal;
       const taxVal = (priceAfterDiscount * rawTax) / 100;
@@ -52,6 +54,8 @@ export default function Discount() {
         finalVal,
         `Price: ₹${rawPrice.toLocaleString('en-IN')}, Discount: ${rawDiscount}%, Saved: ₹${discountVal.toFixed(2)}${rawTax > 0 ? `, Tax: ${rawTax}%` : ''}`
       );
+    } else {
+      triggerHaptic('warning');
     }
   };
 

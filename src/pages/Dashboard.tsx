@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import Card from '../components/Card';
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Sparkles, ArrowRight, Lightbulb, TrendingUp, HandCoins } from 'lucide-react';
+import { triggerHaptic } from '../lib/haptic';
 
 export default function Dashboard() {
   const [historyItems, setHistoryItems] = React.useState<any[]>([]);
@@ -115,9 +116,10 @@ export default function Dashboard() {
       {/* 📈 KPI ROW */}
       <div className="grid grid-cols-2 gap-4">
         <motion.div 
+          onClick={() => triggerHaptic('light')}
           whileHover={{ scale: 1.03, y: -2 }}
           whileTap={{ scale: 0.98 }}
-          className="glass p-4 rounded-2xl flex flex-col justify-between border border-white/5 bg-white/3"
+          className="glass p-4 rounded-2xl flex flex-col justify-between border border-white/5 bg-white/3 cursor-pointer"
         >
           <span className="text-[10px] text-gray-400 uppercase font-black tracking-widest flex items-center gap-1">
             <TrendingUp className="w-3 h-3 text-blue-400" /> Growth
@@ -126,9 +128,10 @@ export default function Dashboard() {
         </motion.div>
 
         <motion.div 
+          onClick={() => triggerHaptic('light')}
           whileHover={{ scale: 1.03, y: -2 }}
           whileTap={{ scale: 0.98 }}
-          className="glass p-4 rounded-2xl flex flex-col justify-between border border-white/5 bg-white/3"
+          className="glass p-4 rounded-2xl flex flex-col justify-between border border-white/5 bg-white/3 cursor-pointer"
         >
           <span className="text-[10px] text-gray-400 uppercase font-black tracking-widest flex items-center gap-1">
             <HandCoins className="w-3 h-3 text-emerald-400" /> Savings
@@ -144,6 +147,7 @@ export default function Dashboard() {
       >
         <Link 
           to="/tools" 
+          onClick={() => triggerHaptic('light')}
           className="glass flex items-center justify-between p-5 border border-white/6 hover:border-blue-500/20 bg-gradient-to-r from-slate-900/40 to-blue-950/20 group cursor-pointer transition-all duration-300 block"
         >
           <div className="flex items-center justify-between w-full">

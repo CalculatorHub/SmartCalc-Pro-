@@ -7,6 +7,7 @@ import { getHistory, clearHistory, HistoryEntry } from '../lib/historyUtils';
 import Card from './Card';
 import Input from './Input';
 import Button from './Button';
+import { triggerHaptic } from '../lib/haptic';
 
 export default function HistoryPage() {
   const [historyItems, setHistoryItems] = useState<HistoryEntry[]>([]);
@@ -81,13 +82,13 @@ export default function HistoryPage() {
               <div className="flex items-center gap-2 select-none">
                 <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Are you sure?</span>
                 <button
-                  onClick={handleClearAll}
+                  onClick={() => { triggerHaptic('success'); handleClearAll(); }}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-md shadow-red-900/10"
                 >
                   Yes, Clear
                 </button>
                 <button
-                  onClick={() => setConfirmClear(false)}
+                  onClick={() => { triggerHaptic('light'); setConfirmClear(false); }}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-gray-300 text-xs font-bold transition-all active:scale-95 cursor-pointer"
                 >
                   Cancel
@@ -95,7 +96,7 @@ export default function HistoryPage() {
               </div>
             ) : (
               <button
-                onClick={() => setConfirmClear(true)}
+                onClick={() => { triggerHaptic('warning'); setConfirmClear(true); }}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-500/20 bg-red-500/5 hover:bg-red-500/15 text-red-400 text-xs font-bold transition-all active:scale-95 cursor-pointer max-w-max"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -129,7 +130,7 @@ export default function HistoryPage() {
                 {filterCategories.map((cat, i) => (
                   <button
                     key={i}
-                    onClick={() => setSelectedFilter(cat)}
+                    onClick={() => { triggerHaptic('light'); setSelectedFilter(cat); }}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all cursor-pointer border ${
                       selectedFilter === cat
                         ? 'bg-indigo-600/25 border-indigo-500/40 text-indigo-300'
@@ -175,7 +176,7 @@ export default function HistoryPage() {
                     </h3>
                     
                     <button
-                      onClick={() => copyResultValue(item.id, item.value.toString())}
+                      onClick={() => { triggerHaptic('success'); copyResultValue(item.id, item.value.toString()); }}
                       className="p-1.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 text-[#8fa3c7] hover:text-white transition-all active:scale-90 cursor-pointer"
                       title="Copy result"
                     >
@@ -205,7 +206,7 @@ export default function HistoryPage() {
                 <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] italic">No Matches</h3>
                 <p className="text-xs font-bold text-gray-400 mt-2.5 max-w-[240px]">We couldn't find any ledger records that matched your filters or search keywords.</p>
                 <button 
-                  onClick={() => { setSearchTerm(''); setSelectedFilter('All'); }}
+                  onClick={() => { triggerHaptic('light'); setSearchTerm(''); setSelectedFilter('All'); }}
                   className="mt-4 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-[10px] font-black uppercase text-white tracking-widest cursor-pointer transition-all active:scale-95"
                 >
                   Reset Query

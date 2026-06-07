@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
+import { triggerHaptic } from "../lib/haptic";
 
 export default function ToolsPage() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function ToolsPage() {
             key={i}
             whileHover={{ y: -5, scale: 1.02 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => navigate(tool.path)}
+            onClick={() => { triggerHaptic('light'); navigate(tool.path); }}
             className="premium-card p-6 py-8 rounded-[30px] flex flex-col items-center justify-center text-center cursor-pointer group active:bg-white/5 transition-all"
           >
             <div className="text-4xl mb-5 bg-white/5 w-20 h-20 flex items-center justify-center rounded-3xl shadow-glow-sm border border-white/5 group-hover:bg-blue-500/10 group-hover:border-blue-500/20 transition-all duration-300">

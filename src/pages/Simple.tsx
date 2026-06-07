@@ -4,6 +4,7 @@ import Input from '../components/Input';
 import Button from '../components/Button';
 import { saveHistory } from '../lib/historyUtils';
 import { Sparkles, Calendar, Calculator, Percent } from 'lucide-react';
+import { triggerHaptic } from '../lib/haptic';
 
 const getDurationString = (startStr: string, endStr: string) => {
   if (!startStr || !endStr) return '';
@@ -85,6 +86,7 @@ export default function Simple() {
     const time = computedYears;
 
     if (principal > 0 && rate > 0 && time > 0) {
+      triggerHaptic('success');
       const earned = (principal * rate * time) / 100;
       const total = principal + earned;
       saveHistory(
@@ -92,6 +94,8 @@ export default function Simple() {
         total,
         `Pr: ₹${principal.toLocaleString('en-IN')}, R: ${rate}%, T: ${time.toFixed(2)} Yrs (Earned: ₹${earned.toFixed(2)})`
       );
+    } else {
+      triggerHaptic('warning');
     }
   };
 
