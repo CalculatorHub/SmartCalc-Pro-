@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Card from '../components/Card';
-import Input from '../components/Input';
-import Button from '../components/Button';
-import { annualToMonthlyRate, monthlyToAnnualRate, formatIndianCurrency } from '../lib/financeUtils';
+import { annualToMonthlyRate, monthlyToAnnualRate, formatIndianCurrency, formatIndianShorthand } from '../lib/financeUtils';
 import { saveHistory } from '../lib/historyUtils';
-import { ArrowRightLeft, Calculator, Percent } from 'lucide-react';
+import { ArrowRightLeft, Calculator, TrendingUp, Coins, Save, Check, RefreshCw, Sparkles, HelpCircle, Calendar } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 /* ---------- Traditional Rate Converter ---------- */
 function TraditionalConverter() {
@@ -39,40 +38,46 @@ function TraditionalConverter() {
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-base font-bold flex items-center gap-2">
-          <ArrowRightLeft className="w-4 h-4 text-blue-400" />
-          Rural ⇋ Bank Converter
+        <h3 className="text-sm font-bold flex items-center gap-2">
+          <ArrowRightLeft className="w-4 h-4 text-emerald-400" />
+          Rural ⇋ Bank Rate Converter
         </h3>
         <button
           onClick={() => {
             setMode(prev => prev === 'pctToRs' ? 'rsToPct' : 'pctToRs');
             setInputVal('');
           }}
-          className="text-xs bg-white/10 hover:bg-white/20 px-2.5 py-1 rounded-lg text-[#60a5fa] font-bold transition-all cursor-pointer border border-white/5"
+          className="text-[10px] bg-white/5 hover:bg-white/10 px-2.5 py-1.5 rounded-xl text-[#60a5fa] font-black uppercase tracking-wider transition-all cursor-pointer border border-white/5 active:scale-95"
         >
           {mode === 'pctToRs' ? 'Rs/Month ⇋ %' : '% ⇋ Rs/Month'}
         </button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-4 font-mono">
         <div>
-          <label className="text-xs text-gray-400 font-semibold mb-1.5 block">
+          <label className="text-[10px] text-gray-400 font-bold mb-1.5 block uppercase tracking-[0.15em]">
             {mode === 'pctToRs' ? 'Annual Percentage Rate (%)' : 'Rural Monthly Rate (₹ per ₹100)'}
           </label>
-          <Input 
-            placeholder={mode === 'pctToRs' ? "e.g., 12" : "e.g., 1"} 
-            value={inputVal} 
-            onChange={(e) => setInputVal(e.target.value)} 
-            type="number"
-          />
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs select-none">
+              {mode === 'pctToRs' ? '%' : '₹'}
+            </span>
+            <input
+              type="number"
+              placeholder={mode === 'pctToRs' ? "e.g., 12" : "e.g., 1.5"}
+              value={inputVal}
+              onChange={(e) => setInputVal(e.target.value)}
+              className="w-full h-12 bg-white/5 border border-white/5 rounded-xl px-4 pl-9 text-xs font-bold text-white outline-none focus:border-emerald-500/30 transition-all font-mono"
+            />
+          </div>
         </div>
 
         {converted && (
-          <div className="p-4 bg-white/5 border border-white/5 rounded-xl text-center">
-            <span className="text-[10px] uppercase font-black text-blue-400 tracking-wider">Equivalent Interest Rate</span>
-            <div className="text-xl font-extrabold text-white mt-1">
+          <div className="p-4 bg-[#22c55e]/5 border border-[#22c55e]/15 rounded-xl text-center">
+            <span className="text-[10px] uppercase font-black text-emerald-400 tracking-wider">Equivalent Exchange Rate</span>
+            <div className="text-lg font-extrabold text-white mt-1">
               {mode === 'pctToRs' && parseFloat(converted.value) >= 1 ? '₹' : ''}
-              {converted.value} <span className="text-xs font-semibold text-gray-400">{converted.unit}</span>
+              {converted.value} <span className="text-[10px] font-semibold text-gray-400 uppercase ml-1 font-mono">{converted.unit}</span>
             </div>
           </div>
         )}
@@ -81,147 +86,133 @@ function TraditionalConverter() {
   );
 }
 
-/* ---------- Compound & Simple Interest ---------- */
-const getDurationString = (startStr: string, endStr: string) => {
-  if (!startStr || !endStr) return '';
-  const s = new Date(startStr);
-  const e = new Date(endStr);
-  if (isNaN(s.getTime()) || isNaN(e.getTime())) return '';
-  const diffMs = e.getTime() - s.getTime();
-  if (diffMs <= 0) return 'End Date must be after Start Date';
+/* ---------- Date-to-Date Interest Calculator ---------- */
+function InterestByDates() {
+  const [p, setP] = useState<number>(100000);
+  const [rateType, setRateType] = useState<'annual' | 'rural'>('rural'); // rural is ₹ per month per ₹100
+  const [r, setR] = useState<number>(2); // 2%/month rural default
+  const [mode, setMode] = useState<'SI' | 'CI'>('SI'); // simple interest is standard
   
-  const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const years = Math.floor(totalDays / 365.25);
-  const remainingDays = totalDays - Math.floor(years * 365.25);
-  const months = Math.floor(remainingDays / 30.43);
-  const days = Math.round(remainingDays - Math.floor(months * 30.43));
+  // Dates
+  const [startStr, setStartStr] = useState<string>(() => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 1); // 1 year ago default
+    return d.toISOString().split('T')[0];
+  });
+  const [endStr, setEndStr] = useState<string>(() => {
+    return new Date().toISOString().split('T')[0];
+  });
 
-  const parts = [];
-  if (years > 0) parts.push(`${years} Yr${years > 1 ? 's' : ''}`);
-  if (months > 0) parts.push(`${months} Mo${months > 1 ? 's' : ''}`);
-  if (days > 0) parts.push(`${days} Day${days > 1 ? 's' : ''}`);
-
-  return parts.join(', ') || '0 Days';
-};
-
-export default function Finance() {
-  const [interestType, setInterestType] = useState<'SI' | 'CI'>('CI');
-  const [p, setP] = useState("");
-  const [r, setR] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [resultTotal, setResultTotal] = useState<string>("0.00");
-  const [resultInterest, setResultInterest] = useState<string>("0.00");
-
-  const [computedYears, setComputedYears] = useState<number>(0);
-  const [isDatesInvalid, setIsDatesInvalid] = useState<boolean>(false);
+  const [dur, setDur] = useState<{ years: number; months: number; days: number; totalDays: number } | null>(null);
 
   useEffect(() => {
-    if (startDate && endDate) {
-      const s = new Date(startDate);
-      const e = new Date(endDate);
-      if (!isNaN(s.getTime()) && !isNaN(e.getTime())) {
-        const diffMs = e.getTime() - s.getTime();
-        if (diffMs > 0) {
-          const yrs = diffMs / (1000 * 60 * 60 * 24 * 365.25);
-          setComputedYears(yrs);
-          setIsDatesInvalid(false);
-        } else {
-          setComputedYears(0);
-          setIsDatesInvalid(true);
-        }
-      } else {
-        setComputedYears(0);
-        setIsDatesInvalid(false);
-      }
-    } else {
-      setComputedYears(0);
-      setIsDatesInvalid(false);
+    if (!startStr || !endStr) {
+      setDur(null);
+      return;
     }
-  }, [startDate, endDate]);
+    const start = new Date(startStr);
+    const end = new Date(endStr);
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || start > end) {
+      setDur(null);
+      return;
+    }
 
-  const calculate = () => {
-    const principal = parseFloat(p) || 0;
-    const rate = parseFloat(r) || 0;
-    const time = computedYears;
+    // Precise count
+    let years = end.getFullYear() - start.getFullYear();
+    let months = end.getMonth() - start.getMonth();
+    let days = end.getDate() - start.getDate();
+
+    if (days < 0) {
+      months--;
+      const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+      days += prevMonth.getDate();
+    }
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+
+    const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    setDur({ years, months, days, totalDays });
+  }, [startStr, endStr]);
+
+  // Calculations
+  let interest = 0;
+  let totalTimeInYears = 0;
+  let textTime = '';
+
+  if (dur) {
+    totalTimeInYears = dur.totalDays / 365.25;
     
-    if (principal > 0 && rate > 0 && time > 0) {
-      if (interestType === 'CI') {
-        const total = principal * Math.pow(1 + rate / 100, time);
-        const earned = total - principal;
-        setResultTotal(total.toFixed(2));
-        setResultInterest(earned.toFixed(2));
-      } else {
-        const earned = (principal * rate * time) / 100;
-        const total = principal + earned;
-        setResultTotal(total.toFixed(2));
-        setResultInterest(earned.toFixed(2));
-      }
+    // Construct readable text time
+    const parts = [];
+    if (dur.years > 0) parts.push(`${dur.years} Yr${dur.years > 1 ? 's' : ''}`);
+    if (dur.months > 0) parts.push(`${dur.months} Mo${dur.months > 1 ? 's' : ''}`);
+    if (dur.days > 0) parts.push(`${dur.days} Day${dur.days > 1 ? 's' : ''}`);
+    textTime = parts.join(', ') || '0 Days';
+
+    // Rate calculations
+    // If rural rate (₹ per month per ₹100), it's equivalent to (r * 12)% per annum
+    const annualRate = rateType === 'rural' ? r * 12 : r;
+
+    if (mode === 'SI') {
+      interest = (p * annualRate * totalTimeInYears) / 100;
     } else {
-      setResultTotal("0.00");
-      setResultInterest("0.00");
+      interest = p * Math.pow(1 + annualRate / 100, totalTimeInYears) - p;
     }
-  };
+  }
 
-  const handleRecalculate = () => {
-    calculate();
-    const principal = parseFloat(p) || 0;
-    const rate = parseFloat(r) || 0;
-    const time = computedYears;
-    if (principal > 0 && rate > 0 && time > 0) {
-      if (interestType === 'CI') {
-        const total = principal * Math.pow(1 + rate / 100, time);
-        const earned = total - principal;
-        saveHistory(
-          'Compound Interest',
-          total,
-          `Pr: ₹${principal.toLocaleString('en-IN')}, R: ${rate}%, T: ${time.toFixed(2)} Yrs (Earned: ₹${earned.toFixed(2)})`
-        );
-      } else {
-        const earned = (principal * rate * time) / 100;
-        const total = principal + earned;
-        saveHistory(
-          'Simple Interest',
-          total,
-          `Pr: ₹${principal.toLocaleString('en-IN')}, R: ${rate}%, T: ${time.toFixed(2)} Yrs (Earned: ₹${earned.toFixed(2)})`
-        );
-      }
-    }
-  };
+  const total = p + interest;
 
-  // Real-time calculation on state change
-  useEffect(() => {
-    calculate();
-  }, [interestType, p, r, computedYears]);
+  // Manual save
+  const [manualSaved, setManualSaved] = useState(false);
+  const handleManualSave = () => {
+    if (!dur || p <= 0 || r <= 0) return;
+    saveHistory(
+      'Date-to-Date Interest',
+      total,
+      `Pr: ${formatIndianCurrency(p)}, Rate: ${r}% (${rateType === 'rural' ? 'Rural' : 'Annual'}), Time: ${dur.totalDays} Days (${mode === 'CI' ? 'Compound' : 'Simple'})`
+    );
+    setManualSaved(true);
+    setTimeout(() => setManualSaved(false), 2000);
+  };
 
   return (
-    <div className="container animate-in fade-in duration-350 space-y-6">
-      
-      {/* 🔄 UNIT / RATE CONVERTER */}
-      <TraditionalConverter />
+    <div className="space-y-6">
+      {/* INSTRUCTIONAL TIP */}
+      <div className="bg-indigo-500/5 border border-indigo-500/10 p-4 rounded-2xl flex items-start gap-3">
+        <Sparkles className="w-4 h-4 text-indigo-400 mt-0.5 shrink-0" />
+        <div>
+          <h4 className="text-xs font-bold text-white tracking-wide font-sans">Date-to-Date Interest Calculator</h4>
+          <p className="text-[10px] text-gray-400 mt-1 leading-relaxed">
+            Calculate precise day-by-day interest for modern accounts or customary village accounts (₹ per ₹100 per month).
+          </p>
+        </div>
+      </div>
 
-      {/* 📊 INTEREST CALCULATOR ZONE */}
       <Card>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-bold flex items-center gap-2">
-            <Calculator className="w-4 h-4 text-indigo-400" />
-            Interest Calculator
+        <div className="flex items-center justify-between mb-6 block">
+          <h3 className="text-xs font-black uppercase tracking-widest text-[#8fa3c7] font-mono flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-indigo-400" />
+            Interest Parameters
           </h3>
-          
-          {/* Segmented SI/CI Toggle control */}
-          <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 select-none text-[10px] font-bold font-mono">
+
+          {/* Compound / Simple Toggle switch */}
+          <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 select-none font-mono mt-2 sm:mt-0">
             <button 
-              onClick={() => setInterestType('SI')} 
-              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                interestType === 'SI' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-400 hover:text-white'
+              type="button"
+              onClick={() => setMode('SI')} 
+              className={`px-3 py-1.5 text-[9px] font-black rounded-lg transition-all cursor-pointer ${
+                mode === 'SI' ? 'bg-indigo-600 text-white font-black' : 'text-[#8fa3c7] hover:text-white'
               }`}
             >
               Simple
             </button>
             <button 
-              onClick={() => setInterestType('CI')} 
-              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                interestType === 'CI' ? 'bg-indigo-600 text-white shadow-md' : 'text-gray-400 hover:text-white'
+              type="button"
+              onClick={() => setMode('CI')} 
+              className={`px-3 py-1.5 text-[9px] font-black rounded-lg transition-all cursor-pointer ${
+                mode === 'CI' ? 'bg-indigo-600 text-white font-black' : 'text-[#8fa3c7] hover:text-white'
               }`}
             >
               Compound
@@ -229,72 +220,189 @@ export default function Finance() {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <label className="text-xs text-gray-400 font-semibold mb-1 block">Principal (₹)</label>
-            <Input placeholder="Principal ₹" value={p} onChange={(e) => setP(e.target.value)} type="number" />
+        <div className="space-y-6">
+          {/* Principal Input */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center px-1">
+              <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em]">Principal Amount</label>
+              <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-2.5 py-1 max-w-[150px] shadow-inner">
+                <span className="text-gray-500 font-bold font-mono text-xs mr-1">₹</span>
+                <input
+                  type="number"
+                  value={p === 0 ? '' : p}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setP(isNaN(val) ? 0 : val);
+                  }}
+                  placeholder="e.g. 10000"
+                  className="bg-transparent text-white font-mono font-bold text-xs w-full outline-none text-right"
+                  min="0"
+                />
+              </div>
+            </div>
+            <input
+              type="range"
+              min="1000"
+              max="2000000"
+              step="1000"
+              value={p > 2000000 ? 2000000 : p}
+              onChange={(e) => setP(parseFloat(e.target.value))}
+              className="w-full h-2 bg-white/5 rounded-lg appearance-none cursor-pointer accent-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/30 transition-all font-mono"
+            />
           </div>
-          <div>
-            <label className="text-xs text-gray-400 font-semibold mb-1 block">Annual Interest Rate (%)</label>
-            <Input placeholder="Rate %" value={r} onChange={(e) => setR(e.target.value)} type="number" />
+
+          {/* Rate Input & Type Switch */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center px-1">
+              <div className="flex items-center gap-2">
+                <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em]">Interest Rate</label>
+                <div className="flex bg-white/5 px-1.5 py-0.5 rounded-lg border border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => { setRateType('rural'); setR(2); }}
+                    className={`text-[8px] px-1.5 py-0.5 rounded font-bold ${rateType === 'rural' ? 'bg-indigo-500/20 text-indigo-400 font-black' : 'text-gray-400'}`}
+                  >
+                    Rural (₹)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setRateType('annual'); setR(12); }}
+                    className={`text-[8px] px-1.5 py-0.5 rounded font-bold ${rateType === 'annual' ? 'bg-indigo-500/20 text-indigo-400 font-black' : 'text-gray-400'}`}
+                  >
+                    Annual (%)
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center bg-white/5 border border-white/10 rounded-xl px-2.5 py-1 max-w-[110px] shadow-inner">
+                <input
+                  type="number"
+                  value={r === 0 ? '' : r}
+                  onChange={(e) => {
+                    const val = parseFloat(e.target.value);
+                    setR(isNaN(val) ? 0 : val);
+                  }}
+                  placeholder="0"
+                  className="bg-transparent text-white font-mono font-bold text-xs w-full outline-none text-right mr-1"
+                  min="0.1"
+                  step="0.1"
+                />
+                <span className="text-[#8fa3c7] font-black text-[10px] font-mono">
+                  {rateType === 'rural' ? '₹' : '%'}
+                </span>
+              </div>
+            </div>
+            
+            <p className="text-[9px] text-gray-500 font-mono italic">
+              {rateType === 'rural' 
+                ? `₹${r} per month for every ₹100 principal (equivalent to ${r * 12}% per annum)`
+                : `${r}% interest per annum`
+              }
+            </p>
           </div>
+
+          {/* Start and End Dates */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs text-gray-400 font-semibold mb-1 block">Start Date</label>
-              <Input value={startDate} onChange={(e) => setStartDate(e.target.value)} type="date" />
+              <label className="text-[10px] text-gray-400 font-bold mb-1.5 block uppercase tracking-[0.1em]">Start Date</label>
+              <input
+                type="date"
+                value={startStr}
+                onChange={(e) => setStartStr(e.target.value)}
+                className="w-full h-11 bg-white/5 border border-white/5 rounded-xl px-3 text-xs font-bold text-white outline-none focus:border-indigo-500/30 transition-all font-mono"
+              />
             </div>
             <div>
-              <label className="text-xs text-gray-400 font-semibold mb-1 block">End Date</label>
-              <Input value={endDate} onChange={(e) => setEndDate(e.target.value)} type="date" />
+              <label className="text-[10px] text-gray-400 font-bold mb-1.5 block uppercase tracking-[0.1em]">End Date</label>
+              <input
+                type="date"
+                value={endStr}
+                onChange={(e) => setEndStr(e.target.value)}
+                className="w-full h-11 bg-white/5 border border-white/5 rounded-xl px-3 text-xs font-bold text-white outline-none focus:border-indigo-500/30 transition-all font-mono"
+              />
             </div>
           </div>
-
-          {startDate && endDate && (
-            <div className={`p-3 rounded-xl border font-mono text-[11px] text-center font-bold tracking-wide ${
-              isDatesInvalid 
-                ? 'bg-red-500/10 border-red-500/20 text-red-400 animate-pulse' 
-                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-            }`}>
-              {isDatesInvalid ? (
-                <span>⚠️ End Date must be strictly after Start Date</span>
-              ) : (
-                <span>🕒 Duration: {getDurationString(startDate, endDate)} ({computedYears.toFixed(2)} Years)</span>
-              )}
-            </div>
-          )}
-
-          <Button text="Recalculate" onClick={handleRecalculate} />
         </div>
       </Card>
 
-      {/* 📊 ACCUMULATED RESULTS BREAKDOWN */}
-      <Card>
-        <div className="space-y-4 py-1">
-          <div className="grid grid-cols-2 gap-4 divide-x divide-white/5 text-center">
-            <div>
-              <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Interest Earned</div>
-              <h4 className="text-lg font-black text-emerald-400">
-                ₹ {parseFloat(resultInterest).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-              </h4>
-            </div>
-            <div>
-              <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1">Principal Amount</div>
-              <h4 className="text-lg font-black text-gray-300">
-                ₹ {p && !isNaN(parseFloat(p)) ? parseFloat(p).toLocaleString('en-IN', { minimumFractionDigits: 2 }) : '0.00'}
-              </h4>
-            </div>
-          </div>
+      {/* DYNAMIC RESULTS BOARD */}
+      {dur ? (
+        <div className="premium-card rounded-[22px] p-6 space-y-6 flex flex-col justify-between border-white/5 relative overflow-hidden font-mono">
+          <div className="absolute top-[-20%] right-[-10%] w-32 h-32 bg-indigo-500/5 rounded-full blur-2xl pointer-events-none" />
           
-          <div className="border-t border-white/5 pt-4 text-center">
-            <div className="text-xs text-gray-400 uppercase font-black tracking-widest mb-1">
-              Projected {interestType === 'CI' ? 'Compound' : 'Simple'} Total
+          <div className="space-y-4">
+            <div className="text-center bg-white/5 p-3.5 rounded-2xl border border-white/5">
+              <span className="text-[9px] font-black text-[#8fa3c7] uppercase tracking-[0.2em] block">Calculated Duration</span>
+              <h4 className="text-xs font-black text-[#89a5f7] mt-1">{textTime}</h4>
+              <p className="text-[9px] text-gray-500 mt-0.5">{dur.totalDays} Total Days elapsed</p>
             </div>
-            <h2 className="text-3xl font-black text-indigo-400">
-              ₹ {parseFloat(resultTotal).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-            </h2>
+
+            <div className="grid grid-cols-2 gap-4 divide-x divide-white/5 text-center">
+              <div>
+                <span className="text-[9px] font-black text-[#8fa3c7] uppercase tracking-[0.2em] block">Principal Amount</span>
+                <h4 className="text-[15px] font-black text-gray-300 mt-1 italic tracking-tight">{formatIndianCurrency(p)}</h4>
+              </div>
+              <div>
+                <span className="text-[9px] font-black text-[#8fa3c7] uppercase tracking-[0.2em] block">Interest Earned</span>
+                <h4 className="text-[15px] font-black text-emerald-400 mt-1 italic tracking-tight">+{formatIndianCurrency(interest)}</h4>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-5 text-center">
+              <span className="text-[10px] text-gray-400 uppercase font-black tracking-widest block">Projected Future Value</span>
+              <h2 className="text-3xl font-black text-[#22c55e] tracking-tighter italic mt-1 drop-shadow-[0_0_15px_rgba(34,197,148,0.2)]">
+                {formatIndianCurrency(total)}
+              </h2>
+            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={handleManualSave}
+            className={`w-full mt-2 h-12 rounded-[18px] text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 border transition-all ${
+              manualSaved 
+                ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-400 shadow-lg shadow-emerald-500/10' 
+                : 'bg-indigo-600/10 border-indigo-500/20 text-[#89a5f7] hover:bg-indigo-600 hover:text-white hover:border-transparent active:scale-95 cursor-pointer shadow-md'
+            }`}
+          >
+            {manualSaved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {manualSaved ? 'Saved to Ledger ✓' : 'Save To Local History'}
+          </button>
         </div>
-      </Card>
+      ) : (
+        <div className="p-8 bg-white/5 border border-dashed border-white/10 rounded-2xl text-center">
+          <HelpCircle className="w-8 h-8 text-gray-500 mx-auto mb-2" />
+          <p className="text-xs text-gray-400 font-mono">Please enter a valid Start and End Date</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------- Finance Hub (Rate Converter & Interest by Dates) ---------- */
+export default function Finance() {
+  return (
+    <div className="container animate-in fade-in duration-350 space-y-8 pb-10">
+      <div className="space-y-2">
+        <h2 className="text-xl font-black text-white flex items-center gap-2">
+          <Calculator className="w-5 h-5 text-emerald-400" />
+          Finance Calculator
+        </h2>
+        <p className="text-xs text-gray-400">
+          Convert rural to bank interest rates and calculate precise interest by custom dates.
+        </p>
+      </div>
+
+      <div className="space-y-8">
+        <div>
+          <TraditionalConverter />
+        </div>
+
+        <hr className="border-white/5" />
+
+        <div className="space-y-6">
+          <InterestByDates />
+        </div>
+      </div>
     </div>
   );
 }

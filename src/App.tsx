@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation, Link } from 'react-router-dom';
 import FinanceHub from './components/FinanceHub';
 import MetalsPage from './components/MetalsHub/MetalsPage';
 import VehiclePage from './components/VehicleHub/VehiclePage';
@@ -29,6 +29,99 @@ function Layout({ children }: { children: React.ReactNode }) {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
+  const customNavStyles = {
+    navWrap: {
+      position: "fixed" as const,
+      bottom: "10px",
+      width: "100%",
+      left: 0,
+      display: "flex",
+      justifyContent: "center",
+      zIndex: 1000
+    },
+    navBar: {
+      width: "92%",
+      maxWidth: "448px",
+      display: "flex",
+      justifyContent: "space-around",
+      alignItems: "center",
+      padding: "14px",
+      borderRadius: "30px",
+      backdropFilter: "blur(25px)",
+      WebkitBackdropFilter: "blur(25px)",
+      background: "rgba(15,23,42,0.6)",
+      border: "1px solid rgba(255,255,255,0.08)",
+      boxShadow: "0 15px 40px rgba(0,0,0,0.6)",
+      transition: "background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease"
+    },
+    navItem: {
+      color: "#cbd5f5",
+      fontSize: "22px",
+      textDecoration: "none",
+      opacity: 0.8,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  };
+
+  const getNavColorConfig = () => {
+    const path = location.pathname;
+    
+    // Finance pages: soft blue tint
+    if (path === '/finance' || path === '/finance-expert' || path === '/emi' || path === '/simple' || path === '/discount') {
+      return {
+        background: "rgba(17, 34, 64, 0.75)",
+        borderColor: "rgba(59, 130, 246, 0.25)",
+        boxShadow: "0 0 25px rgba(59, 130, 246, 0.15), 0 15px 40px rgba(0,0,0,0.6)"
+      };
+    }
+    
+    // Metal pages (gold, silver): warm gold/amber tint
+    if (path === '/gold' || path === '/silver') {
+      return {
+        background: "rgba(50, 39, 12, 0.75)",
+        borderColor: "rgba(245, 158, 11, 0.25)",
+        boxShadow: "0 0 25px rgba(245, 158, 11, 0.15), 0 15px 40px rgba(0,0,0,0.6)"
+      };
+    }
+
+    // Vehicle pages: soft cyan/teal tint
+    if (path === '/vehicle') {
+      return {
+        background: "rgba(11, 41, 44, 0.75)",
+        borderColor: "rgba(6, 182, 212, 0.25)",
+        boxShadow: "0 0 25px rgba(6, 182, 212, 0.15), 0 15px 40px rgba(0,0,0,0.6)"
+      };
+    }
+
+    // Estate pages: soft purple/indigo tint
+    if (path === '/estate') {
+      return {
+        background: "rgba(35, 23, 56, 0.75)",
+        borderColor: "rgba(168, 85, 247, 0.25)",
+        boxShadow: "0 0 25px rgba(168, 85, 247, 0.15), 0 15px 40px rgba(0,0,0,0.6)"
+      };
+    }
+    
+    // Default style
+    return {
+      background: "rgba(15, 23, 42, 0.6)",
+      borderColor: "rgba(255, 255, 255, 0.08)",
+      boxShadow: "0 15px 40px rgba(0,0,0,0.6)"
+    };
+  };
+
+  const getNavItemStyle = (path: string) => {
+    const active = location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
+    return {
+      ...customNavStyles.navItem,
+      color: active ? '#60a5fa' : '#cbd5f5',
+      opacity: active ? 1 : 0.7,
+      filter: active ? 'drop-shadow(0 0 6px rgba(96,165,250,0.4))' : 'none',
+    };
+  };
+
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -39,13 +132,6 @@ function Layout({ children }: { children: React.ReactNode }) {
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
-
-  const navItems = [
-    { name: "Home", emoji: "🏠", path: "/" },
-    { name: "Tools", emoji: "🧩", path: "/tools" },
-    { name: "History", emoji: "🕘", path: "/history" },
-    { name: "Profile", emoji: "👤", path: "/profile" },
-  ];
 
   const onHome = location.pathname === '/';
   const [showNotificationToast, setShowNotificationToast] = useState(false);
@@ -145,32 +231,34 @@ function Layout({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </main>
 
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[90%] max-w-md flex justify-around py-3 px-2 rounded-[20px] backdrop-blur-[16px] bg-[#0f172a]/70 border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-[1000] transition-all duration-300">
-        {navItems.map((item, i) => {
-          const active = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+      {/* Bottom Navigation wrap & custom styled layout bar */}
+      <div style={customNavStyles.navWrap}>
+        <div style={{ ...customNavStyles.navBar, ...getNavColorConfig() }}>
+          <Link to="/" style={getNavItemStyle('/')}>
+            <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
+              🏠
+            </motion.div>
+          </Link>
 
-          return (
-            <button
-              key={i}
-              onClick={() => navigate(item.path)}
-              className="flex flex-col items-center justify-center text-[12px] text-white no-underline transition-all duration-300 hover:scale-110 cursor-pointer focus:outline-none"
-              style={{ transition: "0.3s" }}
-            >
-              <span className="text-xl mb-0.5" role="img" aria-label={item.name}>{item.emoji}</span>
-              <span className={`text-[10px] font-medium tracking-wide transition-colors ${active ? "text-blue-400 font-bold" : "text-gray-300 opacity-80"}`}>
-                {item.name}
-              </span>
-              {active && (
-                <motion.div 
-                  layoutId="nav-dot" 
-                  className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(96,165,250,0.8)]" 
-                />
-              )}
-            </button>
-          );
-        })}
-      </nav>
+          <Link to="/tools" style={getNavItemStyle('/tools')}>
+            <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
+              🧩
+            </motion.div>
+          </Link>
+
+          <Link to="/history" style={getNavItemStyle('/history')}>
+            <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
+              🕘
+            </motion.div>
+          </Link>
+
+          <Link to="/profile" style={getNavItemStyle('/profile')}>
+            <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
+              👤
+            </motion.div>
+          </Link>
+        </div>
+      </div>
 
       {/* Feedback Modal Overlay */}
       <AnimatePresence>

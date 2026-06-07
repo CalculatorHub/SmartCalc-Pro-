@@ -6,7 +6,7 @@ export default function ToolsPage() {
   const navigate = useNavigate();
 
   const tools = [
-    { title: "Finance", icon: "💲", path: "/finance", glow: "shadow-blue-500/20" },
+    { title: "Finance", icon: "📊", path: "/finance", glow: "shadow-blue-500/20" },
     { title: "Discount", icon: "🏷️", path: "/discount", glow: "shadow-rose-500/20" },
     { title: "Gold", icon: "🪙", path: "/gold", glow: "shadow-yellow-500/20" },
     { title: "Silver", icon: "🥈", path: "/silver", glow: "shadow-gray-400/20" },

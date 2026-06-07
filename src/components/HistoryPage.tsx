@@ -13,6 +13,7 @@ export default function HistoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<string>('All');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [confirmClear, setConfirmClear] = useState(false);
 
   const loadHistory = () => {
     setHistoryItems(getHistory());
@@ -33,10 +34,9 @@ export default function HistoryPage() {
   }, []);
 
   const handleClearAll = () => {
-    if (window.confirm("Are you sure you want to clear your calculation history? This action cannot be undone.")) {
-      clearHistory();
-      setHistoryItems([]);
-    }
+    clearHistory();
+    setHistoryItems([]);
+    setConfirmClear(false);
   };
 
   const copyResultValue = (id: string, text: string) => {
@@ -77,13 +77,31 @@ export default function HistoryPage() {
             </div>
           </div>
           {historyItems.length > 0 && (
-            <button
-              onClick={handleClearAll}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-500/20 bg-red-500/5 hover:bg-red-500/15 text-red-400 text-xs font-bold transition-all active:scale-95 cursor-pointer max-w-max"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              Clear Ledger
-            </button>
+            confirmClear ? (
+              <div className="flex items-center gap-2 select-none">
+                <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Are you sure?</span>
+                <button
+                  onClick={handleClearAll}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-md shadow-red-900/10"
+                >
+                  Yes, Clear
+                </button>
+                <button
+                  onClick={() => setConfirmClear(false)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-gray-300 text-xs font-bold transition-all active:scale-95 cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setConfirmClear(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-500/20 bg-red-500/5 hover:bg-red-500/15 text-red-400 text-xs font-bold transition-all active:scale-95 cursor-pointer max-w-max"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Clear Ledger
+              </button>
+            )
           )}
         </div>
       </Card>
