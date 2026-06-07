@@ -1,27 +1,261 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell 
-} from 'recharts';
-import { 
   Percent, IndianRupee, TrendingUp, Calculator, Tag, ArrowRightLeft, 
-  History, PlusCircle, Zap, ShieldCheck, Download, FileText
+  PlusCircle, AlertCircle, Sparkles, HelpCircle, ArrowUpRight, Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { annualToMonthlyRate, monthlyToAnnualRate, getMonthsBetween, numberToIndianWords, formatIndianCurrency, formatIndianShorthand } from '../lib/financeUtils';
-import { exportToCSV, exportToPDF } from '../lib/exportUtils';
+import { annualToMonthlyRate, monthlyToAnnualRate, formatIndianCurrency, formatIndianShorthand } from '../lib/financeUtils';
 
 /**
- * RATE ↔ RUPEES SMART CONVERTER
+ * ⏳ GET HUMAN READABLE DURATION STRING BETWEEN TWO DATES
  */
-const RateConverter = () => {
+const getDurationString = (startStr: string, endStr: string) => {
+  if (!startStr || !endStr) return '';
+  const s = new Date(startStr);
+  const e = new Date(endStr);
+  if (isNaN(s.getTime()) || isNaN(e.getTime())) return '';
+  const diffMs = e.getTime() - s.getTime();
+  if (diffMs <= 0) return 'End Date must be after Start Date';
+  
+  const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const years = Math.floor(totalDays / 365.25);
+  const remainingDays = totalDays - Math.floor(years * 365.25);
+  const months = Math.floor(remainingDays / 30.43);
+  const days = Math.round(remainingDays - Math.floor(months * 30.43));
+
+  const parts = [];
+  if (years > 0) parts.push(`${years} Yr${years > 1 ? 's' : ''}`);
+  if (months > 0) parts.push(`${months} Mo${months > 1 ? 's' : ''}`);
+  if (days > 0) parts.push(`${days} Day${days > 1 ? 's' : ''}`);
+
+  return parts.join(', ') || '0 Days';
+};
+
+/**
+ * 🛠️ REUSABLE FLOATING VALIDATION INPUT COMPONENT
+ */
+interface ValidatedInputProps {
+  label: string;
+  value: string;
+  setValue: (val: string) => void;
+  placeholder?: string;
+  prefix?: string;
+  suffix?: string;
+  isInvalid: boolean;
+  errorMessage?: string;
+  type?: string;
+}
+
+const ValidatedInput = ({
+  label,
+  value,
+  setValue,
+  placeholder = "0.00",
+  prefix,
+  suffix,
+  isInvalid,
+  errorMessage = "Must be > 0",
+  type = "number"
+}: ValidatedInputProps) => {
+  const [hasInteracted, setHasInteracted] = useState(false);
+
+  return (
+    <div className="space-y-2 relative">
+      <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1">{label}</label>
+      <div className="relative">
+        <AnimatePresence>
+          {isInvalid && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 5, scale: 0.95 }}
+              className="absolute z-30 bottom-full mb-3 left-0 right-0 p-3 bg-red-950/90 backdrop-blur-md border border-red-500/40 rounded-xl shadow-glow text-red-200"
+            >
+              <div className="flex items-center gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                <span className="text-[9px] font-black uppercase tracking-wider font-mono">{errorMessage}</span>
+              </div>
+              {/* Tiny decorative downward-pointing arrow */}
+              <div className="absolute top-full left-5 -translate-y-1.5 w-3.5 h-3.5 flex items-center justify-center overflow-hidden pointer-events-none">
+                <div className="w-2 h-2 bg-red-950/90 border-r border-b border-red-500/40 rotate-45 transform origin-center" />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {prefix && (
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8fa3c7] font-bold text-xs select-none">
+            {prefix}
+          </span>
+        )}
+        
+        <input
+          type={type}
+          value={value}
+          placeholder={placeholder}
+          onBlur={() => setHasInteracted(true)}
+          onChange={(e) => setValue(e.target.value)}
+          className={`w-full h-14 bg-white/5 text-white rounded-2xl px-4 text-sm font-bold focus:border-blue-500/50 outline-none border transition-all font-mono ${
+            prefix ? 'pl-9' : ''
+          } ${
+            suffix ? 'pr-12' : ''
+          } ${
+            isInvalid 
+              ? 'border-red-500/60 shadow-[0_0_12px_rgba(239,68,68,0.25)]' 
+              : (hasInteracted && !value ? 'border-red-500/50' : 'border-white/5 focus:border-blue-500/30')
+          }`}
+        />
+
+        {suffix && (
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-[#8fa3c7]/40 uppercase font-mono select-none">
+            {suffix}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * ⚡ METRIC CARD COMPONENT
+ */
+function SummaryMetricCard({ title, value, icon, description, badgeColor }: { 
+  title: string; 
+  value: string; 
+  icon?: React.ReactNode; 
+  description?: string;
+  badgeColor?: string;
+}) {
+  return (
+    <motion.div 
+      whileHover={{ scale: 1.02 }}
+      className="premium-card rounded-[22px] p-5 flex flex-col justify-between border-white/5 relative overflow-hidden font-mono text-left"
+    >
+      <div className="absolute top-[-10%] right-[-10%] w-16 h-16 bg-blue-500/5 rounded-full blur-xl pointer-events-none" />
+      <div className="space-y-2">
+        <div className="flex justify-between items-center">
+          <span className="text-[9px] font-black text-[#8fa3c7] uppercase tracking-[0.2em]">
+            {title}
+          </span>
+          {icon && <span className={`p-1.5 rounded-lg text-xs ${badgeColor || 'bg-white/5 text-gray-400'}`}>{icon}</span>}
+        </div>
+        <h2 className="text-xl font-black text-white italic tracking-tighter truncate">
+          {value}
+        </h2>
+      </div>
+      {description && (
+        <span className="text-[8px] font-bold text-gray-500 uppercase tracking-wider block mt-3">
+          {description}
+        </span>
+      )}
+    </motion.div>
+  );
+}
+
+/**
+ * 💸 DISCOUNT CALCULATOR COMPONENT
+ */
+const DiscountCalculatorComponent = () => {
+  const [price, setPrice] = useState('');
+  const [discountPct, setDiscountPct] = useState('');
+
+  // Input Validation States
+  const isPriceInvalid = price !== '' && parseFloat(price) <= 0;
+  const isDiscountInvalid = discountPct !== '' && parseFloat(discountPct) <= 0;
+
+  const discountAmount = useMemo(() => {
+    if (isPriceInvalid || isDiscountInvalid || !price || !discountPct) return 0;
+    const p = parseFloat(price);
+    const d = parseFloat(discountPct);
+    return (p * d) / 100;
+  }, [price, discountPct, isPriceInvalid, isDiscountInvalid]);
+
+  const finalPrice = useMemo(() => {
+    if (isPriceInvalid || !price) return 0;
+    const p = parseFloat(price);
+    return p - discountAmount;
+  }, [price, discountAmount, isPriceInvalid]);
+
+  const isValid = price && discountPct && !isPriceInvalid && !isDiscountInvalid;
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="premium-card rounded-[22px] p-6 space-y-6"
+    >
+      <div className="flex items-center gap-2">
+        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <Tag className="w-4 h-4" />
+        </div>
+        <div>
+          <h3 className="text-xs font-black text-white uppercase tracking-widest font-mono">Discount Calculator</h3>
+          <p className="text-[9px] text-gray-400">Instantly evaluate savings and retail markdown values</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <ValidatedInput
+          label="Price"
+          value={price}
+          setValue={setPrice}
+          prefix="₹"
+          placeholder="0.00"
+          isInvalid={isPriceInvalid}
+          errorMessage="Price must be > 0"
+        />
+
+        <ValidatedInput
+          label="Discount"
+          value={discountPct}
+          setValue={setDiscountPct}
+          suffix="%"
+          placeholder="0"
+          isInvalid={isDiscountInvalid}
+          errorMessage="Discount must be > 0"
+        />
+      </div>
+
+      <AnimatePresence mode="wait">
+        {isValid && (
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/10 rounded-[22px] p-5 text-center font-mono mt-4"
+          >
+            <div className="space-y-1">
+              <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.22em]">Final Retail Price</p>
+              <p className="font-black text-white text-3xl tracking-tighter">
+                {formatIndianCurrency(finalPrice)}
+              </p>
+              {discountAmount > 0 && (
+                <p className="text-[10px] text-emerald-300 font-bold uppercase tracking-widest mt-2">
+                  🎉 Total Saved {formatIndianCurrency(discountAmount)}
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
+/**
+ * 🔄 RATE ↔ RUPEES SMART CONVERTER
+ */
+const RateConverterComponent = () => {
   const [mode, setMode] = useState<'pctToRs' | 'rsToPct'>('pctToRs');
   const [inputVal, setInputVal] = useState('');
   const [result, setResult] = useState<{ value: string; unit: string } | null>(null);
-  const [history, setHistory] = useState<any[]>([]);
   const [hasInteracted, setHasInteracted] = useState(false);
 
+  const isInputInvalid = inputVal !== '' && parseFloat(inputVal) <= 0;
+
   useEffect(() => {
-    if (!inputVal) {
+    if (!inputVal || isInputInvalid) {
       setResult(null);
       return;
     }
@@ -33,27 +267,15 @@ const RateConverter = () => {
     if (mode === 'pctToRs') {
       const rs = annualToMonthlyRate(val);
       if (rs < 1) {
-        setResult({ value: (rs * 100).toFixed(0), unit: 'Paise/month' });
+        setResult({ value: (rs * 100).toFixed(0), unit: 'Paise/month/₹100' });
       } else {
-        setResult({ value: rs.toFixed(2), unit: 'Rupees/month' });
+        setResult({ value: rs.toFixed(2), unit: 'Rupees/month/₹100' });
       }
     } else {
       const pct = monthlyToAnnualRate(val);
       setResult({ value: pct.toFixed(2), unit: 'Annual %' });
     }
-  }, [inputVal, mode]);
-
-  const saveToHistory = () => {
-    if (!result || !inputVal) return;
-    const entry = {
-      id: Date.now(),
-      type: mode === 'pctToRs' ? 'Pct to Rs' : 'Rs to Pct',
-      input: `${inputVal}${mode === 'pctToRs' ? '%' : '₹'}`,
-      output: `${result.value} ${result.unit}`,
-      date: new Date().toLocaleTimeString()
-    };
-    setHistory(prev => [entry, ...prev].slice(0, 10));
-  };
+  }, [inputVal, mode, isInputInvalid]);
 
   return (
     <motion.div 
@@ -63,42 +285,36 @@ const RateConverter = () => {
       className="premium-card rounded-[22px] p-6 space-y-6"
     >
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-widest">
-          <ArrowRightLeft className="w-5 h-5 text-blue-500" />
-          Smart Converter
-        </h3>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+            <ArrowRightLeft className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-xs font-black text-white uppercase tracking-widest font-mono">Traditional Converter</h3>
+            <p className="text-[9px] text-gray-400">Swap between bank interest (%) & rural rate (Paise/Rs/Month)</p>
+          </div>
+        </div>
         <button 
           onClick={() => {
             setMode(prev => prev === 'pctToRs' ? 'rsToPct' : 'pctToRs');
             setInputVal('');
           }}
-          className="text-[10px] font-black uppercase tracking-[0.2em] px-4 py-2 bg-white/5 text-[#8fa3c7] rounded-xl border border-white/5 font-mono"
+          className="text-[9px] font-black uppercase tracking-[0.2em] px-3.5 py-2 bg-white/5 hover:bg-white/10 active:scale-95 text-[#8fa3c7] hover:text-white rounded-xl border border-white/5 font-mono cursor-pointer transition-all"
         >
           {mode === 'pctToRs' ? 'Rs/M' : 'Pct/A'}
         </button>
       </div>
 
       <div className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1">
-            {mode === 'pctToRs' ? 'Annual Percentage (%)' : 'Monthly Rate (₹/100)'}
-          </label>
-          <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8fa3c7]">
-              {mode === 'pctToRs' ? <Percent className="w-4 h-4" /> : <IndianRupee className="w-4 h-4" />}
-            </div>
-            <input
-              type="number"
-              value={inputVal}
-              onChange={(e) => setInputVal(e.target.value)}
-              onBlur={() => setHasInteracted(true)}
-              placeholder="0.00"
-              className={`w-full h-14 bg-white/5 text-white rounded-2xl pl-12 pr-4 text-sm font-bold outline-none border transition-all placeholder-gray-600 font-mono ${
-                hasInteracted && !inputVal ? 'border-red-500/50' : 'border-white/5 focus:border-blue-500/50'
-              }`}
-            />
-          </div>
-        </div>
+        <ValidatedInput
+          label={mode === 'pctToRs' ? 'Annual Percentage Rate' : 'Rural Monthly Rate'}
+          value={inputVal}
+          setValue={setInputVal}
+          prefix={mode === 'pctToRs' ? '%' : '₹'}
+          placeholder="0.00"
+          isInvalid={isInputInvalid}
+          errorMessage="Enter a strictly positive rate"
+        />
 
         <AnimatePresence mode="wait">
           {result && (
@@ -106,25 +322,19 @@ const RateConverter = () => {
               key={result.value + result.unit}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="p-6 bg-gradient-to-br from-blue-600/20 to-indigo-600/20 border border-blue-500/20 rounded-[22px] flex flex-col items-center justify-center gap-4 text-center font-mono"
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="p-5 bg-gradient-to-br from-blue-600/10 to-indigo-600/10 border border-blue-500/15 rounded-[22px] flex flex-col items-center justify-center gap-3 text-center font-mono"
             >
               <div className="space-y-1">
-                <span className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]">Converted result</span>
-                <div className="flex items-baseline justify-center gap-1.5">
-                  <span className="text-3xl font-black text-white tracking-tighter">
-                    {mode === 'rsToPct' ? '' : (parseFloat(result.value) >= 1 && result.unit.includes('Rupees') ? '₹' : '')}
+                <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em]">Equant Equivalent</span>
+                <div className="flex items-baseline justify-center gap-1.5 mt-0.5">
+                  <span className="text-2xl font-black text-white tracking-tighter">
+                    {mode === 'rsToPct' ? '' : (parseFloat(result.value) >= 1 ? '₹' : '')}
                     {result.value}
                   </span>
-                  <span className="text-xs font-bold text-blue-300/60">{result.unit}</span>
+                  <span className="text-[10px] font-bold text-blue-300">{result.unit}</span>
                 </div>
               </div>
-              <button 
-                onClick={saveToHistory}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/5 text-[10px] font-black uppercase tracking-[0.2em] text-[#8fa3c7] rounded-xl border border-white/5 font-mono"
-              >
-                <PlusCircle className="w-4 h-4 text-blue-500" />
-                Capture Log
-              </button>
             </motion.div>
           )}
         </AnimatePresence>
@@ -133,259 +343,204 @@ const RateConverter = () => {
   );
 };
 
-/**
- * INTEREST CALCULATOR & BAR CHART
- */
-const InterestCalculator = () => {
-  const [principal, setPrincipal] = useState('');
-  const [rate, setRate] = useState('');
-  const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
+export default function FinanceHub() {
+  // Shared States initialized empty
+  const [principalStr, setPrincipalStr] = useState('');
+  const [rateStr, setRateStr] = useState('');
+  const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [type, setType] = useState<'SI' | 'CI'>('SI');
-  const [isCalculated, setIsCalculated] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState({ principal: false, rate: false });
+  const [interestType, setInterestType] = useState<'SI' | 'CI'>('CI');
 
-  const stats = useMemo(() => {
-    if (!principal || !rate || !startDate || !endDate) return null;
-    const totalMonths = getMonthsBetween(startDate, endDate);
-    if (totalMonths <= 0) return null;
-    
-    const T = totalMonths / 12;
-    const P = parseFloat(principal);
-    const R = parseFloat(rate);
-    
-    let totalInterest = 0;
-    let totalAmount = 0;
-    const chartData = [];
+  // Input Validation Checkers
+  const isPrincipalInvalid = principalStr !== '' && parseFloat(principalStr) <= 0;
+  const isRateInvalid = rateStr !== '' && parseFloat(rateStr) <= 0;
+  const isDatesInvalid = useMemo(() => {
+    if (!startDate || !endDate) return false;
+    return new Date(endDate) <= new Date(startDate);
+  }, [startDate, endDate]);
 
-    if (type === 'SI') {
-      totalInterest = (P * R * T) / 100;
-      totalAmount = P + totalInterest;
-      const step = totalMonths > 24 ? 12 : 1;
-      for (let i = step; i <= totalMonths; i += step) {
-        chartData.push({ label: totalMonths > 24 ? `Y${i/12}` : `M${i}`, amount: Math.round(P + (P * R * (i/12)) / 100) });
-      }
-    } else {
-      totalAmount = P * Math.pow(1 + R / 100, T);
-      totalInterest = totalAmount - P;
-      const step = totalMonths > 24 ? 12 : 1;
-      for (let i = step; i <= totalMonths; i += step) {
-        chartData.push({ label: totalMonths > 24 ? `Y${i/12}` : `M${i}`, amount: Math.round(P * Math.pow(1 + R / 100, i/12)) });
-      }
+  // Real-time calculation variables
+  const calculations = useMemo(() => {
+    // Sanitize numeric inputs gracefully
+    const P = isPrincipalInvalid ? 0 : (parseFloat(principalStr) || 0);
+    const R = isRateInvalid ? 0 : (parseFloat(rateStr) || 0);
+
+    let CalculatedYears = 0;
+    if (startDate && endDate && !isDatesInvalid) {
+      const s = new Date(startDate);
+      const e = new Date(endDate);
+      const diffMs = e.getTime() - s.getTime();
+      CalculatedYears = diffMs / (1000 * 60 * 60 * 24 * 365.25);
     }
 
-    return { totalInterest: Math.round(totalInterest), totalAmount: Math.round(totalAmount), chartData };
-  }, [principal, rate, startDate, endDate, type]);
+    const Y = CalculatedYears > 0 ? CalculatedYears : 0;
 
-  const handleCalculate = () => {
-    setHasInteracted({ principal: true, rate: true });
-    if (!principal || !rate || !startDate || !endDate) return;
-    setIsCalculated(true);
-  };
+    let totalAmount = 0;
+    let interest = 0;
+
+    if (P > 0 && R > 0 && Y > 0) {
+      if (interestType === 'CI') {
+        totalAmount = P * Math.pow(1 + R / 100, Y);
+        interest = totalAmount - P;
+      } else {
+        interest = (P * R * Y) / 100;
+        totalAmount = P + interest;
+      }
+    } else {
+      totalAmount = P;
+      interest = 0;
+    }
+
+    // Secondary calculation weight
+    const siReturns = (P * R * Y) / 100;
+    const ciReturns = P * Math.pow(1 + R / 100, Y) - P;
+    const compoundingDifference = Math.max(ciReturns - siReturns, 0);
+
+    return {
+      principal: P,
+      interest: Math.round(interest),
+      totalAmount: Math.round(totalAmount),
+      compoundingDifference: Math.round(compoundingDifference),
+      years: Y
+    };
+  }, [principalStr, rateStr, startDate, endDate, interestType, isPrincipalInvalid, isRateInvalid, isDatesInvalid]);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="premium-card rounded-[22px] p-6 space-y-6"
-    >
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-black text-white flex items-center gap-2 uppercase tracking-widest">
-          <Calculator className="w-5 h-5 text-blue-500" />
-          Interest Calculator
-        </h3>
-        <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
-          <button onClick={() => setType('SI')} className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all ${type === 'SI' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500'}`}>S.I</button>
-          <button onClick={() => setType('CI')} className={`px-4 py-1.5 text-[10px] font-black rounded-lg transition-all ${type === 'CI' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500'}`}>C.I</button>
+    <div className="min-h-screen text-white px-5 pt-8 pb-32 space-y-8 animate-in fade-in duration-500">
+      
+      {/* HEADER SECTION */}
+      <div className="space-y-1.5 flex justify-between items-end">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-black tracking-tighter uppercase italic text-white flex items-center gap-2">
+            <TrendingUp className="w-6 h-6 text-blue-500 shrink-0" />
+            Finance Hub
+          </h1>
+          <p className="text-xs font-bold text-[#8fa3c7] uppercase tracking-widest">
+            Smart systems for capital & asset optimization
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-5">
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1">Principal Amount (₹)</label>
-          <input
-            type="number"
-            value={principal}
-            placeholder="0.00"
-            onChange={(e) => { setPrincipal(e.target.value); setIsCalculated(false); }}
-            onBlur={() => setHasInteracted(prev => ({ ...prev, principal: true }))}
-            className={`w-full h-14 bg-white/5 text-white rounded-2xl px-4 text-sm font-bold focus:border-blue-500/50 outline-none border transition-all font-mono ${
-              hasInteracted.principal && !principal ? 'border-red-500/50' : 'border-white/5'
-            }`}
-          />
-        </div>
+      {/* 🔄 RATE ↔ RUPEES SMART CONVERTER (FIRST DETAILED COMPONENT) */}
+      <RateConverterComponent />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1">Interest Rate (%)</label>
-            <input
-              type="number"
-              value={rate}
-              placeholder="0.00"
-              onChange={(e) => { setRate(e.target.value); setIsCalculated(false); }}
-              onBlur={() => setHasInteracted(prev => ({ ...prev, rate: true }))}
-              className={`w-full h-14 bg-white/5 text-white rounded-2xl px-4 text-sm font-bold focus:border-blue-500/50 outline-none border transition-all font-mono ${
-                hasInteracted.rate && !rate ? 'border-red-500/50' : 'border-white/5'
-              }`}
+      {/* 📊 INTEREST CALCULATOR ZONE (SECOND) */}
+      <div className="space-y-8">
+        
+        {/* 📊 CORE CALCULATOR COMPACT BOARD */}
+        <div className="premium-card rounded-[22px] p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                <Calculator className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-white uppercase tracking-widest font-mono">Interest Calculator</h3>
+                <p className="text-[9px] text-gray-400">Model capital projection metrics in compound or simple structures</p>
+              </div>
+            </div>
+            
+            {/* Simple and Compound Switch inside the Interest Planner */}
+            <div className="flex bg-white/5 p-1 rounded-xl border border-white/5 select-none shrink-0 font-mono">
+              <button 
+                onClick={() => setInterestType('SI')} 
+                className={`px-3 py-1.5 text-[9px] font-black rounded-lg transition-all cursor-pointer ${
+                  interestType === 'SI' ? 'bg-blue-600 text-white shadow-glow-sm' : 'text-[#8fa3c7] hover:text-white'
+                }`}
+              >
+                S.I
+              </button>
+              <button 
+                onClick={() => setInterestType('CI')} 
+                className={`px-3 py-1.5 text-[9px] font-black rounded-lg transition-all cursor-pointer ${
+                  interestType === 'CI' ? 'bg-blue-600 text-white shadow-glow-sm' : 'text-[#8fa3c7] hover:text-white'
+                }`}
+              >
+                C.I
+              </button>
+            </div>
+          </div>
+
+          {/* Dynamic Parameter Settings Layout */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
+            <ValidatedInput
+              label="Principal (₹)"
+              value={principalStr}
+              setValue={setPrincipalStr}
+              prefix="₹"
+              placeholder="Capital"
+              isInvalid={isPrincipalInvalid}
+              errorMessage="Principal must be > 0"
+            />
+
+            <ValidatedInput
+              label="Rate (%)"
+              value={rateStr}
+              setValue={setRateStr}
+              suffix="%"
+              placeholder="Rate"
+              isInvalid={isRateInvalid}
+              errorMessage="Interest rate must be > 0"
+            />
+
+            <ValidatedInput
+              label="Start Date"
+              value={startDate}
+              setValue={setStartDate}
+              placeholder="YYYY-MM-DD"
+              isInvalid={false}
+              type="date"
+            />
+
+            <ValidatedInput
+              label="End Date"
+              value={endDate}
+              setValue={setEndDate}
+              placeholder="YYYY-MM-DD"
+              isInvalid={isDatesInvalid}
+              errorMessage="End Date must be after Start Date"
+              type="date"
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1">Start Date</label>
-            <input type="date" value={startDate} onChange={(e) => { setStartDate(e.target.value); setIsCalculated(false); }} className="w-full h-14 bg-white/5 text-white rounded-2xl px-4 text-sm font-bold border border-white/5 outline-none focus:border-blue-500/50" />
-          </div>
-        </div>
 
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1">End Date</label>
-          <input type="date" value={endDate} min={startDate} onChange={(e) => { setEndDate(e.target.value); setIsCalculated(false); }} className="w-full h-14 bg-white/5 text-white rounded-2xl px-4 text-sm font-bold border border-white/5 outline-none focus:border-blue-500/50" />
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-6">
-        <button 
-          onClick={handleCalculate}
-          className={`w-full h-14 text-white text-sm font-black uppercase tracking-[0.2em] rounded-2zl shadow-lg flex items-center justify-center gap-3 ${
-            !principal || !rate || !startDate || !endDate ? 'bg-white/5 text-gray-600' : 'bg-gradient-to-r from-blue-600 to-indigo-600'
-          }`}
-        >
-           <Calculator className="w-5 h-5" />
-           Execute Calculation
-        </button>
-
-        <div className={`grid grid-cols-2 gap-4 transition-all duration-300 ${isCalculated ? 'opacity-100 translate-y-0' : 'opacity-20 translate-y-2 grayscale'}`}>
-          <div className="bg-white/5 border border-white/5 p-5 rounded-[22px] text-center font-mono">
-            <p className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-widest mb-1">Interest</p>
-            <p className="font-black text-emerald-400 text-xl tracking-tighter">{isCalculated && stats ? formatIndianCurrency(stats.totalInterest) : '₹0'}</p>
-          </div>
-          <div className="bg-white/5 border border-white/5 p-5 rounded-[22px] text-center font-mono">
-            <p className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-widest mb-1">Total Amount</p>
-            <p className="font-black text-blue-400 text-xl tracking-tighter">{isCalculated && stats ? formatIndianCurrency(stats.totalAmount) : '₹0'}</p>
-          </div>
-        </div>
-      </div>
-
-      {isCalculated && stats && stats.chartData.length > 0 && (
-        <div className="h-[180px] w-full pt-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={stats.chartData} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
-              <XAxis dataKey="label" fontSize={9} axisLine={false} tickLine={false} tick={{ fill: '#8fa3c7', fontWeight: 'bold' }} />
-              <YAxis fontSize={9} axisLine={false} tickLine={false} tick={{ fill: '#8fa3c7', fontWeight: 'bold' }} tickFormatter={(v) => formatIndianShorthand(v)} />
-              <Tooltip cursor={{ fill: 'white', opacity: 0.05 }} contentStyle={{ backgroundColor: '#141c30', border: 'none', borderRadius: '12px', fontSize: '10px' }} />
-              <Bar dataKey="amount" radius={[4, 4, 0, 0]}>
-                {stats.chartData.map((_, index) => <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#3b82f6' : '#6366f1'} />)}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-    </motion.div>
-  );
-};
-
-/**
- * DISCOUNT CALCULATOR
- */
-const DiscountCalculator = () => {
-  const [price, setPrice] = useState('');
-  const [discountPct, setDiscountPct] = useState('');
-  const [hasInteracted, setHasInteracted] = useState({ price: false, discount: false });
-
-  const discountAmount = (!price || !discountPct) ? 0 : (parseFloat(price) * parseFloat(discountPct)) / 100;
-  const finalPrice = (!price || !discountPct) ? 0 : parseFloat(price) - discountAmount;
-  const isValid = price && discountPct;
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="premium-card rounded-[22px] p-6 space-y-6"
-    >
-      <div className="flex items-center gap-2">
-        <Tag className="w-5 h-5 text-blue-500" />
-        <h3 className="text-sm font-black text-white uppercase tracking-widest">Discount Calculator</h3>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1">Price (₹)</label>
-          <input
-            type="number"
-            value={price}
-            placeholder="0.00"
-            onChange={(e) => setPrice(e.target.value)}
-            onBlur={() => setHasInteracted(prev => ({ ...prev, price: true }))}
-            className={`w-full h-14 bg-white/5 text-white rounded-2xl px-4 text-sm font-bold focus:border-blue-500/50 outline-none border transition-all font-mono ${
-              hasInteracted.price && !price ? 'border-red-500/50' : 'border-white/5'
-            }`}
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-[#8fa3c7] uppercase tracking-[0.2em] px-1">Discount (%)</label>
-          <input
-            type="number"
-            value={discountPct}
-            placeholder="0"
-            onChange={(e) => setDiscountPct(e.target.value)}
-            onBlur={() => setHasInteracted(prev => ({ ...prev, discount: true }))}
-            className={`w-full h-14 bg-white/5 text-white rounded-2xl px-4 text-sm font-bold focus:border-blue-500/50 outline-none border transition-all font-mono ${
-              hasInteracted.discount && !discountPct ? 'border-red-500/50' : 'border-white/5'
-            }`}
-          />
-        </div>
-      </div>
-
-      <motion.div 
-        animate={isValid ? { scale: 1, opacity: 1, y: 0 } : { scale: 0.95, opacity: 0.2, y: 10 }}
-        className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-500/20 rounded-[22px] p-6 text-center font-mono mt-4"
-      >
-        <div className="space-y-1">
-          <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em]">Final amount</p>
-          <p className="font-black text-white text-3xl tracking-tighter">{isValid ? formatIndianCurrency(finalPrice) : '₹0'}</p>
-          {isValid && discountAmount > 0 && (
-            <p className="text-[10px] text-emerald-300/60 font-bold uppercase tracking-widest mt-2 font-mono">Saved {formatIndianCurrency(discountAmount)}</p>
+          {/* Computed Duration Info Panel */}
+          {startDate && endDate && !isDatesInvalid && (
+            <div className="text-[10px] bg-white/5 px-4 py-2 rounded-xl text-center border border-white/5 font-mono font-bold tracking-wider uppercase text-blue-400">
+              Computed Duration: {getDurationString(startDate, endDate)} ({calculations.years.toFixed(2)} Years)
+            </div>
           )}
         </div>
-      </motion.div>
-    </motion.div>
-  );
-};
 
-export default function FinanceHub() {
-  return (
-    <div className="min-h-screen text-white px-5 pt-8 pb-32 space-y-8">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-black tracking-tighter uppercase italic">Finance Hub</h1>
-        <p className="text-xs font-bold text-[#8fa3c7] uppercase tracking-widest">Smart systems for capital management</p>
+        {/* 📊 DYNAMIC SUMMARY METRICS DASHBOARD */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <SummaryMetricCard 
+            title="Principal Asset" 
+            value={formatIndianCurrency(calculations.principal)} 
+            description="Total Registered Capital"
+            icon={<IndianRupee className="w-3.5 h-3.5" />}
+            badgeColor="bg-blue-500/10 text-blue-400 border border-blue-500/10"
+          />
+          <SummaryMetricCard 
+            title="Compound Returns" 
+            value={formatIndianCurrency(calculations.interest)} 
+            description="Sum Interest Earned"
+            icon={<ArrowUpRight className="w-3.5 h-3.5" />}
+            badgeColor="bg-emerald-500/10 text-emerald-400 border border-emerald-500/10"
+          />
+          <SummaryMetricCard 
+            title="Projected Value" 
+            value={formatIndianCurrency(calculations.totalAmount)} 
+            description="Capitalization Total"
+            icon={<Calculator className="w-3.5 h-3.5" />}
+            badgeColor="bg-indigo-500/10 text-indigo-400 border border-indigo-500/10"
+          />
+        </div>
+
       </div>
 
-      <div className="space-y-10">
-        <RateConverter />
-        <InterestCalculator />
-        <DiscountCalculator />
+      {/* 💸 DISCOUNT CALCULATOR (LAST DETAILED COMPONENT) */}
+      <DiscountCalculatorComponent />
 
-        <section className="space-y-4 pt-4">
-          <h3 className="text-[10px] font-black text-[#8fa3c7] uppercase tracking-[0.4em] px-1 text-center">Core Intelligence</h3>
-          <div className="grid grid-cols-1 gap-4">
-            {[
-              { title: 'Market Index', desc: 'Real-time delta tracking for interest conversions.', icon: <Zap className="w-5 h-5 text-blue-500" /> },
-              { title: 'Capital Growth', desc: 'Exponential expansion modeling for principal assets.', icon: <TrendingUp className="w-5 h-5 text-emerald-500" /> },
-              { title: 'Risk Guard', desc: 'Encrypted valuation protocols for manual entries.', icon: <ShieldCheck className="w-5 h-5 text-indigo-500" /> },
-            ].map((item, idx) => (
-              <motion.div key={idx} whileTap={{ scale: 0.98 }} className="premium-card p-5 rounded-[22px] flex items-center gap-4 group">
-                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 border border-white/5 group-hover:bg-blue-500/10">
-                  {item.icon}
-                </div>
-                <div>
-                  <h4 className="text-[11px] font-black text-white tracking-widest uppercase italic">{item.title}</h4>
-                  <p className="text-[10px] font-bold text-[#8fa3c7] mt-0.5 leading-relaxed">{item.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-      </div>
     </div>
   );
 }

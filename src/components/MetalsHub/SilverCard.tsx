@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Coins, IndianRupee, Percent, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Coins, IndianRupee, Percent, ArrowRight, Save, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { formatIndianCurrency } from '../../lib/financeUtils';
+import { saveHistory } from '../../lib/historyUtils';
 
 interface PurityOption {
   label: string;
@@ -19,23 +20,6 @@ export default function SilverCard() {
   const [making, setMaking] = useState('');
   const [purity, setPurity] = useState(PURITIES[0]);
   const [hasInteracted, setHasInteracted] = useState({ weight: false, rate: false, making: false });
-
-  // Load saved rate on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('silverRate');
-    if (saved) {
-      setRate(saved);
-    } else {
-      setRate('310');
-    }
-  }, []);
-
-  // Save rate when changed
-  useEffect(() => {
-    if (rate) {
-      localStorage.setItem('silverRate', rate);
-    }
-  }, [rate]);
 
   const [results, setResults] = useState({
     adjustedRate: 0,
@@ -70,6 +54,44 @@ export default function SilverCard() {
       isValid: true
     });
   }, [weight, rate, making, purity]);
+
+  const [manualSaved, setManualSaved] = useState(false);
+  const lastLoggedRef = useRef<string>('');
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    if (!results.isValid || results.totalPrice <= 0) return;
+
+    const paramKey = `${weight}-${rate}-${making}-${purity.label}`;
+    if (lastLoggedRef.current === paramKey) return;
+
+    const handler = setTimeout(() => {
+      saveHistory(
+        'Silver Valuation',
+        results.totalPrice,
+        `Weight: ${weight}g, Pure: ${purity.label}, Basic Rate: ₹${rate}/g, Making Charges: ${making || '0'}%`
+      );
+      lastLoggedRef.current = paramKey;
+    }, 1800);
+
+    return () => clearTimeout(handler);
+  }, [results.totalPrice, results.isValid, weight, rate, making, purity]);
+
+  const handleManualSave = () => {
+    if (!results.isValid) return;
+
+    saveHistory(
+      'Silver Valuation',
+      results.totalPrice,
+      `Weight: ${weight}g, Pure: ${purity.label}, Basic Rate: ₹${rate}/g, Making Charges: ${making || '0'}%`
+    );
+
+    const paramKey = `${weight}-${rate}-${making}-${purity.label}`;
+    lastLoggedRef.current = paramKey;
+
+    setManualSaved(true);
+    setTimeout(() => setManualSaved(false), 2000);
+  };
 
   const isFieldInvalid = (val: string, field: keyof typeof hasInteracted) => {
     return hasInteracted[field] && !val;
@@ -167,6 +189,20 @@ export default function SilverCard() {
               {formatIndianCurrency(results.totalPrice, 2)}
             </div>
           </div>
+
+          {results.isValid && (
+            <button
+              onClick={handleManualSave}
+              className={`w-full mt-4 h-12 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 border transition-all ${
+                manualSaved 
+                  ? 'bg-blue-500/10 border-blue-500/30 text-blue-300' 
+                  : 'bg-white/5 border-white/10 hover:bg-white/10 text-white cursor-pointer active:scale-95'
+              }`}
+            >
+              {manualSaved ? <Check className="w-4 h-4 text-blue-400" /> : <Save className="w-4 h-4 text-gray-400" />}
+              {manualSaved ? 'Saved to Ledger ✓' : 'Save Silver Valuation'}
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -10,9 +10,14 @@ import HistoryPage from './components/HistoryPage';
 import ProfilePage from './components/ProfilePage';
 import AdminPanel from './components/AdminPanel';
 import FeedbackSystem from './components/FeedbackSystem';
+import Dashboard from './pages/Dashboard';
+import Finance from './pages/Finance';
+import EMI from './pages/EMI';
+import Simple from './pages/Simple';
+import Discount from './pages/Discount';
 import { 
   Menu, User, Bell, Search, Settings, Shield, MessageSquare, X, WifiOff, ArrowLeft,
-  Home as HomeIcon, Grid, Clock
+  Home as HomeIcon, Grid, Clock, TrendingUp, CreditCard, Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -36,10 +41,10 @@ function Layout({ children }: { children: React.ReactNode }) {
   }, []);
 
   const navItems = [
-    { name: "Home", icon: HomeIcon, path: "/" },
-    { name: "Tools", icon: Grid, path: "/tools" },
-    { name: "History", icon: Clock, path: "/history" },
-    { name: "Profile", icon: User, path: "/profile" },
+    { name: "Home", emoji: "🏠", path: "/" },
+    { name: "Tools", emoji: "🧩", path: "/tools" },
+    { name: "History", emoji: "🕘", path: "/history" },
+    { name: "Profile", emoji: "👤", path: "/profile" },
   ];
 
   const onHome = location.pathname === '/';
@@ -141,24 +146,27 @@ function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-[#020617]/80 backdrop-blur-3xl border-t border-white/5 flex justify-around py-4 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+      <nav className="fixed bottom-5 left-1/2 -translate-x-1/2 w-[90%] max-w-md flex justify-around py-3 px-2 rounded-[20px] backdrop-blur-[16px] bg-[#0f172a]/70 border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-[1000] transition-all duration-300">
         {navItems.map((item, i) => {
-          const Icon = item.icon;
           const active = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
 
           return (
             <button
               key={i}
               onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${
-                active ? "text-blue-400" : "text-[#8fa3c7]"
-              }`}
+              className="flex flex-col items-center justify-center text-[12px] text-white no-underline transition-all duration-300 hover:scale-110 cursor-pointer focus:outline-none"
+              style={{ transition: "0.3s" }}
             >
-              <div className={`p-1.5 rounded-xl transition-all duration-300 ${active ? "bg-blue-500/10 shadow-glow-sm" : ""}`}>
-                <Icon size={20} strokeWidth={active ? 3 : 2} />
-              </div>
-              <span className={`text-[8px] font-black uppercase tracking-[0.2em] italic ${active ? "opacity-100" : "opacity-60"}`}>{item.name}</span>
-              {active && <motion.div layoutId="nav-dot" className="w-1 h-1 bg-blue-500 rounded-full mt-0.5 shadow-glow" />}
+              <span className="text-xl mb-0.5" role="img" aria-label={item.name}>{item.emoji}</span>
+              <span className={`text-[10px] font-medium tracking-wide transition-colors ${active ? "text-blue-400 font-bold" : "text-gray-300 opacity-80"}`}>
+                {item.name}
+              </span>
+              {active && (
+                <motion.div 
+                  layoutId="nav-dot" 
+                  className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-0.5 shadow-[0_0_8px_rgba(96,165,250,0.8)]" 
+                />
+              )}
             </button>
           );
         })}
@@ -213,9 +221,14 @@ export default function App() {
     <BrowserRouter>
       <Layout>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<Dashboard />} />
           <Route path="/tools" element={<ToolsPage />} />
-          <Route path="/finance" element={<FinanceHub />} />
+          <Route path="/finance" element={<Finance />} />
+          <Route path="/discount" element={<Discount />} />
+          <Route path="/emi" element={<EMI />} />
+          <Route path="/simple" element={<Simple />} />
+          <Route path="/finance-expert" element={<FinanceHub />} />
+          <Route path="/hub" element={<HomePage />} />
           <Route path="/gold" element={<MetalsPage mode="gold" />} />
           <Route path="/silver" element={<MetalsPage mode="silver" />} />
           <Route path="/vehicle" element={<VehiclePage />} />

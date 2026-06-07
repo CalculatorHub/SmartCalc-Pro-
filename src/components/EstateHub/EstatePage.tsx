@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import DimensionsCard from './DimensionsCard';
 import ValuationCard from './ValuationCard';
 import EstimationCard from './EstimationCard';
 import ConversionCard from './ConversionCard';
 import { Landmark } from 'lucide-react';
+import { saveHistory } from '../../lib/historyUtils';
 
 export default function EstatePage() {
   const [length, setLength] = useState('');
@@ -13,9 +14,13 @@ export default function EstatePage() {
   const [rateUnit, setRateUnit] = useState('SQ.FT');
 
   const stats = useMemo(() => {
-    const L = parseFloat(length) || 0;
-    const W = parseFloat(width) || 0;
-    const R = parseFloat(rate) || 0;
+    const rawL = parseFloat(length);
+    const rawW = parseFloat(width);
+    const rawR = parseFloat(rate);
+
+    const L = isNaN(rawL) || rawL <= 0 ? 0 : rawL;
+    const W = isNaN(rawW) || rawW <= 0 ? 0 : rawW;
+    const R = isNaN(rawR) || rawR <= 0 ? 0 : rawR;
 
     let area = L * W;
     let convertedArea = area;
@@ -37,6 +42,56 @@ export default function EstatePage() {
     };
   }, [length, width, unit, rate, rateUnit]);
 
+  const [archiveSaved, setArchiveSaved] = useState(false);
+  const lastLoggedRef = useRef<string>('');
+
+  // Auto-save logic
+  useEffect(() => {
+    const rawL = parseFloat(length);
+    const rawW = parseFloat(width);
+    const rawR = parseFloat(rate);
+
+    if (isNaN(rawL) || rawL <= 0 || isNaN(rawW) || rawW <= 0 || isNaN(rawR) || rawR <= 0) {
+      return;
+    }
+
+    const paramKey = `${length}-${width}-${unit}-${rate}-${rateUnit}`;
+    if (lastLoggedRef.current === paramKey) return;
+
+    const handler = setTimeout(() => {
+      saveHistory(
+        'Real Estate Valuation',
+        stats.totalPrice,
+        `Dimensions: ${length}x${width} ${unit} (Area: ${stats.area.toFixed(2)} ${stats.displayUnit}), Rate: ₹${rate}/${rateUnit}`
+      );
+      lastLoggedRef.current = paramKey;
+    }, 1800);
+
+    return () => clearTimeout(handler);
+  }, [length, width, unit, rate, rateUnit, stats]);
+
+  const handleArchive = () => {
+    const rawL = parseFloat(length);
+    const rawW = parseFloat(width);
+    const rawR = parseFloat(rate);
+
+    if (isNaN(rawL) || rawL <= 0 || isNaN(rawW) || rawW <= 0 || isNaN(rawR) || rawR <= 0) {
+      return;
+    }
+
+    saveHistory(
+      'Real Estate Valuation',
+      stats.totalPrice,
+      `Dimensions: ${length}x${width} ${unit} (Area: ${stats.area.toFixed(2)} ${stats.displayUnit}), Rate: ₹${rate}/${rateUnit}`
+    );
+
+    const paramKey = `${length}-${width}-${unit}-${rate}-${rateUnit}`;
+    lastLoggedRef.current = paramKey;
+
+    setArchiveSaved(true);
+    setTimeout(() => setArchiveSaved(false), 2000);
+  };
+
   return (
     <div className="min-h-screen text-white px-5 pt-8 pb-32 space-y-10 animate-in fade-in duration-700">
       <div className="space-y-1">
@@ -54,6 +109,8 @@ export default function EstatePage() {
             rate={rate} setRate={setRate}
             rateUnit={rateUnit} setRateUnit={setRateUnit}
             onReset={() => { setLength(''); setWidth(''); setRate(''); }}
+            onArchive={handleArchive}
+            archiveSaved={archiveSaved}
         />
         <EstimationCard area={stats.area} totalPrice={stats.totalPrice} unit={stats.displayUnit} />
         <ConversionCard />

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Coins, Scale, Percent, ShoppingCart, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Coins, Scale, Percent, ShoppingCart, ArrowRight, Save, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { formatIndianCurrency } from '../../lib/financeUtils';
+import { saveHistory } from '../../lib/historyUtils';
 
 interface PurityOption {
   label: string;
@@ -20,23 +21,6 @@ export default function GoldCard() {
   const [making, setMaking] = useState('');
   const [purity, setPurity] = useState(PURITIES[0]);
   const [hasInteracted, setHasInteracted] = useState({ weight: false, rate: false, making: false });
-
-  // Load saved rate on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('goldRate');
-    if (saved) {
-      setRate(saved);
-    } else {
-      setRate('16798');
-    }
-  }, []);
-
-  // Save rate when changed
-  useEffect(() => {
-    if (rate) {
-      localStorage.setItem('goldRate', rate);
-    }
-  }, [rate]);
 
   const [results, setResults] = useState({
     adjustedRate: 0,
@@ -71,6 +55,44 @@ export default function GoldCard() {
       isValid: true
     });
   }, [weight, rate, making, purity]);
+
+  const [manualSaved, setManualSaved] = useState(false);
+  const lastLoggedRef = useRef<string>('');
+
+  // Debounced auto-save effect
+  useEffect(() => {
+    if (!results.isValid || results.totalPrice <= 0) return;
+
+    const paramKey = `${weight}-${rate}-${making}-${purity.label}`;
+    if (lastLoggedRef.current === paramKey) return;
+
+    const handler = setTimeout(() => {
+      saveHistory(
+        'Gold Valuation',
+        results.totalPrice,
+        `Weight: ${weight}g, Pure: ${purity.label}, Basic Rate: ₹${rate}/g, Making Charges: ${making || '0'}%`
+      );
+      lastLoggedRef.current = paramKey;
+    }, 1800);
+
+    return () => clearTimeout(handler);
+  }, [results.totalPrice, results.isValid, weight, rate, making, purity]);
+
+  const handleManualSave = () => {
+    if (!results.isValid) return;
+
+    saveHistory(
+      'Gold Valuation',
+      results.totalPrice,
+      `Weight: ${weight}g, Pure: ${purity.label}, Basic Rate: ₹${rate}/g, Making Charges: ${making || '0'}%`
+    );
+
+    const paramKey = `${weight}-${rate}-${making}-${purity.label}`;
+    lastLoggedRef.current = paramKey;
+
+    setManualSaved(true);
+    setTimeout(() => setManualSaved(false), 2000);
+  };
 
   const isFieldInvalid = (val: string, field: keyof typeof hasInteracted) => {
     return hasInteracted[field] && !val;
@@ -168,6 +190,20 @@ export default function GoldCard() {
               {formatIndianCurrency(results.totalPrice, 2)}
             </div>
           </div>
+
+          {results.isValid && (
+            <button
+              onClick={handleManualSave}
+              className={`w-full mt-4 h-12 rounded-xl text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 border transition-all ${
+                manualSaved 
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
+                  : 'bg-white/5 border-white/10 hover:bg-white/10 text-white cursor-pointer active:scale-95'
+              }`}
+            >
+              {manualSaved ? <Check className="w-4 h-4 text-emerald-400" /> : <Save className="w-4 h-4 text-gray-400" />}
+              {manualSaved ? 'Saved to Ledger ✓' : 'Save Gold Valuation'}
+            </button>
+          )}
         </div>
       </div>
     </div>
