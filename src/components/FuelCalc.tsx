@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RotateCcw, Save, Flame, Info, Route, ShieldAlert } from 'lucide-react';
+import { RotateCcw, Save, Flame, Route, ShieldAlert, Info } from 'lucide-react';
 import { formatCurrency, cn } from '../utils';
 import { HistoryItem } from '../types';
 
@@ -8,69 +8,67 @@ interface FuelCalcProps {
   onSaveHistory: (item: Omit<HistoryItem, 'id' | 'date'>) => void;
 }
 
-export default function FuelCalc({ currency, onSaveHistory }: FuelCalcProps) {
+export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcProps) {
+  // Balanced Indian default values: 100 km, ₹101.5/L, 15 km/L (KMPL)
   const [distance, setDistance] = useState<number>(100);
-  const [fuelPrice, setFuelPrice] = useState<number>(3.8);
-  const [efficiency, setEfficiency] = useState<number>(25); // km/L or MPG
-  const [unitSystem, setUnitSystem] = useState<'imperial' | 'metric'>('imperial');
+  const [fuelPrice, setFuelPrice] = useState<number>(101.5);
+  const [efficiency, setEfficiency] = useState<number>(15); // in km/L (KMPL)
   const [isSaved, setIsSaved] = useState<boolean>(false);
 
-  // Labels and standard formulas
-  const efficiencyLabel = unitSystem === 'imperial' ? 'mpg (Miles / Gallon)' : 'L/100km (Liters / 100km)';
-  const distanceUnit = unitSystem === 'imperial' ? 'miles' : 'km';
-  const volumeUnit = unitSystem === 'imperial' ? 'gallons' : 'liters';
+  // Labels
+  const efficiencyLabel = 'km/L (KMPL - Kilometers per Liter)';
+  const distanceUnit = 'km';
+  const volumeUnit = 'Liters';
 
   // Calculations
-  let fuelNeeded = 0;
-  if (unitSystem === 'imperial') {
-    // Miles / mpg = Gallons
-    fuelNeeded = efficiency > 0 ? distance / efficiency : 0;
-  } else {
-    // (Distance * L/100km) / 100 = Liters
-    fuelNeeded = (distance * efficiency) / 100;
-  }
-
+  // Distance (km) / Efficiency (km/L) = Fuel Needed (Liters)
+  const fuelNeeded = efficiency > 0 ? distance / efficiency : 0;
   const totalCost = fuelNeeded * fuelPrice;
-  const costPerUnit = distance > 0 ? totalCost / distance : 0;
+  const costPerUnit = distance > 0 ? totalCost / distance : 0; // ₹ per km
 
-  // CO2 Emissions (Approx: 8.89 kg per Gallon, 2.31 kg per Liter)
-  const co2Factor = unitSystem === 'imperial' ? 8.897 : 2.31;
-  const co2Emissions = fuelNeeded * co2Factor;
+  // CO2 Emissions (Approx: 2.31 kg per Liter for standard petrol/diesel)
+  const co2Emissions = fuelNeeded * 2.31; // in kg CO2
 
-  // Scale commute expenditures
+  // Projected budgets
   const dailyCost = totalCost;
-  const weeklyCost = totalCost * 5; // assumes 5-day commute
-  const monthlyCost = totalCost * 22; // 22 standard work days
-  const annualCost = totalCost * 260; // 260 standard work days
+  const weeklyCost = totalCost * 5; // 5-day work week
+  const monthlyCost = totalCost * 22; // 22 work days
+  const annualCost = totalCost * 260; // 260 work days
 
-  const maxYearlyCost = 6000; // default cap for color sizing
+  // Default max budget cap for visual sizing (e.g. ₹1,00,000 / year)
+  const maxYearlyCost = 100000;
   const annualPercent = Math.min(100, Math.max(5, (annualCost / maxYearlyCost) * 100));
 
-  const handlePreset = (sys: 'imperial' | 'metric', dist: number, price: number, eff: number) => {
-    setUnitSystem(sys);
+  const handlePreset = (dist: number, price: number, eff: number) => {
     setDistance(dist);
     setFuelPrice(price);
     setEfficiency(eff);
     setIsSaved(false);
   };
 
+  const handleReset = () => {
+    setDistance(100);
+    setFuelPrice(101.5);
+    setEfficiency(15);
+    setIsSaved(false);
+  };
+
   const handleSave = () => {
     onSaveHistory({
       type: 'fuel',
-      title: 'Fuel Calculator',
+      title: 'Fuel & Commute Calculator',
       inputs: {
-        distance,
-        fuelPrice,
-        efficiency,
-        unitSystem,
+        distanceKm: distance,
+        fuelPricePerLiter: fuelPrice,
+        efficiencyKmpl: efficiency,
       },
       outputs: {
-        fuelNeeded,
-        totalCost,
-        co2Emissions,
-        weeklyCost,
-        monthlyCost,
-        annualCost,
+        fuelNeededLiters: fuelNeeded,
+        totalCostINR: totalCost,
+        co2EmissionsKg: co2Emissions,
+        weeklyCostINR: weeklyCost,
+        monthlyCostINR: monthlyCost,
+        annualCostINR: annualCost,
       },
     });
     setIsSaved(true);
@@ -80,12 +78,12 @@ export default function FuelCalc({ currency, onSaveHistory }: FuelCalcProps) {
   return (
     <div className="space-y-6">
       {/* Carbon footprint banner */}
-      <div className="bg-orange-50 border border-orange-100 rounded-2xl p-4 flex gap-3 text-orange-950 text-sm">
+      <div className="bg-orange-50/70 border border-orange-100 rounded-2xl p-4 flex gap-3 text-orange-950 text-sm">
         <Flame className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
         <div>
-          <span className="font-semibold text-orange-900">Eco-Finance insights:</span>
+          <span className="font-semibold text-orange-900">Commute Carbon & Financial Insight:</span>
           <p className="mt-0.5 text-xs text-orange-850 opacity-90">
-            Fuel expenses map directly to carbon emissions. By increasing fuel efficiency by just 5 MPG, you can save roughly {formatCurrency(350, currency)} per year and offset 1,200 lbs of CO2.
+            Fuel costs map directly to carbon emissions. By improving your vehicle's mileage (KMPL) by just 3 km/L, you can save significant fuel charges per year and reduce your carbon footprint by up to {(100 * 2.31).toFixed(0)} kg of CO2.
           </p>
         </div>
       </div>
@@ -94,63 +92,24 @@ export default function FuelCalc({ currency, onSaveHistory }: FuelCalcProps) {
         {/* Left Side: Parameters */}
         <div className="space-y-5 bg-white p-6 rounded-2xl border border-gray-100">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h3 className="font-semibold text-gray-800 text-lg flex items-center gap-2">
+            <h3 className="font-semibold text-gray-800 text-base flex items-center gap-2">
               <Route className="w-5 h-5 text-orange-600" />
-              Commute Parameters
+              Indian Commute Parameters
             </h3>
             <button
-              onClick={() => handlePreset('imperial', 50, 3.8, 25)}
-              className="text-gray-400 hover:text-orange-600 text-xs flex items-center gap-1 cursor-pointer"
+              onClick={handleReset}
+              className="text-gray-400 hover:text-orange-600 text-xs flex items-center gap-1 cursor-pointer font-bold"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              Reset
+              Reset Defaults
             </button>
-          </div>
-
-          {/* Unit System Selector */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Measurement System</label>
-            <div className="grid grid-cols-2 gap-2 bg-gray-50 p-1 rounded-xl">
-              <button
-                type="button"
-                onClick={() => {
-                  setUnitSystem('imperial');
-                  setEfficiency(25); // reset efficiency to standard MPG
-                  setIsSaved(false);
-                }}
-                className={cn(
-                  "py-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center",
-                  unitSystem === 'imperial'
-                    ? "bg-orange-600 text-white shadow-xs"
-                    : "text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-                )}
-              >
-                Imperial (Miles, MPG, Gallon)
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setUnitSystem('metric');
-                  setEfficiency(8.5); // reset to standard L/100km
-                  setIsSaved(false);
-                }}
-                className={cn(
-                  "py-2 rounded-lg text-xs font-bold transition-all cursor-pointer text-center",
-                  unitSystem === 'metric'
-                    ? "bg-orange-600 text-white shadow-xs"
-                    : "text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-                )}
-              >
-                Metric (Km, L/100km, Liter)
-              </button>
-            </div>
           </div>
 
           {/* Planned Distance */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium text-gray-600">Travel Distance ({distanceUnit})</label>
-              <span className="text-sm font-semibold text-gray-800">{distance} {distanceUnit}</span>
+            <div className="flex justify-between items-center text-xs">
+              <label className="font-bold text-gray-500 uppercase tracking-wider">Travel Distance ({distanceUnit})</label>
+              <span className="font-bold text-gray-800 text-sm">{distance} {distanceUnit}</span>
             </div>
             <div className="relative rounded-xl">
               <input
@@ -160,29 +119,17 @@ export default function FuelCalc({ currency, onSaveHistory }: FuelCalcProps) {
                   setDistance(Math.max(0, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
+                className="block w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold"
                 placeholder="0"
               />
             </div>
-            <input
-              type="range"
-              min="1"
-              max="500"
-              step="5"
-              value={distance}
-              onChange={(e) => {
-                setDistance(parseInt(e.target.value));
-                setIsSaved(false);
-              }}
-              className="w-full accent-orange-600 h-1 bg-gray-100 rounded-lg appearance-none cursor-pointer"
-            />
           </div>
 
-          {/* Fuel Price */}
+          {/* Fuel Price (Rupees per Liter) */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium text-gray-600">Fuel Price (per {volumeUnit})</label>
-              <span className="text-sm font-semibold text-gray-800">{formatCurrency(fuelPrice, currency)}</span>
+            <div className="flex justify-between items-center text-xs">
+              <label className="font-bold text-gray-500 uppercase tracking-wider">Fuel Price (per Liter)</label>
+              <span className="font-bold text-gray-800 text-sm">{formatCurrency(fuelPrice, currency)}/L</span>
             </div>
             <div className="relative rounded-xl">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -196,29 +143,17 @@ export default function FuelCalc({ currency, onSaveHistory }: FuelCalcProps) {
                   setFuelPrice(Math.max(0, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full pl-8 pr-3 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
+                className="block w-full pl-8 pr-3 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold"
                 placeholder="0.00"
               />
             </div>
-            <input
-              type="range"
-              min="1.0"
-              max="10.0"
-              step="0.05"
-              value={fuelPrice}
-              onChange={(e) => {
-                setFuelPrice(parseFloat(e.target.value));
-                setIsSaved(false);
-              }}
-              className="w-full accent-orange-600 h-1 bg-gray-100 rounded-lg appearance-none cursor-pointer"
-            />
           </div>
 
-          {/* Fuel Efficiency / Mileage */}
+          {/* Fuel Efficiency / Vehicle Mileage (km/L) */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-sm font-medium text-gray-600">Vehicle Fuel Consumption</label>
-              <span className="text-sm font-semibold text-gray-800">{efficiency} {unitSystem === 'imperial' ? 'mpg' : 'L/100km'}</span>
+            <div className="flex justify-between items-center text-xs">
+              <label className="font-bold text-gray-500 uppercase tracking-wider">Vehicle Mileage ({efficiencyLabel})</label>
+              <span className="font-bold text-gray-800 text-sm">{efficiency} km/L</span>
             </div>
             <div className="relative rounded-xl">
               <input
@@ -229,47 +164,35 @@ export default function FuelCalc({ currency, onSaveHistory }: FuelCalcProps) {
                   setEfficiency(Math.max(0.1, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-medium"
+                className="block w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold"
               />
             </div>
-            <input
-              type="range"
-              min={unitSystem === 'imperial' ? 5 : 2}
-              max={unitSystem === 'imperial' ? 80 : 30}
-              step="0.5"
-              value={efficiency}
-              onChange={(e) => {
-                setEfficiency(parseFloat(e.target.value));
-                setIsSaved(false);
-              }}
-              className="w-full accent-orange-600 h-1 bg-gray-100 rounded-lg appearance-none cursor-pointer"
-            />
           </div>
 
-          {/* Quick Vehicle Presets */}
+          {/* Indian Typical Vehicle Presets */}
           <div className="space-y-1.5 pt-1 border-t border-gray-50">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-widest block">Typical Vehicles</span>
+            <span className="text-[10px] font-bold text-gray-450 uppercase tracking-widest block">Typical Indian Vehicles</span>
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => handlePreset('imperial', 30, 3.8, 52)}
+                onClick={() => handlePreset(100, 101.5, 55)}
                 className="px-2.5 py-1.5 rounded-lg border border-gray-200 hover:border-orange-200 hover:bg-orange-50/20 text-xs text-gray-600 hover:text-orange-700 transition-all font-medium cursor-pointer"
               >
-                🚴 Hybrid Hatchback (52 mpg)
+                🏍️ Commuter Bike / Scooty (55 km/L)
               </button>
               <button
                 type="button"
-                onClick={() => handlePreset('imperial', 40, 3.8, 28)}
+                onClick={() => handlePreset(100, 101.5, 18)}
                 className="px-2.5 py-1.5 rounded-lg border border-gray-200 hover:border-orange-200 hover:bg-orange-50/20 text-xs text-gray-600 hover:text-orange-700 transition-all font-medium cursor-pointer"
               >
-                🚗 Standard Sedan (28 mpg)
+                🚗 Hatchback / Sedan (18 km/L)
               </button>
               <button
                 type="button"
-                onClick={() => handlePreset('imperial', 50, 4.0, 16)}
+                onClick={() => handlePreset(100, 101.5, 12)}
                 className="px-2.5 py-1.5 rounded-lg border border-gray-200 hover:border-orange-200 hover:bg-orange-50/20 text-xs text-gray-600 hover:text-orange-700 transition-all font-medium cursor-pointer"
               >
-                🛻 Family SUV / Truck (16 mpg)
+                🚙 Family SUV / MPV (12 km/L)
               </button>
             </div>
           </div>
@@ -280,7 +203,7 @@ export default function FuelCalc({ currency, onSaveHistory }: FuelCalcProps) {
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
             <h3 className="font-semibold text-gray-800 text-lg flex items-center gap-2">
               <Flame className="w-5 h-5 text-orange-600" />
-              Expenditure Insights
+              Expenditure Estimates
             </h3>
             <button
               onClick={handleSave}
@@ -297,7 +220,7 @@ export default function FuelCalc({ currency, onSaveHistory }: FuelCalcProps) {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-gray-50/30 border border-gray-100 rounded-xl space-y-1">
+            <div className="p-4 bg-gray-50/35 border border-gray-100 rounded-xl space-y-1">
               <span className="text-[10px] uppercase font-bold text-gray-400">Total Fuel Needed</span>
               <p className="text-lg font-bold text-gray-800 font-sans">{fuelNeeded.toFixed(2)} {volumeUnit}</p>
             </div>
@@ -306,31 +229,31 @@ export default function FuelCalc({ currency, onSaveHistory }: FuelCalcProps) {
               <p className="text-lg font-bold text-orange-700 font-sans">{formatCurrency(totalCost, currency)}</p>
             </div>
             <div className="p-4 bg-emerald-50/20 border border-emerald-50 rounded-xl space-y-1">
-              <span className="text-[10px] uppercase font-bold text-emerald-600">Cost per {distanceUnit}</span>
-              <p className="text-lg font-bold text-emerald-700 font-sans">{formatCurrency(costPerUnit, currency)}</p>
+              <span className="text-[10px] uppercase font-bold text-emerald-600">Running Cost ({distanceUnit})</span>
+              <p className="text-lg font-bold text-emerald-700 font-sans">{formatCurrency(costPerUnit, currency)}/km</p>
             </div>
             <div className="p-4 bg-red-50/20 border border-red-50 rounded-xl space-y-1">
-              <span className="text-[10px] uppercase font-bold text-red-600 flex items-center gap-1">
-                <ShieldAlert className="w-3.5 h-3.5" /> Carbon Impact
+              <span className="text-[10px] uppercase font-bold text-red-650 flex items-center gap-1">
+                <ShieldAlert className="w-3.5 h-3.5" /> Carbon Weight
               </span>
-              <p className="text-lg font-bold text-red-700 font-sans">{co2Emissions.toFixed(1)} lbs CO2</p>
+              <p className="text-lg font-bold text-red-700 font-sans">{co2Emissions.toFixed(1)} kg CO2</p>
             </div>
           </div>
 
-          {/* Animated Horizontal Commute bar charts */}
+          {/* Projected Commute bar charts */}
           <div className="space-y-4 pt-1">
-            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Projected Commute Forecast (Budget)</h4>
+            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Projected Commute Budgets</h4>
 
-            <div className="space-y-2.5 text-xs">
+            <div className="space-y-2.5 text-xs font-semibold">
               {/* Daily */}
               <div className="space-y-1">
-                <div className="flex justify-between font-medium text-gray-600">
+                <div className="flex justify-between font-bold text-gray-600">
                   <span>Daily Commute (1 day)</span>
-                  <span className="font-bold text-gray-800">{formatCurrency(dailyCost, currency)}</span>
+                  <span className="font-extrabold text-gray-800">{formatCurrency(dailyCost, currency)}</span>
                 </div>
                 <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                   <div
-                    className="bg-orange-500 h-full rounded-full transition-all duration-300"
+                    className="bg-orange-550 h-full rounded-full transition-all duration-300"
                     style={{ width: `${Math.max(4, (dailyCost / annualCost) * 1000)}%` }}
                   ></div>
                 </div>
@@ -338,9 +261,9 @@ export default function FuelCalc({ currency, onSaveHistory }: FuelCalcProps) {
 
               {/* Weekly */}
               <div className="space-y-1">
-                <div className="flex justify-between font-medium text-gray-600">
+                <div className="flex justify-between font-bold text-gray-600">
                   <span>Weekly Commute (5 days)</span>
-                  <span className="font-bold text-gray-800">{formatCurrency(weeklyCost, currency)}</span>
+                  <span className="font-extrabold text-gray-800">{formatCurrency(weeklyCost, currency)}</span>
                 </div>
                 <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                   <div
@@ -352,9 +275,9 @@ export default function FuelCalc({ currency, onSaveHistory }: FuelCalcProps) {
 
               {/* Monthly */}
               <div className="space-y-1">
-                <div className="flex justify-between font-medium text-gray-600">
+                <div className="flex justify-between font-bold text-gray-600">
                   <span>Monthly Commute (22 days)</span>
-                  <span className="font-bold text-gray-800">{formatCurrency(monthlyCost, currency)}</span>
+                  <span className="font-extrabold text-gray-800">{formatCurrency(monthlyCost, currency)}</span>
                 </div>
                 <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                   <div
@@ -366,13 +289,13 @@ export default function FuelCalc({ currency, onSaveHistory }: FuelCalcProps) {
 
               {/* Annual */}
               <div className="space-y-1">
-                <div className="flex justify-between font-bold text-indigo-900 border-t border-gray-100 pt-2">
-                  <span>Annual Budget (260 commute days)</span>
-                  <span className="text-sm">{formatCurrency(annualCost, currency)}</span>
+                <div className="flex justify-between font-bold text-indigo-900 border-t border-gray-150 pt-2 bg-indigo-50/10 px-2 rounded-lg py-1">
+                  <span className="flex items-center gap-1">Annual Commute Budget (260 Days)</span>
+                  <span className="text-sm font-extrabold">{formatCurrency(annualCost, currency)}</span>
                 </div>
                 <div className="w-full bg-gray-150 h-3 rounded-full overflow-hidden">
                   <div
-                    className="bg-indigo-600 h-full rounded-full transition-all duration-300"
+                    className="bg-indigo-650 h-full rounded-full transition-all duration-300"
                     style={{ width: `${annualPercent}%` }}
                   ></div>
                 </div>

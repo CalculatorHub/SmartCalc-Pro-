@@ -10,11 +10,7 @@ interface ProfileTabProps {
 }
 
 const CURRENCIES = [
-  { symbol: '$', code: 'USD', name: 'US Dollar ($)' },
   { symbol: '₹', code: 'INR', name: 'Indian Rupee (₹)' },
-  { symbol: '€', code: 'EUR', name: 'Euro (€)' },
-  { symbol: '£', code: 'GBP', name: 'British Pound (£)' },
-  { symbol: '¥', code: 'JPY', name: 'Japanese Yen (¥)' },
 ];
 
 export default function ProfileTab({
@@ -26,8 +22,13 @@ export default function ProfileTab({
     <div className="space-y-6 max-w-2xl mx-auto">
       {/* Visual Avatar Card banner */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 text-white flex flex-col sm:flex-row items-center gap-5 shadow-sm">
-        <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20 shadow-inner">
-          <User className="w-8 h-8" />
+        <div className="w-16 h-16 rounded-2xl bg-white overflow-hidden flex items-center justify-center border-2 border-white/30 shadow-lg shrink-0">
+          <img
+            src="/src/assets/images/smart_finance_logo_1780875300350.png"
+            alt="Smart Finance Brand"
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
         </div>
         <div className="text-center sm:text-left space-y-1">
           <span className="text-[10px] uppercase font-bold tracking-widest text-blue-100 bg-blue-500/30 px-2.5 py-0.5 rounded-full">

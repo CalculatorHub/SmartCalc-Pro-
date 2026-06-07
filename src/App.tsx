@@ -24,8 +24,7 @@ import { AppTab, CalculatorType, HistoryItem, NotificationItem, UserPreferences 
 import { cn } from './utils';
 
 // Calculator components
-import SimpleInterestCalc from './components/SimpleInterestCalc';
-import CompoundInterestCalc from './components/CompoundInterestCalc';
+import InterestCalc from './components/InterestCalc';
 import FuelCalc from './components/FuelCalc';
 import MetalCalc from './components/MetalCalc';
 import EstateCalc from './components/EstateCalc';
@@ -63,7 +62,7 @@ const INITIAL_NOTIFICATIONS: NotificationItem[] = [
 export default function App() {
   // Shell tabs selection
   const [activeTab, setActiveTab] = useState<AppTab>('home');
-  const [selectedCalc, setSelectedCalc] = useState<CalculatorType>('simple');
+  const [selectedCalc, setSelectedCalc] = useState<CalculatorType>('interest');
 
   // Stored state
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -71,7 +70,7 @@ export default function App() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [preferences, setPreferences] = useState<UserPreferences>({
     userName: 'Smart Finance Owner',
-    currency: '$',
+    currency: '₹',
     themeColor: 'indigo',
     weeklyGoal: 5,
   });
@@ -101,7 +100,9 @@ export default function App() {
     const savedPref = localStorage.getItem('finance_pref_v1');
     if (savedPref) {
       try {
-        setPreferences(JSON.parse(savedPref));
+        const parsed = JSON.parse(savedPref);
+        parsed.currency = '₹';
+        setPreferences(parsed);
       } catch (e) {
         console.error('Failed to load preferences', e);
       }
@@ -174,12 +175,17 @@ export default function App() {
         <header className="flex items-center justify-between bg-white px-6 py-4 md:px-8 md:py-5 rounded-3xl border border-gray-100 shadow-sm relative">
           
           {/* Welcome Text, matching Vibrant Palette header design */}
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-100 rounded-2xl flex items-center justify-center text-brand-primary shadow-3xs">
-              <BarChart2 className="w-6 h-6" />
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 bg-white rounded-2xl overflow-hidden flex items-center justify-center shadow-xs border border-gray-100 shrink-0">
+              <img
+                src="/src/assets/images/smart_finance_logo_1780875300350.png"
+                alt="Smart Finance Logo"
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div>
-              <p className="text-xs md:text-sm text-gray-500 font-medium">Welcome back,</p>
+              <p className="text-[10px] uppercase font-black text-indigo-650 tracking-widest leading-none mb-1">Smart Finance</p>
               <h2 className="text-sm font-bold text-gray-900 leading-tight md:text-base font-display">
                 {preferences.userName} 👋
               </h2>
@@ -285,38 +291,24 @@ export default function App() {
                     </button>
                   </div>
 
-                  {/* GRID OF 5 CARDS Matching Popular Tools grid from Design HTML */}
-                  <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
+                  {/* GRID OF 4 CARDS Matching Popular Tools grid from Design HTML */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
                     
-                    {/* 1. Simple Interest */}
+                    {/* 1. Interest Calculator */}
                     <div
-                      onClick={() => handleLaunchCalc('simple')}
-                      className="group bg-white p-6 rounded-3xl shadow-sm hover:shadow-md border border-transparent hover:border-emerald-100 flex flex-col justify-between h-40 transition-all duration-300 cursor-pointer"
+                      onClick={() => handleLaunchCalc('interest')}
+                      className="group bg-white p-6 rounded-3xl shadow-sm hover:shadow-md border border-transparent hover:border-indigo-100 flex flex-col justify-between h-40 transition-all duration-300 cursor-pointer"
                     >
-                      <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:bg-emerald-500 group-hover:text-white">
+                      <div className="w-12 h-12 bg-indigo-50 text-indigo-650 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:bg-indigo-650 group-hover:text-white">
                         <Percent className="w-6 h-6" />
                       </div>
                       <div>
-                        <p className="font-bold text-gray-800 font-display text-sm">Simple Interest</p>
-                        <p className="text-xs text-gray-400">Quick return estimations</p>
+                        <p className="font-bold text-gray-800 font-display text-sm">Interest Calculator</p>
+                        <p className="text-xs text-gray-400">Simple & Compound modes</p>
                       </div>
                     </div>
 
-                    {/* 2. Compound Interest */}
-                    <div
-                      onClick={() => handleLaunchCalc('compound')}
-                      className="group bg-white p-6 rounded-3xl shadow-sm hover:shadow-md border border-transparent hover:border-purple-100 flex flex-col justify-between h-40 transition-all duration-300 cursor-pointer"
-                    >
-                      <div className="w-12 h-12 bg-purple-50 text-purple-500 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:bg-purple-500 group-hover:text-white">
-                        <TrendingUp className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-gray-800 font-display text-sm">Compound Growth</p>
-                        <p className="text-xs text-gray-400">Visualize growth metrics</p>
-                      </div>
-                    </div>
-
-                    {/* 3. Fuel Calculator */}
+                    {/* 2. Fuel Calculator */}
                     <div
                       onClick={() => handleLaunchCalc('fuel')}
                       className="group bg-white p-6 rounded-3xl shadow-sm hover:shadow-md border border-transparent hover:border-orange-100 flex flex-col justify-between h-40 transition-all duration-300 cursor-pointer"
@@ -330,10 +322,10 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* 4. Silver Calculator */}
+                    {/* 3. Silver Calculator */}
                     <div
                       onClick={() => handleLaunchCalc('silver')}
-                      className="group bg-white p-6 rounded-3xl shadow-sm hover:shadow-md border border-transparent hover:border-indigo-100 flex flex-col justify-between h-40 transition-all duration-300 cursor-pointer"
+                      className="group bg-white p-6 rounded-3xl shadow-sm hover:shadow-md border border-transparent hover:border-slate-100 flex flex-col justify-between h-40 transition-all duration-300 cursor-pointer"
                     >
                       <div className="w-12 h-12 bg-slate-50 text-slate-500 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:bg-slate-500 group-hover:text-white">
                         <Coins className="w-6 h-6" />
@@ -344,7 +336,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    {/* 5. Gold Calculator */}
+                    {/* 4. Gold Calculator */}
                     <div
                       onClick={() => handleLaunchCalc('gold')}
                       className="group bg-white p-6 rounded-3xl shadow-sm hover:shadow-md border border-transparent hover:border-amber-100 flex flex-col justify-between h-40 transition-all duration-300 cursor-pointer"
@@ -403,8 +395,7 @@ export default function App() {
                   <h3 className="font-black text-lg text-gray-800">Financial Catalogs</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[
-                      { type: 'simple', name: 'Simple Interest', sub: 'Calculate standard linear rate parameters with customized periods.', col: 'emerald', ic: <Percent className="w-5 h-5" /> },
-                      { type: 'compound', name: 'Compound Growth', sub: 'Project exponential deposits values over years or months steps.', col: 'purple', ic: <TrendingUp className="w-5 h-5" /> },
+                      { type: 'interest', name: 'Interest Calculator', sub: 'Calculate standard linear (Simple) and exponential (Compound) periods.', col: 'indigo', ic: <Percent className="w-5 h-5" /> },
                       { type: 'fuel', name: 'Fuel & Commuting', sub: 'Log mileage, travel parameters, fuel prices boundaries, CO2 impact.', col: 'orange', ic: <Flame className="w-5 h-5" /> },
                       { type: 'gold', name: 'Gold Index Tracker', sub: 'Calculate real gold value by purities karats (24K, 22K) with making fee.', col: 'amber', ic: <Sparkles className="w-5 h-5" /> },
                       { type: 'silver', name: 'Silver Purity Tracker', sub: 'Calculate silver value matching fine, sterling or coin ratios.', col: 'slate', ic: <Coins className="w-5 h-5" /> },
@@ -452,8 +443,7 @@ export default function App() {
                     <span className="text-xs font-black text-gray-450 uppercase tracking-widest hidden sm:inline">Active Workspace:</span>
                     <div className="flex bg-gray-50/80 p-0.5 rounded-xl border border-gray-100/50 font-bold text-xs scrollbar-none overflow-x-auto">
                       {[
-                        { id: 'simple', label: 'Simple' },
-                        { id: 'compound', label: 'Compound' },
+                        { id: 'interest', label: 'Interest' },
                         { id: 'fuel', label: 'Fuel' },
                         { id: 'gold', label: 'Gold' },
                         { id: 'silver', label: 'Silver' },
@@ -477,11 +467,12 @@ export default function App() {
 
                   {/* Calculator view viewport */}
                   <div className="min-h-96">
-                    {selectedCalc === 'simple' && (
-                      <SimpleInterestCalc currency={preferences.currency} onSaveHistory={saveToHistory} />
-                    )}
-                    {selectedCalc === 'compound' && (
-                      <CompoundInterestCalc currency={preferences.currency} onSaveHistory={saveToHistory} />
+                    {(selectedCalc === 'interest' || selectedCalc === 'simple' || selectedCalc === 'compound') && (
+                      <InterestCalc 
+                        initialMode={selectedCalc === 'compound' ? 'compound' : 'simple'} 
+                        currency={preferences.currency} 
+                        onSaveHistory={saveToHistory} 
+                      />
                     )}
                     {selectedCalc === 'fuel' && (
                       <FuelCalc currency={preferences.currency} onSaveHistory={saveToHistory} />

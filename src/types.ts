@@ -1,6 +1,6 @@
 export type AppTab = 'home' | 'tools' | 'calculate' | 'history' | 'profile';
 
-export type CalculatorType = 'simple' | 'compound' | 'fuel' | 'gold' | 'silver' | 'estate';
+export type CalculatorType = 'interest' | 'simple' | 'compound' | 'fuel' | 'gold' | 'silver' | 'estate';
 
 export interface HistoryItem {
   id: string;

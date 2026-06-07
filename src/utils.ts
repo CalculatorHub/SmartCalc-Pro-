@@ -4,7 +4,7 @@ export function cn(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
 
-export function formatCurrency(value: number, symbol: string = '$'): string {
+export function formatCurrency(value: number, symbol: string = '₹'): string {
   return `${symbol}${value.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
