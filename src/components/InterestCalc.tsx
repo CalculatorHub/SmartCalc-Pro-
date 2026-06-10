@@ -262,19 +262,19 @@ export default function InterestCalc({
     <div className="space-y-6">
       
       {/* SECTION HEADER BLOCK - Clean mode selection */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-gray-150/45 shadow-2xs">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-app-card p-4 rounded-3xl border border-app-border shadow-2xs">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 font-display flex items-center gap-2">
-            <Landmark className="w-5.5 h-5.5 text-indigo-600" />
+          <h2 className="text-xl font-bold text-app-text font-display flex items-center gap-2">
+            <Landmark className="w-5.5 h-5.5 text-app-accent" />
             Interest Calculator
           </h2>
-          <p className="text-xs text-gray-450 mt-1 select-none font-medium">
+          <p className="text-xs text-app-text-muted mt-1 select-none font-medium">
             Dual Rate Conversion System (Annual % p.a. &amp; Local Monthly Rupee Rate)
           </p>
         </div>
 
         {/* Clean Selector for Simple and Compound. Compare mode removed completely */}
-        <div className="flex bg-gray-100 p-1 rounded-xl self-start md:self-auto border border-gray-200/50 font-bold text-xs select-none shadow-3xs">
+        <div className="flex bg-app-bg p-1 rounded-xl self-start md:self-auto border border-app-border font-bold text-xs select-none shadow-3xs">
           <button
             type="button"
             onClick={() => {
@@ -283,7 +283,7 @@ export default function InterestCalc({
             }}
             className={cn(
               "px-4 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1",
-              calcMode === 'simple' ? "bg-white text-emerald-700 shadow-3xs border border-emerald-100" : "text-gray-500 hover:text-gray-900"
+              calcMode === 'simple' ? "bg-app-card text-emerald-600 dark:text-emerald-400 shadow-3xs border border-app-border" : "text-app-text-secondary hover:text-app-text"
             )}
           >
             <Percent className="w-3.5 h-3.5 text-emerald-500" />
@@ -297,7 +297,7 @@ export default function InterestCalc({
             }}
             className={cn(
               "px-4 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1",
-              calcMode === 'compound' ? "bg-white text-purple-700 shadow-3xs border border-purple-100" : "text-gray-500 hover:text-gray-900"
+              calcMode === 'compound' ? "bg-app-card text-purple-650 dark:text-purple-400 shadow-3xs border border-app-border" : "text-app-text-secondary hover:text-app-text"
             )}
           >
             <TrendingUp className="w-3.5 h-3.5 text-purple-500" />
@@ -307,13 +307,13 @@ export default function InterestCalc({
       </div>
 
       {/* DYNAMICS EXPLANATION FOR RATE CONVERSIONS */}
-      <div className="bg-gradient-to-r from-indigo-50/50 to-emerald-50/50 border border-indigo-100/50 rounded-2xl p-4 flex gap-3 text-gray-700 text-xs shadow-3xs relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#4F46E5]/5 to-emerald-500/5 border border-app-border rounded-2xl p-4 flex gap-3 text-app-text-secondary text-xs shadow-3xs relative overflow-hidden">
         <Lightbulb className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5 animate-pulse" />
         <div className="space-y-1 z-10">
-          <span className="font-bold text-indigo-950 text-sm">Traditional Conversions Integrated Directly:</span>
-          <p className="opacity-90 leading-relaxed text-indigo-900">
-            For local finance bookkeeping, interest is defined as <strong className="text-emerald-750 font-extrabold">Rupees per month for every ₹100 of principal</strong>. 
-            Here, <strong className="text-slate-800 font-bold">12% Annual Rate (% p.a.) = ₹1.00 Rupee Rate</strong>, and <strong className="text-slate-800 font-bold">18% Annual Rate = ₹1.50 Rupee Rate</strong>. 
+          <span className="font-bold text-app-text text-sm">Traditional Conversions Integrated Directly:</span>
+          <p className="opacity-90 leading-relaxed text-app-text-secondary">
+            For local finance bookkeeping, interest is defined as <strong className="text-emerald-600 dark:text-emerald-405 font-extrabold">Rupees per month for every ₹100 of principal</strong>. 
+            Here, <strong className="text-app-text font-bold">12% Annual Rate (% p.a.) = ₹1.00 Rupee Rate</strong>, and <strong className="text-app-text font-bold">18% Annual Rate = ₹1.50 Rupee Rate</strong>. 
             Simply modify either field below, and the active conversion rate displays instantly inline.
           </p>
         </div>
@@ -322,15 +322,15 @@ export default function InterestCalc({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* LEFT COLUMN: PARAMETERS FOR THE INDIVIDUAL SECTION */}
-        <div className="lg:col-span-6 bg-white p-6 rounded-3xl border border-gray-150/45 shadow-3xs space-y-5">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2">
+        <div className="lg:col-span-6 bg-app-card p-6 rounded-3xl border border-app-border shadow-3xs space-y-5">
+          <div className="flex items-center justify-between border-b border-app-border pb-3">
+            <h3 className="font-bold text-app-text text-sm flex items-center gap-2">
               <Sliders className="w-4 h-4 text-indigo-500" />
               Configure {calcMode === 'simple' ? 'Simple' : 'Compound'} Parameters
             </h3>
             <button
               onClick={handleReset}
-              className="text-gray-400 hover:text-indigo-600 text-xs flex items-center gap-1 font-bold cursor-pointer transition-colors"
+              className="text-app-text-muted hover:text-app-accent text-xs flex items-center gap-1 font-bold cursor-pointer transition-colors"
               title="Reset parameters"
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -341,8 +341,8 @@ export default function InterestCalc({
           {/* 1. Principal Amount */}
           <div className="space-y-2">
             <div className="flex justify-between items-center select-none">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Principal Amount</label>
-              <span className="text-sm font-extrabold text-gray-800 bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+              <label className="text-xs font-bold text-app-text-secondary uppercase tracking-wide">Principal Amount</label>
+              <span className="text-sm font-extrabold text-app-text-secondary bg-app-bg px-2 py-0.5 rounded-md border border-app-border">
                 {formatCurrency(principal, currency)}
               </span>
             </div>
@@ -357,17 +357,16 @@ export default function InterestCalc({
                   setPrincipal(Math.max(0, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full pl-9 pr-3 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 text-sm font-bold text-gray-850"
+                className="block w-full pl-9 pr-3 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 text-sm font-bold text-[#0F172A] dark:text-[#FFFFFF]"
                 placeholder="0"
               />
             </div>
           </div>
-
-          {/* 2. Synced Rate Inputs inside the Section for User Interest (12% = 1 Rupee / 18% = 1.5 Rupees) */}
-          <div className="space-y-3.5 p-4 rounded-2xl bg-gray-50/60 border border-gray-150/45">
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-gray-600 uppercase tracking-wide block">Rate &amp; Rupee Conversion Converter</span>
-              <span className="text-[10px] text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md font-bold">
+                     {/* 2. Synced Rate Inputs inside the Section for User Interest (12% = 1 Rupee / 18% = 1.5 Rupees) */}
+          <div className="space-y-3.5 p-4 rounded-2xl bg-app-bg border border-app-border">
+            <div className="flex justify-between items-center select-none">
+              <span className="text-xs font-bold text-app-text-secondary uppercase tracking-wide block">Rate &amp; Rupee Converter</span>
+              <span className="text-[10px] text-[#4F46E5] dark:text-[#FACC15] bg-[#4F46E5]/10 dark:bg-[#FACC15]/10 px-2 py-0.5 rounded-md font-bold">
                 12% = 1 Rupee | 18% = 1.5 Rupees
               </span>
             </div>
@@ -375,8 +374,8 @@ export default function InterestCalc({
             <div className="grid grid-cols-2 gap-3">
               {/* Annual Percent Field */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-gray-500 flex items-center gap-1 select-none">
-                  <Percent className="w-3 h-3 text-indigo-500" />
+                <label className="text-[11px] font-bold text-[#475569] dark:text-[#D1D5DB] flex items-center gap-1 select-none font-sans">
+                  <Percent className="w-3 h-3 text-[#4F46E5] dark:text-[#FACC15]" />
                   Annual Rate (% p.a.)
                 </label>
                 <div className="relative rounded-lg shadow-3xs">
@@ -390,19 +389,19 @@ export default function InterestCalc({
                       const v = Math.max(0, parseFloat(e.target.value) || 0);
                       handleAnnualRateChange(v);
                     }}
-                    className="block w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-extrabold focus:outline-none focus:ring-1 focus:ring-indigo-500 text-indigo-950"
+                    className="block w-full px-2.5 py-1.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-lg text-xs font-extrabold focus:outline-none focus:ring-1 focus:ring-indigo-500 text-[#0F172A] dark:text-[#FFFFFF]"
                     placeholder="0"
                   />
                   <div className="absolute inset-y-0 right-2.5 flex items-center pointer-events-none">
-                    <span className="text-[10px] text-gray-400 font-bold">%</span>
+                    <span className="text-[10px] text-app-text-muted font-bold">%</span>
                   </div>
                 </div>
               </div>
 
               {/* Monthly Rupee Field */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-emerald-800 flex items-center gap-1 select-none">
-                  <Coins className="w-3 h-3 text-emerald-600" />
+                <label className="text-[11px] font-bold text-[#475569] dark:text-[#D1D5DB] flex items-center gap-1 select-none">
+                  <Coins className="w-3 h-3 text-emerald-555" />
                   Monthly Rupee Rate
                 </label>
                 <div className="relative rounded-lg shadow-3xs">
@@ -416,29 +415,29 @@ export default function InterestCalc({
                       const v = Math.max(0, parseFloat(e.target.value) || 0);
                       handleRupeeRateChange(v);
                     }}
-                    className="block w-full pl-5 pr-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-extrabold focus:outline-none focus:ring-1 focus:ring-emerald-500 text-emerald-950"
+                    className="block w-full pl-5 pr-2 py-1.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-lg text-xs font-extrabold focus:outline-none focus:ring-1 focus:ring-emerald-500 text-[#0F172A] dark:text-[#FFFFFF]"
                     placeholder="0"
                   />
                   <div className="absolute inset-y-0 left-2 flex items-center pointer-events-none">
-                    <span className="text-[10px] text-emerald-500 font-bold">{currency}</span>
+                    <span className="text-[10px] text-emerald-555 font-bold">{currency}</span>
                   </div>
                   <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
-                    <span className="text-[8px] text-gray-450 font-bold">/100 p.m.</span>
+                    <span className="text-[8px] text-app-text-muted font-bold">/100 p.m.</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Micro Conversion Indicator bar inside SI and CI */}
-            <div className="bg-white/80 p-2.5 rounded-xl border border-gray-150/40 text-center select-none font-medium">
-              <p className="text-[11px] text-slate-700">
-                👉 Conversion: <strong className="text-indigo-700">{annualRate}%</strong> Annual is exactly <strong className="text-emerald-700">{currency}{rupeeRate.toFixed(4)}</strong> Rupee Interest per ₹100/month
+            <div className="bg-app-bg p-2.5 rounded-xl border border-app-border text-center select-none font-medium">
+              <p className="text-[11px] text-[#475569] dark:text-[#D1D5DB]">
+                👉 Conversion: <strong className="text-[#4F46E5] dark:text-[#FACC15]">{annualRate}%</strong> Annual is exactly <strong className="text-emerald-550">{currency}{rupeeRate.toFixed(4)}</strong> Rupee Interest per ₹100/month
               </p>
             </div>
 
             {/* PRESETS */}
             <div className="space-y-1 select-none">
-              <span className="text-[9px] font-extrabold text-gray-400 uppercase tracking-wider block">Presets</span>
+              <span className="text-[9px] font-extrabold text-[#94A3B8] dark:text-[#9CA3AF] uppercase tracking-wider block">Presets</span>
               <div className="flex flex-wrap gap-1">
                 {traditionalPresets.map((preset, idx) => {
                   const isActive = Math.abs(rupeeRate - preset.rRate) < 0.01;
@@ -452,8 +451,8 @@ export default function InterestCalc({
                       className={cn(
                         "px-2 py-0.5 rounded-md border text-[9px] font-bold cursor-pointer transition-all",
                         isActive 
-                          ? "bg-slate-900 text-white border-slate-900" 
-                          : "bg-white text-slate-600 border-gray-250/60 hover:bg-slate-50"
+                          ? "bg-[#4F46E5] text-white dark:bg-[#FACC15] dark:text-[#000000] border-[#4F46E5] dark:border-[#FACC15]" 
+                          : "bg-[#FFFFFF] dark:bg-[#151515] text-[#475569] dark:text-[#D1D5DB] border-[#E2E8F0] dark:border-[#2A2A2A] hover:bg-app-bg"
                       )}
                       title={preset.desc}
                     >
@@ -466,17 +465,17 @@ export default function InterestCalc({
           </div>
 
           {/* 3. Duration */}
-          <div className="space-y-3.5 pt-2 border-t border-gray-100">
+          <div className="space-y-3.5 pt-2 border-t border-app-border">
             <div className="flex justify-between items-center select-none">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Time Duration</label>
-              <div className="text-[10px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md font-bold">Computed from Dates</div>
+              <label className="text-xs font-bold text-app-text-secondary uppercase tracking-wide">Time Duration</label>
+              <div className="text-[10px] text-[#4F46E5] dark:text-[#FACC15] bg-[#4F46E5]/10 dark:bg-[#FACC15]/10 px-2 py-0.5 rounded-md font-bold">Computed from Dates</div>
             </div>
 
-            <div className="space-y-3.5 p-4 rounded-2xl bg-indigo-50/20 border border-indigo-100/35">
+            <div className="space-y-3.5 p-4 rounded-2xl bg-app-bg border border-app-border">
               <div className="grid grid-cols-2 gap-3.5">
                 {/* Start Date */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-gray-500 flex items-center gap-1 select-none">
+                  <label className="text-[11px] font-bold text-app-text-secondary flex items-center gap-1 select-none">
                     <Calendar className="w-3.5 h-3.5 text-indigo-500" />
                     Start Date
                   </label>
@@ -622,7 +621,7 @@ export default function InterestCalc({
                   type="button"
                   onClick={handleSave}
                   disabled={isSaved || principal === 0}
-                  className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 disabled:opacity-40 font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-3xs cursor-pointer select-none transition-all"
+                  className="bg-[#4F46E5] text-white hover:opacity-90 dark:bg-[#FACC15] dark:text-[#000000] disabled:opacity-40 font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-3xs cursor-pointer select-none transition-all"
                 >
                   <Save className="w-3 h-3" />
                   Save Calculation
@@ -664,7 +663,7 @@ export default function InterestCalc({
                   type="button"
                   onClick={handleSave}
                   disabled={isSaved || principal === 0}
-                  className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-500 disabled:opacity-40 font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-3xs cursor-pointer select-none transition-all"
+                  className="bg-[#4F46E5] text-white hover:opacity-90 dark:bg-[#FACC15] dark:text-[#000000] disabled:opacity-40 font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-3xs cursor-pointer select-none transition-all"
                 >
                   <Save className="w-3 h-3" />
                   Save Calculation

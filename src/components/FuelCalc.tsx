@@ -13,6 +13,7 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
   const [distance, setDistance] = useState<number>(100);
   const [fuelPrice, setFuelPrice] = useState<number>(101.5);
   const [efficiency, setEfficiency] = useState<number>(15); // in km/L (KMPL)
+  const [mileageError, setMileageError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState<boolean>(false);
 
   // Labels
@@ -43,6 +44,7 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
     setDistance(dist);
     setFuelPrice(price);
     setEfficiency(eff);
+    setMileageError(null);
     setIsSaved(false);
   };
 
@@ -50,10 +52,15 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
     setDistance(100);
     setFuelPrice(101.5);
     setEfficiency(15);
+    setMileageError(null);
     setIsSaved(false);
   };
 
   const handleSave = () => {
+    if (mileageError || isNaN(efficiency) || efficiency < 1 || efficiency > 100) {
+      setMileageError("Please enter mileage between 1 and 100 KMPL");
+      return;
+    }
     onSaveHistory({
       type: 'fuel',
       title: 'Fuel & Commute Calculator',
@@ -119,7 +126,7 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
                   setDistance(Math.max(0, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full px-3.5 py-2.5 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold text-app-text"
+                className="block w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF] placeholder-[#94A3B8] dark:placeholder-[#9CA3AF]"
                 placeholder="0"
               />
             </div>
@@ -143,30 +150,51 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
                   setFuelPrice(Math.max(0, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full pl-8 pr-3 py-2.5 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold text-app-text"
+                className="block w-full pl-8 pr-3 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF] placeholder-[#94A3B8] dark:placeholder-[#9CA3AF]"
                 placeholder="0.00"
               />
             </div>
           </div>
 
-          {/* Fuel Efficiency / Vehicle Mileage (km/L) */}
+          {/* Fuel Efficiency / Vehicle Mileage (km/L - KMPL) */}
           <div className="space-y-2">
             <div className="flex justify-between items-center text-xs">
-              <label className="font-bold text-app-text-secondary uppercase tracking-wider">Vehicle Mileage ({efficiencyLabel})</label>
-              <span className="font-bold text-app-text text-sm">{efficiency} km/L</span>
+              <label className="font-bold text-app-text-secondary uppercase tracking-wider">Vehicle Mileage (km/L - KMPL)</label>
+              <span className="font-bold text-app-text text-sm">{efficiency || 0} km/L</span>
             </div>
             <div className="relative rounded-xl">
               <input
                 type="number"
+                min="1"
+                max="100"
                 step="0.1"
                 value={efficiency || ''}
                 onChange={(e) => {
-                  setEfficiency(Math.max(0.1, parseFloat(e.target.value) || 0));
+                  const val = parseFloat(e.target.value);
+                  setEfficiency(val);
                   setIsSaved(false);
+                  
+                  if (isNaN(val) || val < 1 || val > 100) {
+                    setMileageError("Please enter mileage between 1 and 100 KMPL");
+                  } else {
+                    setMileageError(null);
+                  }
                 }}
-                className="block w-full px-3.5 py-2.5 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold text-app-text"
+                className={cn(
+                  "block w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border rounded-xl focus:outline-none focus:ring-2 text-sm font-semibold placeholder-[#94A3B8] dark:placeholder-[#9CA3AF] transition-all",
+                  mileageError 
+                    ? "border-red-500 text-red-600 dark:text-red-400 focus:ring-red-500/20 focus:border-red-500" 
+                    : "border-[#E2E8F0] dark:border-[#2A2A2A] text-[#0F172A] dark:text-[#FFFFFF] focus:ring-orange-500/20 focus:border-orange-500"
+                )}
+                placeholder="Enter mileage"
               />
             </div>
+            {mileageError && (
+              <p className="text-xs text-red-500 font-semibold mt-1.5 flex items-center gap-1.5 animate-in fade-in duration-150">
+                <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
+                {mileageError}
+              </p>
+            )}
           </div>
 
           {/* Indian Typical Vehicle Presets */}
@@ -211,7 +239,7 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
                 "px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs",
                 isSaved
                   ? "bg-orange-500/10 text-orange-500 border border-orange-500/30"
-                  : "bg-orange-500 text-white dark:text-zinc-950 hover:bg-orange-600 active:scale-95"
+                  : "bg-[#4F46E5] text-white dark:bg-[#FACC15] dark:text-[#000000] hover:opacity-90 active:scale-95"
               )}
             >
               <Save className="w-3.5 h-3.5" />

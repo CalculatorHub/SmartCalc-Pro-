@@ -401,7 +401,7 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
                   setWeight(Math.max(0, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full px-3.5 py-2.5 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold text-app-text"
+                className="block w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF] placeholder-[#94A3B8] dark:placeholder-[#9CA3AF]"
                 placeholder="0.00"
               />
             </div>
@@ -477,7 +477,7 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
                   setMakingCharges(Math.max(0, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full px-3.5 py-2.5 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold text-app-text"
+                className="block w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF] placeholder-[#94A3B8] dark:placeholder-[#9CA3AF]"
                 placeholder="0.00"
               />
               <div className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none">
@@ -502,7 +502,7 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
                   setTaxRate(Math.max(0, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full px-3.5 py-2.5 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold text-app-text"
+                className="block w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF] placeholder-[#94A3B8] dark:placeholder-[#9CA3AF]"
                 placeholder="0.00"
               />
               <div className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none">
@@ -525,9 +525,7 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
                 "px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs",
                 isSaved
                   ? "bg-amber-500/10 text-amber-500 border border-amber-500/30"
-                  : metalType === 'gold'
-                    ? "bg-amber-500 text-zinc-950 hover:bg-amber-600 active:scale-95"
-                    : "bg-app-text-secondary text-app-card hover:opacity-90 active:scale-95"
+                  : "bg-[#4F46E5] text-white dark:bg-[#FACC15] dark:text-[#000000] hover:opacity-90 active:scale-95"
               )}
             >
               <Save className="w-3.5 h-3.5" />

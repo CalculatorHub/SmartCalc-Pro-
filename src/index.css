@@ -24,6 +24,8 @@
 
 :root {
   --app-bg: #F8FAFC;
+  --bg-primary: #F8FAFC;
+  --bg-card: #FFFFFF;
   --app-card: #FFFFFF;
   --app-text: #0F172A;
   --app-text-secondary: #475569;
@@ -35,6 +37,8 @@
 
 .dark {
   --app-bg: #0D0D0D;
+  --bg-primary: #0D0D0D;
+  --bg-card: #1C1C1E;
   --app-card: #1C1C1E;
   --app-text: #FFFFFF;
   --app-text-secondary: #D1D5DB;
@@ -42,6 +46,12 @@
   --app-accent: #FACC15;
   --app-accent-hover: #EAB308;
   --app-border: #2A2A2A;
+}
+
+html, body, #root, .min-h-screen {
+  background: var(--bg-primary);
+  color: var(--app-text);
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
 }
 
 

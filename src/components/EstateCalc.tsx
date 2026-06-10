@@ -101,15 +101,17 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
   return (
     <div className="space-y-6">
       {/* Sub-Tabs Nav */}
-      <div className="flex bg-gray-150 p-1 rounded-xl shadow-2xs text-xs font-semibold max-w-lg">
+      <div className="flex bg-[#F1F5F9] dark:bg-[#151515] p-1 rounded-xl shadow-2xs text-xs font-semibold max-w-lg border border-app-border">
         <button
           onClick={() => {
             setSubTab('mortgage');
             setIsSaved(false);
           }}
           className={cn(
-            "flex-1 py-2 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5",
-            subTab === 'mortgage' ? "bg-white text-indigo-700 shadow-xs" : "text-gray-500 hover:text-gray-800"
+            "flex-1 py-2 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 font-bold",
+            subTab === 'mortgage' 
+              ? "bg-[#4F46E5] text-white dark:bg-[#FACC15] dark:text-[#000000] shadow-xs" 
+              : "text-[#64748B] dark:text-[#A1A1AA] hover:text-[#4F46E5] dark:hover:text-[#FACC15]"
           )}
         >
           <Home className="w-4 h-4" />
@@ -121,8 +123,10 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
             setIsSaved(false);
           }}
           className={cn(
-            "flex-1 py-2 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5",
-            subTab === 'stamp' ? "bg-white text-indigo-700 shadow-xs" : "text-gray-500 hover:text-gray-800"
+            "flex-1 py-2 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 font-bold",
+            subTab === 'stamp' 
+              ? "bg-[#4F46E5] text-white dark:bg-[#FACC15] dark:text-[#000000] shadow-xs" 
+              : "text-[#64748B] dark:text-[#A1A1AA] hover:text-[#4F46E5] dark:hover:text-[#FACC15]"
           )}
         >
           <Receipt className="w-4 h-4" />
@@ -134,8 +138,10 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
             setIsSaved(false);
           }}
           className={cn(
-            "flex-1 py-2 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5",
-            subTab === 'afford' ? "bg-white text-indigo-700 shadow-xs" : "text-gray-500 hover:text-gray-800"
+            "flex-1 py-2 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 font-bold",
+            subTab === 'afford' 
+              ? "bg-[#4F46E5] text-white dark:bg-[#FACC15] dark:text-[#000000] shadow-xs" 
+              : "text-[#64748B] dark:text-[#A1A1AA] hover:text-[#4F46E5] dark:hover:text-[#FACC15]"
           )}
         >
           <Calculator className="w-4 h-4" />
@@ -145,10 +151,10 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* LEFT PANEL: Variables */}
-        <div className="space-y-5 bg-white p-6 rounded-2xl border border-gray-100">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h3 className="font-semibold text-gray-800 text-sm flex items-center gap-2">
-              <Landmark className="w-5 h-5 text-indigo-600" />
+        <div className="space-y-5 bg-app-card p-6 rounded-2xl border border-app-border">
+          <div className="flex items-center justify-between border-b border-app-border pb-3">
+            <h3 className="font-semibold text-app-text text-sm flex items-center gap-2">
+              <Landmark className="w-5 h-5 text-[#4F46E5] dark:text-[#FACC15]" />
               {subTab === 'mortgage' && 'Home Loan Parameters'}
               {subTab === 'stamp' && 'State Tax Registration inputs'}
               {subTab === 'afford' && 'Income & Liability Benchmarks'}
@@ -174,7 +180,7 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
                 }
                 setIsSaved(false);
               }}
-              className="text-gray-400 hover:text-indigo-600 text-xs flex items-center gap-1 cursor-pointer font-bold"
+              className="text-app-text-muted hover:text-[#4F46E5] dark:hover:text-[#FACC15] text-xs flex items-center gap-1 cursor-pointer font-bold"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               Reset Variables
@@ -187,12 +193,12 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
               {/* Prop Price */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-gray-500 uppercase tracking-wider block">Home/Property Value</label>
-                  <span className="font-bold text-gray-800 text-sm">{formatCurrency(propertyPrice, currency)}</span>
+                  <label className="font-bold text-app-text-secondary uppercase tracking-wider block">Home/Property Value</label>
+                  <span className="font-bold text-app-text text-sm">{formatCurrency(propertyPrice, currency)}</span>
                 </div>
                 <div className="relative rounded-xl shadow-xs">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-xs font-bold">{currency}</span>
+                    <span className="text-app-text-muted text-xs font-bold">{currency}</span>
                   </div>
                   <input
                     type="number"
@@ -201,17 +207,17 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
                       setPropertyPrice(Math.max(0, parseFloat(e.target.value) || 0));
                       setIsSaved(false);
                     }}
-                    className="block w-full pl-8 pr-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold"
+                    className="block w-full pl-8 pr-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF]"
                   />
                 </div>
-                <span className="text-[10px] text-gray-400 font-semibold block">E.g. ₹5 Lakhs to ₹3 Crores</span>
+                <span className="text-[10px] text-app-text-muted font-semibold block">E.g. ₹5 Lakhs to ₹3 Crores</span>
               </div>
 
               {/* Down Payment % */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-gray-500 uppercase tracking-wider block">Down Payment Margin (%)</label>
-                  <span className="font-bold text-gray-800 text-xs">({formatCurrency(downPayment, currency)})</span>
+                  <label className="font-bold text-app-text-secondary uppercase tracking-wider block">Down Payment Margin (%)</label>
+                  <span className="font-bold text-app-text-secondary text-xs">({formatCurrency(downPayment, currency)})</span>
                 </div>
                 <div className="relative rounded-xl">
                   <input
@@ -224,11 +230,11 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
                       setDownPercent(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)));
                       setIsSaved(false);
                     }}
-                    className="block w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold"
+                    className="block w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF]"
                     placeholder="20"
                   />
                   <div className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-xs font-bold">%</span>
+                    <span className="text-app-text-muted text-xs font-bold">%</span>
                   </div>
                 </div>
               </div>
@@ -236,7 +242,7 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
               {/* Loan percentage rate */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-gray-500 uppercase tracking-wider block">Bank Annual Interest Rate (%)</label>
+                  <label className="font-bold text-app-text-secondary uppercase tracking-wider block">Bank Annual Interest Rate (%)</label>
                 </div>
                 <div className="relative rounded-xl">
                   <input
@@ -249,11 +255,11 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
                       setLoanRate(Math.max(0, parseFloat(e.target.value) || 0));
                       setIsSaved(false);
                     }}
-                    className="block w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold"
+                    className="block w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF]"
                     placeholder="8.55"
                   />
                   <div className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-xs font-bold">%</span>
+                    <span className="text-app-text-muted text-xs font-bold">%</span>
                   </div>
                 </div>
               </div>
@@ -261,8 +267,8 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
               {/* Home Loan term */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-gray-500 uppercase tracking-wider block">Loan Tenure (Years)</label>
-                  <span className="font-bold text-gray-800 text-sm">{loanTerm} Years</span>
+                  <label className="font-bold text-app-text-secondary uppercase tracking-wider block">Loan Tenure (Years)</label>
+                  <span className="font-bold text-app-text text-sm">{loanTerm} Years</span>
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                   {[5, 10, 15, 20].map((term) => (
@@ -276,8 +282,8 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
                       className={cn(
                         "py-2 rounded-xl text-xs font-bold border cursor-pointer transition-all text-center",
                         loanTerm === term
-                          ? "bg-indigo-50 text-indigo-800 border-indigo-200"
-                          : "border-gray-200 text-gray-600 hover:bg-gray-55"
+                          ? "bg-[#4F46E5] text-white dark:bg-[#FACC15] dark:text-[#000000] border-[#4F46E5] dark:border-[#FACC15]"
+                          : "border-[#E2E8F0] dark:border-[#2A2A2A] text-app-text-secondary hover:bg-app-bg"
                       )}
                     >
                       {term} Yrs
@@ -294,12 +300,12 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
               {/* Property declared value */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-gray-500 uppercase tracking-wider block">Declared Property Value</label>
-                  <span className="font-bold text-gray-800 text-sm">{formatCurrency(stampPropertyPrice, currency)}</span>
+                  <label className="font-bold text-app-text-secondary uppercase tracking-wider block">Declared Property Value</label>
+                  <span className="font-bold text-app-text text-sm">{formatCurrency(stampPropertyPrice, currency)}</span>
                 </div>
                 <div className="relative rounded-xl shadow-xs">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-xs font-bold">{currency}</span>
+                    <span className="text-app-text-muted text-xs font-bold">{currency}</span>
                   </div>
                   <input
                     type="number"
@@ -308,7 +314,7 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
                       setStampPropertyPrice(Math.max(0, parseFloat(e.target.value) || 0));
                       setIsSaved(false);
                     }}
-                    className="block w-full pl-8 pr-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold"
+                    className="block w-full pl-8 pr-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF]"
                   />
                 </div>
               </div>
@@ -316,7 +322,7 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
               {/* Stamp Duty rate */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-gray-500 uppercase tracking-wider block">Stamp Duty Rate (State Government)</label>
+                  <label className="font-bold text-app-text-secondary uppercase tracking-wider block">Stamp Duty Rate (State Government)</label>
                 </div>
                 <div className="relative rounded-xl">
                   <input
@@ -329,11 +335,11 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
                       setStampDutyRate(Math.max(0, parseFloat(e.target.value) || 0));
                       setIsSaved(false);
                     }}
-                    className="block w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold"
+                    className="block w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF]"
                     placeholder="6.0"
                   />
                   <div className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-xs font-bold">%</span>
+                    <span className="text-app-text-muted text-xs font-bold">%</span>
                   </div>
                 </div>
               </div>
@@ -341,7 +347,7 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
               {/* Registration charges */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-gray-500 uppercase tracking-wider block">Deed Registration Charges</label>
+                  <label className="font-bold text-app-text-secondary uppercase tracking-wider block">Deed Registration Charges</label>
                 </div>
                 <div className="relative rounded-xl">
                   <input
@@ -354,11 +360,11 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
                       setRegistrationRate(Math.max(0, parseFloat(e.target.value) || 0));
                       setIsSaved(false);
                     }}
-                    className="block w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold"
+                    className="block w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF]"
                     placeholder="1.0"
                   />
                   <div className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-xs font-bold">%</span>
+                    <span className="text-app-text-muted text-xs font-bold">%</span>
                   </div>
                 </div>
               </div>
@@ -366,12 +372,12 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
               {/* Legal Fees */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-gray-500 uppercase tracking-wider block">Legal, Brokerage, Documentation Fees</label>
-                  <span className="font-bold text-gray-800 text-sm">{formatCurrency(legalFlatFee, currency)}</span>
+                  <label className="font-bold text-app-text-secondary uppercase tracking-wider block">Legal, Brokerage, Documentation Fees</label>
+                  <span className="font-bold text-app-text text-sm">{formatCurrency(legalFlatFee, currency)}</span>
                 </div>
                 <div className="relative rounded-xl shadow-xs">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-xs font-bold">{currency}</span>
+                    <span className="text-app-text-muted text-xs font-bold">{currency}</span>
                   </div>
                   <input
                     type="number"
@@ -380,7 +386,7 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
                       setLegalFlatFee(Math.max(0, parseInt(e.target.value) || 0));
                       setIsSaved(false);
                     }}
-                    className="block w-full pl-8 pr-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold"
+                    className="block w-full pl-8 pr-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF]"
                   />
                 </div>
               </div>
@@ -393,12 +399,12 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
               {/* Monthly household income */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-gray-500 uppercase tracking-wider block">Gross Monthly Household Salary</label>
-                  <span className="font-bold text-gray-800 text-sm">{formatCurrency(monthlyIncome, currency)}</span>
+                  <label className="font-bold text-app-text-secondary uppercase tracking-wider block">Gross Monthly Household Salary</label>
+                  <span className="font-bold text-app-text text-sm">{formatCurrency(monthlyIncome, currency)}</span>
                 </div>
                 <div className="relative rounded-xl shadow-xs">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-xs font-bold">{currency}</span>
+                    <span className="text-app-text-muted text-xs font-bold">{currency}</span>
                   </div>
                   <input
                     type="number"
@@ -407,7 +413,7 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
                       setMonthlyIncome(Math.max(0, parseInt(e.target.value) || 0));
                       setIsSaved(false);
                     }}
-                    className="block w-full pl-8 pr-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-bold text-gray-700"
+                    className="block w-full pl-8 pr-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF]"
                   />
                 </div>
               </div>
@@ -415,12 +421,12 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
               {/* Monthly Debts */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-gray-500 uppercase tracking-wider block">Monthly EMIs & Liabilities</label>
-                  <span className="font-bold text-gray-800 text-sm">{formatCurrency(monthlyDebts, currency)}</span>
+                  <label className="font-bold text-app-text-secondary uppercase tracking-wider block">Monthly EMIs & Liabilities</label>
+                  <span className="font-bold text-app-text text-sm">{formatCurrency(monthlyDebts, currency)}</span>
                 </div>
                 <div className="relative rounded-xl shadow-xs">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-xs font-bold">{currency}</span>
+                    <span className="text-app-text-muted text-xs font-bold">{currency}</span>
                   </div>
                   <input
                     type="number"
@@ -429,7 +435,7 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
                       setMonthlyDebts(Math.max(0, parseInt(e.target.value) || 0));
                       setIsSaved(false);
                     }}
-                    className="block w-full pl-8 pr-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold"
+                    className="block w-full pl-8 pr-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF]"
                   />
                 </div>
               </div>
@@ -437,12 +443,12 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
               {/* Saved Downpayment */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-gray-500 uppercase tracking-wider block">Cash Fund for Down Payment</label>
-                  <span className="font-bold text-gray-800 text-sm">{formatCurrency(affordDown, currency)}</span>
+                  <label className="font-bold text-app-text-secondary uppercase tracking-wider block">Cash Fund for Down Payment</label>
+                  <span className="font-bold text-app-text text-sm">{formatCurrency(affordDown, currency)}</span>
                 </div>
                 <div className="relative rounded-xl shadow-xs">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                    <span className="text-gray-400 text-xs font-bold">{currency}</span>
+                    <span className="text-app-text-muted text-xs font-bold">{currency}</span>
                   </div>
                   <input
                     type="number"
@@ -451,7 +457,7 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
                       setAffordDown(Math.max(0, parseInt(e.target.value) || 0));
                       setIsSaved(false);
                     }}
-                    className="block w-full pl-8 pr-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-bold text-gray-700"
+                    className="block w-full pl-8 pr-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#151515] border border-[#E2E8F0] dark:border-[#2A2A2A] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm font-semibold text-[#0F172A] dark:text-[#FFFFFF]"
                   />
                 </div>
               </div>
@@ -459,8 +465,8 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
               {/* Debt-To-Income slider */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
-                  <label className="font-bold text-gray-500 uppercase tracking-wider block">Max Allowed Bank FOIR / EMI Ratio</label>
-                  <span className="font-bold text-gray-800 text-sm">{dtiLimit}%</span>
+                  <label className="font-bold text-app-text-secondary uppercase tracking-wider block">Max Allowed Bank FOIR / EMI Ratio</label>
+                  <span className="font-bold text-app-text text-sm">{dtiLimit}%</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   {[35, 45, 55].map((limit) => (
@@ -474,8 +480,8 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
                       className={cn(
                         "py-2 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer",
                         dtiLimit === limit
-                          ? "bg-indigo-50 text-indigo-800 border-indigo-200"
-                          : "border-gray-200 text-gray-600 hover:bg-gray-55"
+                          ? "bg-[#4F46E5] text-white dark:bg-[#FACC15] dark:text-[#000000] border-[#4F46E5] dark:border-[#FACC15]"
+                          : "border-[#E2E8F0] dark:border-[#2A2A2A] text-app-text-secondary hover:bg-app-bg"
                       )}
                     >
                       {limit}% {limit === 45 ? '(Standard)' : limit === 35 ? '(Conservative)' : '(Liberal)'}
@@ -485,13 +491,11 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
               </div>
             </div>
           )}
-        </div>
-
-        {/* RIGHT PANEL: Outputs & Visuals */}
-        <div className="flex flex-col justify-between bg-white p-6 rounded-2xl border border-gray-100 space-y-6">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h3 className="font-semibold text-gray-800 text-lg flex items-center gap-2">
-              <Calculator className="w-5 h-5 text-indigo-650" />
+            {/* RIGHT PANEL: Outputs & Visuals */}
+        <div className="flex flex-col justify-between bg-app-card p-6 rounded-2xl border border-app-border space-y-6">
+          <div className="flex items-center justify-between border-b border-app-border pb-3">
+            <h3 className="font-semibold text-app-text text-lg flex items-center gap-2">
+              <Calculator className="w-5 h-5 text-[#4F46E5] dark:text-[#FACC15]" />
               Indian Financial Breakdown
             </h3>
             <button
@@ -499,8 +503,8 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
               className={cn(
                 "px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs",
                 isSaved
-                  ? "bg-indigo-100 text-indigo-850 border border-indigo-200 animate-pulse"
-                  : "bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95"
+                  ? "bg-app-bg text-[#4F46E5] dark:text-[#FACC15] border border-app-border"
+                  : "bg-[#4F46E5] text-white dark:bg-[#FACC15] dark:text-[#000000] hover:opacity-90 active:scale-95"
               )}
             >
               <Save className="w-3.5 h-3.5" />
@@ -511,42 +515,42 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
           {/* 1. HOME LOAN OUTPUTS */}
           {subTab === 'mortgage' && (
             <div className="space-y-5">
-              <div className="p-4 bg-indigo-50/30 border border-indigo-50 rounded-xl space-y-1">
-                <span className="text-xs text-indigo-650 font-bold uppercase tracking-wider block">Estimated Monthly EMI</span>
-                <p className="text-3xl font-black text-indigo-900 font-sans">{formatCurrency(monthlyEmi, currency)}</p>
-                <span className="text-[10px] text-gray-400 block pt-0.5">Calculated using home loan standards in India</span>
+              <div className="p-4 bg-[#4F46E5]/10 dark:bg-[#FACC15]/10 border border-[#4F46E5]/20 dark:border-[#FACC15]/20 rounded-xl space-y-1">
+                <span className="text-xs text-[#4F46E5] dark:text-[#FACC15] font-bold uppercase tracking-wider block">Estimated Monthly EMI</span>
+                <p className="text-3xl font-black text-[#4F46E5] dark:text-[#FACC15] font-sans">{formatCurrency(monthlyEmi, currency)}</p>
+                <span className="text-[10px] text-app-text-muted block pt-0.5">Calculated using home loan standards in India</span>
               </div>
 
-              <div className="grid grid-cols-2 gap-3.5 text-xs text-gray-650 font-semibold">
-                <div className="p-3 bg-gray-50/50 border border-gray-100 rounded-lg">
-                  <span className="text-gray-400 block pb-0.5 font-medium">Loan Principal</span>
-                  <p className="font-bold text-gray-800 font-sans">{formatCurrency(loanAmount, currency)}</p>
+              <div className="grid grid-cols-2 gap-3.5 text-xs text-app-text-secondary font-semibold">
+                <div className="p-3 bg-app-bg border border-app-border rounded-lg">
+                  <span className="text-app-text-muted block pb-0.5 font-medium">Loan Principal</span>
+                  <p className="font-bold text-app-text font-sans">{formatCurrency(loanAmount, currency)}</p>
                 </div>
-                <div className="p-3 bg-gray-50/50 border border-gray-100 rounded-lg">
-                  <span className="text-gray-400 block pb-0.5 font-medium">Down payment ({downPercent}%)</span>
-                  <p className="font-bold text-gray-800 font-sans">{formatCurrency(downPayment, currency)}</p>
+                <div className="p-3 bg-app-bg border border-app-border rounded-lg">
+                  <span className="text-app-text-muted block pb-0.5 font-medium">Down payment ({downPercent}%)</span>
+                  <p className="font-bold text-app-text font-sans">{formatCurrency(downPayment, currency)}</p>
                 </div>
-                <div className="p-3 bg-gray-50/50 border border-gray-100 rounded-lg">
-                  <span className="text-gray-400 block pb-0.5 font-medium">Total Interest Paid</span>
-                  <p className="font-bold text-gray-800 font-sans">{formatCurrency(totalInterest, currency)}</p>
+                <div className="p-3 bg-app-bg border border-app-border rounded-lg">
+                  <span className="text-app-text-muted block pb-0.5 font-medium">Total Interest Paid</span>
+                  <p className="font-bold text-app-text font-sans">{formatCurrency(totalInterest, currency)}</p>
                 </div>
-                <div className="p-3 bg-gray-50/50 border border-gray-100 rounded-lg">
-                  <span className="text-gray-400 block pb-0.5 font-medium">Total Cumulative Cost</span>
-                  <p className="font-bold text-gray-800 font-sans">{formatCurrency(totalMortgagePayment, currency)}</p>
+                <div className="p-3 bg-app-bg border border-app-border rounded-lg">
+                  <span className="text-app-text-muted block pb-0.5 font-medium">Total Cumulative Cost</span>
+                  <p className="font-bold text-app-text font-sans">{formatCurrency(totalMortgagePayment, currency)}</p>
                 </div>
               </div>
 
               {/* Amortized Graph ratio visual */}
-              <div className="space-y-1 pt-1.5 border-t border-gray-100">
-                <div className="flex justify-between text-[10px] font-bold text-gray-400 uppercase tracking-wide">
+              <div className="space-y-1 pt-1.5 border-t border-app-border">
+                <div className="flex justify-between text-[10px] font-bold text-app-text-muted uppercase tracking-wide">
                   <span>Down Payment ({((paintRatio(downPayment, totalMortgagePayment + downPayment)) * 100).toFixed(0)}%)</span>
                   <span>Principal ({((paintRatio(loanAmount, totalMortgagePayment + downPayment)) * 100).toFixed(0)}%)</span>
                   <span>Interest ({((paintRatio(totalInterest, totalMortgagePayment + downPayment)) * 100).toFixed(0)}%)</span>
                 </div>
-                <div className="w-full h-3 rounded-full overflow-hidden flex bg-gray-100">
-                  <div className="bg-slate-300 h-full animate-pulse" style={{ width: `${Math.max(5, paintRatio(downPayment, totalMortgagePayment + downPayment) * 100)}%` }}></div>
-                  <div className="bg-indigo-400 h-full" style={{ width: `${Math.max(5, paintRatio(loanAmount, totalMortgagePayment + downPayment) * 100)}%` }}></div>
-                  <div className="bg-rose-400 h-full" style={{ width: `${Math.max(5, paintRatio(totalInterest, totalMortgagePayment + downPayment) * 100)}%` }}></div>
+                <div className="w-full h-3 rounded-full overflow-hidden flex bg-app-bg border border-app-border">
+                  <div className="bg-slate-300 h-full" style={{ width: `${Math.max(5, paintRatio(downPayment, totalMortgagePayment + downPayment) * 100)}%` }}></div>
+                  <div className="bg-[#4F46E5] h-full" style={{ width: `${Math.max(5, paintRatio(loanAmount, totalMortgagePayment + downPayment) * 100)}%` }}></div>
+                  <div className="bg-rose-450 h-full" style={{ width: `${Math.max(5, paintRatio(totalInterest, totalMortgagePayment + downPayment) * 100)}%` }}></div>
                 </div>
               </div>
             </div>
@@ -555,30 +559,30 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
           {/* 2. STAMP DUTY OUTPUT DETAIL */}
           {subTab === 'stamp' && (
             <div className="space-y-5">
-              <div className="p-4 bg-teal-50/20 border border-teal-100 rounded-xl space-y-1">
-                <span className="text-xs text-teal-605 font-bold uppercase tracking-wider block">Total Gov. Registration & Broker Charges</span>
-                <p className="text-3xl font-black text-teal-900 font-sans">{formatCurrency(totalClosingCost, currency)}</p>
-                <div className="text-[11px] text-gray-500 mt-1">
-                  Adds <span className="font-bold text-gray-700">{((totalClosingCost / stampPropertyPrice) * 100).toFixed(1)}%</span> on top of purchasing bid.
+              <div className="p-4 bg-teal-500/10 dark:bg-emerald-500/10 border border-teal-500/20 dark:border-emerald-500/20 rounded-xl space-y-1">
+                <span className="text-xs text-teal-600 dark:text-emerald-500 font-bold uppercase tracking-wider block">Total Gov. Registration & Broker Charges</span>
+                <p className="text-3xl font-black text-teal-600 dark:text-emerald-500 font-sans">{formatCurrency(totalClosingCost, currency)}</p>
+                <div className="text-[11px] text-app-text-secondary mt-1">
+                  Adds <span className="font-bold text-app-text">{((totalClosingCost / stampPropertyPrice) * 100).toFixed(1)}%</span> on top of purchasing bid.
                 </div>
               </div>
 
-              <div className="space-y-3 divide-y divide-gray-55 text-xs text-gray-650 font-semibold">
+              <div className="space-y-3 divide-y divide-app-border text-xs text-app-text-secondary font-semibold">
                 <div className="flex justify-between py-1">
                   <span>Stamp Duty / Land Tax ({stampDutyRate}%)</span>
-                  <span className="font-bold text-gray-900">{formatCurrency(stampDutyCost, currency)}</span>
+                  <span className="font-bold text-app-text font-sans">{formatCurrency(stampDutyCost, currency)}</span>
                 </div>
                 <div className="flex justify-between py-2">
                   <span>Deed Registration charges ({registrationRate}%)</span>
-                  <span className="font-bold text-gray-900">{formatCurrency(registrationCost, currency)}</span>
+                  <span className="font-bold text-app-text font-sans">{formatCurrency(registrationCost, currency)}</span>
                 </div>
                 <div className="flex justify-between py-2">
                   <span>Legal Drafting, Agency & Brokerage fees</span>
-                  <span className="font-bold text-gray-900">{formatCurrency(legalFlatFee, currency)}</span>
+                  <span className="font-bold text-app-text font-sans">{formatCurrency(legalFlatFee, currency)}</span>
                 </div>
-                <div className="flex justify-between py-2.5 font-black text-indigo-950 border-t border-gray-150">
+                <div className="flex justify-between py-2.5 font-black text-app-text border-t border-app-border">
                   <span>Total Investment Needed (Property + registration)</span>
-                  <span className="text-sm font-black font-sans">{formatCurrency(finalPurchaseCost, currency)}</span>
+                  <span className="text-sm font-black font-sans text-[#4F46E5] dark:text-[#FACC15]">{formatCurrency(finalPurchaseCost, currency)}</span>
                 </div>
               </div>
             </div>
@@ -587,31 +591,31 @@ export default function EstateCalc({ currency = '₹', onSaveHistory }: EstateCa
           {/* 3. AFFORDABILITY REVIEWS */}
           {subTab === 'afford' && (
             <div className="space-y-5">
-              <div className="p-4 bg-rose-50/20 border border-rose-100 rounded-xl space-y-1">
-                <span className="text-xs text-rose-650 font-bold uppercase tracking-wider block">Max Affordable Property Value</span>
-                <p className="text-3xl font-black text-rose-950 font-sans">{formatCurrency(maxAffordableProperty, currency)}</p>
-                <p className="text-[11px] text-gray-400 mt-0.5">Calculated based on down payment reserve and net EMIs</p>
+              <div className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl space-y-1">
+                <span className="text-xs text-rose-500 font-bold uppercase tracking-wider block">Max Affordable Property Value</span>
+                <p className="text-3xl font-black text-rose-500 font-sans">{formatCurrency(maxAffordableProperty, currency)}</p>
+                <p className="text-[11px] text-app-text-muted mt-0.5">Calculated based on down payment reserve and net EMIs</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3.5 text-xs text-gray-650 font-semibold">
-                <div className="p-3 bg-gray-50/50 border border-gray-100 rounded-lg">
-                  <span className="text-gray-405 block pb-0.5 font-medium">Monthly Home EMI Budget</span>
-                  <p className="font-bold text-gray-800 font-sans">{formatCurrency(monthlyEmiBudget, currency)}</p>
+              <div className="grid grid-cols-2 gap-3.5 text-xs text-app-text-secondary font-semibold">
+                <div className="p-3 bg-app-bg border border-app-border rounded-lg">
+                  <span className="text-app-text-muted block pb-0.5 font-medium">Monthly Home EMI Budget</span>
+                  <p className="font-bold text-app-text font-sans">{formatCurrency(monthlyEmiBudget, currency)}</p>
                 </div>
-                <div className="p-3 bg-gray-50/50 border border-gray-100 rounded-lg">
-                  <span className="text-gray-405 block pb-0.5 font-medium">Maximum Loan eligible</span>
-                  <p className="font-bold text-gray-800 font-sans">{formatCurrency(maxAffordablePrincipal, currency)}</p>
+                <div className="p-3 bg-app-bg border border-app-border rounded-lg">
+                  <span className="text-app-text-muted block pb-0.5 font-medium">Maximum Loan eligible</span>
+                  <p className="font-bold text-app-text font-sans">{formatCurrency(maxAffordablePrincipal, currency)}</p>
                 </div>
-                <div className="p-3 bg-gray-50/50 border border-gray-100 rounded-lg col-span-2">
-                  <span className="text-gray-405 block pb-0.5 font-medium">Indian Banking Standards</span>
-                  <p className="italic text-[11px] leading-relaxed text-gray-500 font-normal pt-1">
+                <div className="p-3 bg-app-bg border border-app-border rounded-lg col-span-2 border-app-border">
+                  <span className="text-app-text-muted block pb-0.5 font-medium">Indian Banking Standards</span>
+                  <p className="italic text-[11px] leading-relaxed text-app-text-muted font-normal pt-1">
                     Reserve Bank of India guidelines suggest keeping total EMI ratios under 40-50% (DTI / FOIR limits) of your household salary to ensure successful verification.
                   </p>
                 </div>
               </div>
             </div>
           )}
-        </div>
+        </div>      </div>
       </div>
     </div>
   );

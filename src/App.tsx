@@ -18,11 +18,15 @@ import {
   BookmarkCheck,
   Building,
   HelpCircle,
-  Globe
+  Globe,
+  Shield,
+  Lock,
+  ShieldAlert
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AppTab, CalculatorType, HistoryItem, NotificationItem, UserPreferences } from './types';
 import { cn } from './utils';
+import { appendSecurityLog } from './utils/security';
 
 // Calculator components
 import InterestCalc from './components/InterestCalc';
@@ -78,7 +82,76 @@ export default function App() {
     locationPermission: true,
     vegMode: false,
     hapticFeedback: true,
+    inputSanitization: true,
+    transitEncryption: true,
+    screenshotProtection: true,
+    inactiveSessionAutoLogout: 'off'
   });
+
+  // Cybersecurity Suite active states
+  const [isSessionLocked, setIsSessionLocked] = useState(false);
+  const [securityBlockUntil, setSecurityBlockUntil] = useState<number | null>(null);
+  const [securityPINInput, setSecurityPINInput] = useState("");
+  const [pinError, setPinError] = useState("");
+  const [unlockAttempts, setUnlockAttempts] = useState(0);
+  const [lastActivityTime, setLastActivityTime] = useState<number>(Date.now());
+  const [isWindowFocused, setIsWindowFocused] = useState(true);
+
+  // User activity listeners
+  useEffect(() => {
+    const handleActivity = () => {
+      setLastActivityTime(Date.now());
+    };
+
+    window.addEventListener('mousemove', handleActivity);
+    window.addEventListener('keydown', handleActivity);
+    window.addEventListener('click', handleActivity);
+    window.addEventListener('touchstart', handleActivity);
+
+    // Track window focus (screenshot protection/blur simulation)
+    const handleFocus = () => setIsWindowFocused(true);
+    const handleBlur = () => setIsWindowFocused(false);
+
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('blur', handleBlur);
+
+    return () => {
+      window.removeEventListener('mousemove', handleActivity);
+      window.removeEventListener('keydown', handleActivity);
+      window.removeEventListener('click', handleActivity);
+      window.removeEventListener('touchstart', handleActivity);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('blur', handleBlur);
+    };
+  }, []);
+
+  // Poll for inactivity or lockouts
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Check session lock block time cooldown
+      if (securityBlockUntil && Date.now() > securityBlockUntil) {
+        setSecurityBlockUntil(null);
+        setUnlockAttempts(0);
+        setPinError("");
+      }
+
+      // Check inactive session auto-logout config
+      const setting = preferences.inactiveSessionAutoLogout || 'off';
+      if (setting !== 'off' && !isSessionLocked) {
+        let thresholdMs = 0;
+        if (setting === '1m') thresholdMs = 60000;
+        else if (setting === '5m') thresholdMs = 300000;
+        else if (setting === '15m') thresholdMs = 900000;
+
+        if (thresholdMs > 0 && Date.now() - lastActivityTime > thresholdMs) {
+          setIsSessionLocked(true);
+          appendSecurityLog(`Inactivity threshold (${setting}) exceeded. Inactive logout lock triggered.`, "high");
+        }
+      }
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [lastActivityTime, preferences.inactiveSessionAutoLogout, isSessionLocked, securityBlockUntil]);
 
   // Dynamic theme effect matching provided mobile/web guidelines
   useEffect(() => {
@@ -202,11 +275,111 @@ export default function App() {
     setActiveTab('calculate');
   };
 
+  const handleUnlockSession = () => {
+    if (securityBlockUntil && Date.now() < securityBlockUntil) {
+      setPinError(`Device Bruteforce Protection engaged. Please wait.`);
+      return;
+    }
+
+    const cleanedPin = securityPINInput.trim();
+    // Unlock matches default PIN "1234" or the current username
+    const matchesUser = cleanedPin.toLowerCase() === preferences.userName.toLowerCase();
+    const matchesPIN = cleanedPin === "1234";
+
+    if (matchesUser || matchesPIN) {
+      setIsSessionLocked(false);
+      setSecurityPINInput("");
+      setUnlockAttempts(0);
+      setPinError("");
+      appendSecurityLog(`Session unlocked successfully using authorized passcode.`, "low");
+    } else {
+      const nextCount = unlockAttempts + 1;
+      setUnlockAttempts(nextCount);
+      if (nextCount >= 4) {
+        const until = Date.now() + 15000; // 15 seconds lockout inside simulation
+        setSecurityBlockUntil(until);
+        setPinError(`Too many incorrect inputs. Cyber defense lockout active for 15s.`);
+        appendSecurityLog(`Local passcode brute force block engaged (4 failures). Lockout.`, "high");
+      } else {
+        setPinError(`Incorrect secure key! Attempt ${nextCount}/4`);
+      }
+    }
+  };
+
   // Active unread indicator count
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   return (
     <div className="min-h-screen bg-app-bg font-sans text-app-text pb-20 md:pb-6 flex flex-col selection:bg-app-accent/20 selection:text-app-text transition-colors duration-255">
+      
+      {/* 📸 Screenshot & Privacy Blur Overlay */}
+      {preferences.screenshotProtection && !isWindowFocused && (
+        <div className="fixed inset-0 bg-[#0F172A]/90 backdrop-blur-xl z-100 flex flex-col items-center justify-center p-6 text-center select-none animate-in fade-in duration-200">
+          <div className="w-16 h-16 rounded-2xl bg-[#4F46E5]/10 dark:bg-[#FACC15]/10 flex items-center justify-center text-[#4F46E5] dark:text-[#FACC15] border border-indigo-500/20 mb-4 animate-bounce">
+            <Lock className="w-8 h-8" />
+          </div>
+          <h3 className="text-xl font-black text-white">Sensitive Canvas Shield Active</h3>
+          <p className="text-xs text-slate-400 mt-1 max-w-sm">
+            Content blurred to prevent screenshot grabs, spywares, or shoulder-sniffing when window focus is lost. Click back inside this tab to resume securely.
+          </p>
+        </div>
+      )}
+
+      {/* 🛡️ Secure Session Lock Screen */}
+      {isSessionLocked && (
+        <div className="fixed inset-0 bg-[#0F172A]/95 dark:bg-[#090D1A]/98 z-90 flex flex-col items-center justify-center p-6 font-sans select-none animate-in fade-in duration-250">
+          <div className="max-w-md w-full bg-[#1E293B] border border-[#334155] rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative">
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-sm animate-pulse">
+                <Lock className="w-7 h-7" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-xl font-black text-white">Cyber Session Securely Locked</h3>
+                <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
+                  Your inactivity logout timer triggered. Please enter your secure credentials or passcode to restore access parameters.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-2">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-slate-400 uppercase block">Passcode (Use "1234" or profile name):</label>
+                <input
+                  type="password"
+                  value={securityPINInput}
+                  disabled={!!securityBlockUntil}
+                  onChange={(e) => setSecurityPINInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleUnlockSession();
+                  }}
+                  className="w-full px-4 py-3 bg-[#0F172A]/80 border border-[#334155] text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center font-bold text-lg font-mono tracking-widest placeholder-slate-600 disabled:opacity-50"
+                  placeholder="••••"
+                />
+              </div>
+
+              {pinError && (
+                <p className="text-xs text-red-400 font-semibold text-center mt-1 animate-pulse">
+                  {pinError}
+                </p>
+              )}
+
+              <button
+                type="button"
+                disabled={!!securityBlockUntil || !securityPINInput}
+                onClick={handleUnlockSession}
+                className="w-full bg-[#4F46E5] hover:opacity-90 disabled:opacity-50 transition-all font-bold text-sm py-3 text-white rounded-xl cursor-pointer active:scale-95"
+              >
+                {securityBlockUntil ? "Cooling down..." : "Unlock Session Securely"}
+              </button>
+            </div>
+
+            <div className="text-center pt-2 border-t border-[#334155]/50 flex items-center justify-between text-[10px] text-slate-500">
+              <span>Smart Finance Security</span>
+              <span>256-Bit Emulation</span>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* 🔹 MAIN WRAPPER CONTAINER */}
       <div className="max-w-5xl w-full mx-auto p-4 md:p-6 flex-1 flex flex-col gap-6">
@@ -234,17 +407,6 @@ export default function App() {
 
           {/* Controls Profile and Notifications, mirroring Vibrant Palette buttons */}
           <div className="flex items-center gap-3 relative">
-            {/* Website External Button */}
-            <a
-              href={(import.meta as any).env?.VITE_WEBSITE_URL || 'https://websitehosting.in'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-3.5 py-2.5 rounded-full text-app-text-secondary hover:text-app-accent hover:bg-app-accent/10 bg-app-card shadow-xs border border-app-border transition-all cursor-pointer text-xs md:text-sm font-semibold tracking-tight select-none"
-              title="Visit Web Version"
-            >
-              <Globe className="w-4.5 h-4.5 text-app-accent shrink-0" />
-              <span className="hidden sm:inline">Web Version</span>
-            </a>
 
             <div className="relative">
               {/* Bell with Badge */}
@@ -305,17 +467,17 @@ export default function App() {
                 <div className="space-y-6">
                   
                   {/* Banner: "Plan smart. Calculate better." */}
-                  <div className="relative overflow-hidden text-white bg-gradient-to-br from-app-accent via-app-accent/95 to-app-accent/85 dark:text-zinc-950 p-8 rounded-3xl shadow-xl space-y-4 flex flex-col justify-between group min-h-48 transition-all duration-300">
+                  <div className="relative overflow-hidden text-white bg-gradient-to-br from-[#4F46E5] via-[#3730A3] to-[#1E1B4B] dark:from-[#1E1B4B] dark:via-[#111827] dark:to-[#030712] p-8 rounded-3xl shadow-xl space-y-4 flex flex-col justify-between group min-h-48 transition-all duration-300">
                     {/* Abstract circles design elements decoration */}
-                    <div className="absolute right-0 bottom-0 w-64 h-64 bg-white/10 dark:bg-black/10 rounded-full translate-x-16 translate-y-16 blur-2xl group-hover:scale-110 transition-transform duration-500"></div>
-                    <div className="absolute -left-10 -top-10 w-48 h-48 bg-white/5 dark:bg-black/5 rounded-full blur-xl"></div>
-                    <svg className="absolute bottom-[-15%] right-[-5%] w-60 h-60 text-white/15 dark:text-black/15 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+                    <div className="absolute right-0 bottom-0 w-64 h-64 bg-white/10 dark:bg-white/5 rounded-full translate-x-16 translate-y-16 blur-2xl group-hover:scale-110 transition-transform duration-500"></div>
+                    <div className="absolute -left-10 -top-10 w-48 h-48 bg-white/5 dark:bg-white/5 rounded-full blur-xl"></div>
+                    <svg className="absolute bottom-[-15%] right-[-5%] w-60 h-60 text-white/15 dark:text-white/5 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
                     
                     <div className="space-y-2 z-10">
-                      <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight font-display text-white dark:text-zinc-950">
+                      <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight font-display text-white">
                         Plan Smart. Calculate Better.
                       </h2>
-                      <p className="text-sm md:text-base text-white/80 dark:text-zinc-900 leading-relaxed max-w-xl font-normal">
+                      <p className="text-sm md:text-base text-white/90 leading-relaxed max-w-xl font-normal">
                         All your financial and asset calculators unified in one powerful, highly responsive client dashboard.
                       </p>
                     </div>
@@ -323,7 +485,7 @@ export default function App() {
                     <div className="z-10 pt-2 align-self-start">
                       <button
                         onClick={() => setActiveTab('tools')}
-                        className="bg-white dark:bg-zinc-950 text-indigo-650 dark:text-zinc-900 font-extrabold text-sm px-6 py-3 rounded-xl shadow-lg hover:bg-slate-100 dark:hover:bg-zinc-900 transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+                        className="bg-white/15 hover:bg-white/25 border border-white/30 text-white font-extrabold text-sm px-6 py-3 rounded-xl shadow-lg transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
                       >
                         Explore Tools →
                       </button>
@@ -469,7 +631,7 @@ export default function App() {
                 <div className="space-y-6">
                   {/* Selector Header Bar */}
                   <div className="bg-app-card p-3.5 rounded-2xl border border-app-border flex items-center justify-between gap-4 overflow-x-auto whitespace-nowrap">
-                    <span className="text-xs font-black text-app-text-secondary uppercase tracking-widest hidden sm:inline select-none font-sans">Active Workspace:</span>
+                    <span className="text-xs font-black text-[#475569] dark:text-[#D1D5DB] uppercase tracking-widest hidden sm:inline select-none font-sans">Active Workspace:</span>
                     <div className="flex bg-app-bg p-0.5 rounded-xl border border-app-border font-bold text-xs scrollbar-none overflow-x-auto">
                       {[
                         { id: 'interest', label: 'Interest' },
@@ -481,10 +643,10 @@ export default function App() {
                           key={tab.id}
                           onClick={() => setSelectedCalc(tab.id as CalculatorType)}
                           className={cn(
-                            "px-3.5 py-2 rounded-lg transition-all cursor-pointer text-center font-bold",
+                            "px-4 py-2 rounded-lg transition-all cursor-pointer text-center font-bold text-xs",
                             selectedCalc === tab.id
-                              ? "bg-app-card text-app-accent border border-app-border/25 shadow-xs"
-                              : "text-app-text-secondary hover:text-app-text"
+                              ? "bg-[#4F46E5] text-white dark:bg-[#FACC15] dark:text-[#000000] shadow-xs"
+                              : "text-[#475569] dark:text-[#D1D5DB] hover:text-[#4F46E5] dark:hover:text-[#FACC15]"
                           )}
                         >
                           {tab.label}
@@ -558,10 +720,10 @@ export default function App() {
           }}
           className={cn(
             "flex flex-col items-center justify-center p-2 rounded-xl transition-all cursor-pointer",
-            activeTab === 'home' ? "text-app-accent font-bold scale-102" : "text-app-text-secondary hover:text-app-text"
+            activeTab === 'home' ? "text-[#4F46E5] dark:text-[#FACC15] font-bold scale-102" : "text-[#64748B] dark:text-[#A1A1AA] hover:text-[#4F46E5] dark:hover:text-[#FACC15]"
           )}
         >
-          <Home className="w-6 h-6" />
+          <Home className="w-6 h-6 animate-none" />
           <span className="text-[10px] uppercase font-bold mt-1 tracking-wider">Home</span>
         </button>
 
@@ -573,14 +735,14 @@ export default function App() {
           }}
           className={cn(
             "flex flex-col items-center justify-center p-2 rounded-xl transition-all cursor-pointer",
-            activeTab === 'tools' ? "text-app-accent font-bold scale-102" : "text-app-text-secondary hover:text-app-text"
+            activeTab === 'tools' ? "text-[#4F46E5] dark:text-[#FACC15] font-bold scale-102" : "text-[#64748B] dark:text-[#A1A1AA] hover:text-[#4F46E5] dark:hover:text-[#FACC15]"
           )}
         >
           <LayoutGrid className="w-6 h-6" />
           <span className="text-[10px] uppercase font-bold mt-1 tracking-wider">Tools</span>
         </button>
 
-        {/* Calculate - Central High-Affordability elevated floating-style button */}
+        {/* Calculate - Central Elevated Floating Button */}
         <button
           onClick={() => {
             setActiveTab('calculate');
@@ -589,16 +751,16 @@ export default function App() {
           className="flex flex-col items-center justify-center cursor-pointer select-none group relative"
         >
           <div className={cn(
-            "-mt-10 w-14 h-14 rounded-full flex items-center justify-center shadow-lg border-4 border-app-card ring-2 ring-app-border/20 transition-all duration-300",
+            "-mt-10 w-14 h-14 rounded-full flex items-center justify-center shadow-lg border-4 bg-app-card border-app-card ring-2 ring-app-border/20 transition-all duration-300",
             activeTab === 'calculate'
-              ? "bg-app-accent text-white dark:text-zinc-950 scale-105"
-              : "bg-app-text-secondary text-app-card hover:bg-app-accent hover:text-white dark:hover:text-zinc-950 group-hover:scale-105"
+              ? "bg-[#4F46E5] text-white dark:bg-[#FACC15] dark:text-[#000000] scale-105"
+              : "bg-[#64748B] dark:bg-[#A1A1AA] text-white dark:text-[#000000] hover:bg-[#4F46E5] hover:text-white dark:hover:bg-[#FACC15] dark:hover:text-[#000000] group-hover:scale-105"
           )}>
             <Calculator className="w-6 h-6" />
           </div>
           <span className={cn(
             "text-[10px] uppercase font-bold tracking-wider mt-1 transition-colors duration-200",
-            activeTab === 'calculate' ? "text-app-accent" : "text-app-text-secondary group-hover:text-app-text"
+            activeTab === 'calculate' ? "text-[#4F46E5] dark:text-[#FACC15]" : "text-[#64748B] dark:text-[#A1A1AA] group-hover:text-app-text"
           )}>
             Calc
           </span>
@@ -612,13 +774,13 @@ export default function App() {
           }}
           className={cn(
             "flex flex-col items-center justify-center p-2 rounded-xl transition-all cursor-pointer relative",
-            activeTab === 'history' ? "text-app-accent font-bold scale-102" : "text-app-text-secondary hover:text-app-text"
+            activeTab === 'history' ? "text-[#4F46E5] dark:text-[#FACC15] font-bold scale-102" : "text-[#64748B] dark:text-[#A1A1AA] hover:text-[#4F46E5] dark:hover:text-[#FACC15]"
           )}
         >
           <Clock className="w-6 h-6" />
           <span className="text-[10px] uppercase font-bold mt-1 tracking-wider">History</span>
           {history.length > 0 && (
-            <span className="absolute top-1.5 right-2 bg-app-accent w-2 h-2 rounded-full border border-app-card"></span>
+            <span className="absolute top-1.5 right-2 bg-red-500 w-2 h-2 rounded-full border border-app-card"></span>
           )}
         </button>
 
@@ -630,7 +792,7 @@ export default function App() {
           }}
           className={cn(
             "flex flex-col items-center justify-center p-2 rounded-xl transition-all cursor-pointer",
-            activeTab === 'profile' ? "text-app-accent font-bold scale-102" : "text-app-text-secondary hover:text-app-text"
+            activeTab === 'profile' ? "text-[#4F46E5] dark:text-[#FACC15] font-bold scale-102" : "text-[#64748B] dark:text-[#A1A1AA] hover:text-[#4F46E5] dark:hover:text-[#FACC15]"
           )}
         >
           <User className="w-6 h-6" />

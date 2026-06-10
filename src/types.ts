@@ -34,4 +34,18 @@ export interface UserPreferences {
   locationPermission?: boolean;
   vegMode?: boolean;
   hapticFeedback?: boolean;
+  // Security Panel Options
+  inputSanitization?: boolean;
+  transitEncryption?: boolean;
+  screenshotProtection?: boolean;
+  inactiveSessionAutoLogout?: 'off' | '1m' | '5m' | '15m';
+  lastSecurityCheckTime?: string;
+}
+
+export interface SecurityEventLog {
+  id: string;
+  timestamp: string;
+  event: string;
+  severity: 'low' | 'medium' | 'high';
+  status: string;
 }
