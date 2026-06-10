@@ -1,7 +1,14 @@
-import React from 'react';
-import { User, DollarSign, Target, Award, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { 
+  User, 
+  Check, 
+  Sun, 
+  Moon, 
+  Settings, 
+  AlertCircle
+} from 'lucide-react';
 import { UserPreferences } from '../types';
-import { cn, formatCurrency } from '../utils';
+import { cn } from '../utils';
 
 interface ProfileTabProps {
   preferences: UserPreferences;
@@ -9,156 +16,163 @@ interface ProfileTabProps {
   savedCalculationsCount: number;
 }
 
-const CURRENCIES = [
-  { symbol: '₹', code: 'INR', name: 'Indian Rupee (₹)' },
-];
-
 export default function ProfileTab({
   preferences,
   onUpdatePreferences,
-  savedCalculationsCount,
 }: ProfileTabProps) {
+  const [showToast, setShowToast] = useState(false);
+  const [toastText, setToastText] = useState('');
+
+  const activeTheme = preferences.theme || 'system';
+
+  const triggerToast = (msg: string) => {
+    setToastText(msg);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2500);
+  };
+
+  const handleThemeChange = (newTheme: 'system' | 'light' | 'dark') => {
+    onUpdatePreferences({ theme: newTheme });
+    triggerToast(`Theme set to ${newTheme.toUpperCase()}`);
+  };
+
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      {/* Visual Avatar Card banner */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-6 text-white flex flex-col sm:flex-row items-center gap-5 shadow-sm">
-        <div className="w-16 h-16 rounded-2xl bg-white overflow-hidden flex items-center justify-center border-2 border-white/30 shadow-lg shrink-0">
-          <img
-            src="/src/assets/images/smart_finance_logo_1780875300350.png"
-            alt="Smart Finance Brand"
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-          />
+    <div className="max-w-2xl mx-auto space-y-6 pb-12 font-sans animate-in fade-in duration-300">
+      
+      {/* Toast Alert Banner */}
+      {showToast && (
+        <div className="fixed top-24 left-1/2 transform -translate-x-1/2 z-50 bg-[#1C1C1E] dark:bg-zinc-900 border border-zinc-800 text-app-accent px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2 text-xs font-bold animate-in fade-in slide-in-from-top-6 duration-300">
+          <AlertCircle className="w-4 h-4 shrink-0 text-app-accent" />
+          <span>{toastText}</span>
+        </div>
+      )}
+
+      {/* Visual Header Banner */}
+      <div className="bg-app-card rounded-2xl p-6 flex flex-col sm:flex-row items-center gap-5 border border-app-border shadow-xs">
+        <div className="w-16 h-16 rounded-2xl bg-app-accent/10 flex items-center justify-center border border-app-accent/20 shadow-sm shrink-0">
+          <User className="w-8 h-8 text-app-accent" />
         </div>
         <div className="text-center sm:text-left space-y-1">
-          <span className="text-[10px] uppercase font-bold tracking-widest text-blue-100 bg-blue-500/30 px-2.5 py-0.5 rounded-full">
-            Active Profile
+          <span className="text-[10px] uppercase font-bold tracking-widest text-app-accent bg-app-accent/10 px-2.5 py-0.5 rounded-full select-none">
+            Active Account
           </span>
-          <h3 className="text-2xl font-black">{preferences.userName}</h3>
-          <p className="text-xs text-blue-100">Managing financial plans with real-time variables.</p>
+          <h3 className="text-2xl font-black text-app-text">{preferences.userName}</h3>
+          <p className="text-xs text-app-text-secondary">Customize your account options and interface themes instantly.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Profile Settings Form */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
-          <h4 className="font-extrabold text-gray-800 text-sm border-b border-gray-50 pb-2.5">User Customization</h4>
+      {/* Main Settings Card */}
+      <div className="bg-app-card rounded-2xl border border-app-border p-6 md:p-8 space-y-6 shadow-xs">
+        
+        {/* Header Title */}
+        <div className="flex items-center gap-2.5 border-b border-app-border pb-4 select-none">
+          <Settings className="w-5 h-5 text-app-accent scroll-smooth" />
+          <h4 className="font-extrabold text-app-text text-sm uppercase tracking-wider">
+            User Customization
+          </h4>
+        </div>
+
+        <div className="space-y-6 pt-2">
           
-          {/* Change Name */}
+          {/* Profile Name Input */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Profile Name</label>
+            <label className="text-[11px] font-bold text-app-text-secondary uppercase tracking-wider block">
+              Profile Name
+            </label>
             <input
               type="text"
               value={preferences.userName}
               onChange={(e) => onUpdatePreferences({ userName: e.target.value })}
-              className="w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-xs font-semibold text-gray-700"
+              placeholder="Enter profile name"
+              className="w-full px-4 py-3 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-app-accent/15 focus:border-app-accent text-xs font-semibold text-app-text transition-all"
             />
           </div>
 
-          {/* Currency Selector */}
+          {/* Workspace Currency info */}
           <div className="space-y-2">
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block">Global Workspace Currency</label>
-            <div className="space-y-1.5 max-h-48 overflow-y-auto">
-              {CURRENCIES.map((curr) => {
-                const isSelected = preferences.currency === curr.symbol;
-                return (
-                  <button
-                    key={curr.code}
-                    onClick={() => onUpdatePreferences({ currency: curr.symbol })}
-                    className={cn(
-                      "w-full px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center justify-between border cursor-pointer transition-all",
-                      isSelected
-                        ? "bg-blue-50 text-blue-700 border-blue-200"
-                        : "border-gray-150 hover:bg-gray-50 text-gray-600"
-                    )}
-                  >
-                    <span>{curr.name}</span>
-                    {isSelected && <Check className="w-4 h-4 text-blue-600" />}
-                  </button>
-                );
-              })}
+            <label className="text-[11px] font-bold text-app-text-secondary uppercase tracking-wider block">
+              Workspace Currency
+            </label>
+            <div className="w-full px-4 py-3 bg-app-bg border border-app-border rounded-xl text-xs font-semibold text-app-text select-none">
+              Indian Rupee (₹)
             </div>
           </div>
-        </div>
 
-        {/* Goals & Achievements */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-6">
-          <h4 className="font-extrabold text-gray-800 text-sm border-b border-gray-50 pb-2.5">Achievements & Milestones</h4>
-
-          <div className="space-y-4 text-xs font-semibold">
-            {/* Target Card math */}
-            <div className="p-4 bg-indigo-50/20 border border-indigo-50 rounded-xl flex gap-3 text-indigo-950 items-center">
-              <div className="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center text-indigo-600 shrink-0">
-                <Target className="w-5 h-5" />
-              </div>
-              <div className="space-y-0.5">
-                <span className="text-gray-400 text-[10px] uppercase block tracking-wider">Saved Computations Goals</span>
-                <p className="text-sm font-black text-indigo-900">{savedCalculationsCount} / 5 Calculations Stored</p>
-              </div>
+          {/* Segmented Theme Switcher */}
+          <div className="space-y-3 pt-2">
+            <div className="flex justify-between items-center">
+              <label className="text-[11px] font-bold text-app-text-secondary uppercase tracking-wider block">
+                Workspace Theme
+              </label>
+              <span className="text-[10px] font-black bg-app-accent/10 text-app-accent px-2.5 py-0.5 rounded-full capitalize select-none">
+                {activeTheme} Mode
+              </span>
             </div>
 
-            {/* Progress gauge bar */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-[11px] text-gray-400">
-                <span>Core Target Completion</span>
-                <span>{Math.min(100, Math.round((savedCalculationsCount / 5) * 100))}%</span>
-              </div>
-              <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="bg-indigo-600 h-full rounded-full transition-all duration-350"
-                  style={{ width: `${Math.min(100, (savedCalculationsCount / 5) * 100)}%` }}
-                ></div>
-              </div>
-            </div>
-
-            {/* Achievements unlock list */}
-            <div className="space-y-2 pt-2 border-t border-gray-50">
-              <span className="text-xs font-bold text-gray-400 block uppercase tracking-wider">Unlocked badges</span>
+            {/* Segmented Control Container */}
+            <div className="grid grid-cols-3 bg-app-bg rounded-xl p-1 border border-app-border relative overflow-hidden">
               
-              <div className="space-y-2.5 text-xs text-slate-650">
-                <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border text-white",
-                    savedCalculationsCount >= 1 ? "bg-emerald-500 border-emerald-300" : "bg-gray-100 border-gray-200"
-                  )}>
-                    <Award className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-gray-800">First Steps Saver</h5>
-                    <p className="text-[10px] text-gray-400">Logged your first customized projection.</p>
-                  </div>
-                </div>
+              {/* System Option */}
+              <button
+                onClick={() => handleThemeChange('system')}
+                className={cn(
+                  "py-3 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer relative z-10 select-none",
+                  activeTheme === 'system'
+                    ? "bg-app-accent text-white dark:text-zinc-950 shadow-xs font-extrabold scale-102"
+                    : "text-app-text-secondary hover:text-app-text hover:bg-app-accent/5 font-semibold"
+                )}
+              >
+                {activeTheme === 'system' ? (
+                  <Check className="w-4 h-4 shrink-0 stroke-[2.5]" />
+                ) : (
+                  <Settings className="w-4 h-4 shrink-0 opacity-60" />
+                )}
+                <span>System</span>
+              </button>
 
-                <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border text-white",
-                    savedCalculationsCount >= 3 ? "bg-indigo-500 border-indigo-300" : "bg-gray-100 border-gray-200"
-                  )}>
-                    <Award className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-gray-800">Finance Novice</h5>
-                    <p className="text-[10px] text-gray-400">Logged 3+ calculations under different modules.</p>
-                  </div>
-                </div>
+              {/* Light Option */}
+              <button
+                onClick={() => handleThemeChange('light')}
+                className={cn(
+                  "py-3 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer relative z-10 select-none",
+                  activeTheme === 'light'
+                    ? "bg-app-accent text-white dark:text-zinc-950 shadow-xs font-extrabold scale-102"
+                    : "text-app-text-secondary hover:text-app-text hover:bg-app-accent/5 font-semibold"
+                )}
+              >
+                {activeTheme === 'light' ? (
+                  <Check className="w-4 h-4 shrink-0 stroke-[2.5]" />
+                ) : (
+                  <Sun className="w-4 h-4 shrink-0 opacity-60" />
+                )}
+                <span>Light</span>
+              </button>
 
-                <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border text-white",
-                    savedCalculationsCount >= 5 ? "bg-amber-500 border-amber-300 animate-pulse" : "bg-gray-100 border-gray-200"
-                  )}>
-                    <Award className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-gray-800">Strategic Planner</h5>
-                    <p className="text-[10px] text-gray-400">Logged 5+ calculations. Full audit capabilities.</p>
-                  </div>
-                </div>
-              </div>
+              {/* Dark Option */}
+              <button
+                onClick={() => handleThemeChange('dark')}
+                className={cn(
+                  "py-3 px-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer relative z-10 select-none",
+                  activeTheme === 'dark'
+                    ? "bg-app-accent text-zinc-950 dark:text-zinc-950 shadow-xs font-extrabold scale-102"
+                    : "text-app-text-secondary hover:text-app-text hover:bg-app-accent/5 font-semibold"
+                )}
+              >
+                {activeTheme === 'dark' ? (
+                  <Check className="w-4 h-4 shrink-0 stroke-[2.5]" />
+                ) : (
+                  <Moon className="w-4 h-4 shrink-0 opacity-60" />
+                )}
+                <span>Dark</span>
+              </button>
+
             </div>
           </div>
+
         </div>
+
       </div>
+
     </div>
   );
 }

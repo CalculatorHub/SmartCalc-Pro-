@@ -54,6 +54,7 @@ export default function InterestCalc({
   const [timeUnit, setTimeUnit] = useState<'years' | 'months'>('years');
   const [frequency, setFrequency] = useState<Frequency>('monthly');
   const [isSaved, setIsSaved] = useState<boolean>(false);
+  const [activeSlice, setActiveSlice] = useState<'principal' | 'interest' | null>(null);
 
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
@@ -173,6 +174,11 @@ export default function InterestCalc({
   const compoundTotal = principal * Math.pow(1 + rCombined / n, n * t);
   const compoundInterest = compoundTotal - principal;
   const compoundMonthlyAverage = timeValue > 0 ? compoundInterest / (timeUnit === 'years' ? timeValue * 12 : timeValue) : 0;
+
+  const currentTotal = calcMode === 'simple' ? simpleTotal : compoundTotal;
+  const currentInterest = calcMode === 'simple' ? simpleInterest : compoundInterest;
+  const principalPercent = currentTotal > 0 ? (principal / currentTotal) * 100 : 100;
+  const interestPercent = currentTotal > 0 ? (currentInterest / currentTotal) * 100 : 0;
 
   // Growth graph coordinate generator (0-Division safe)
   const numSteps = Math.min(12, Math.ceil(timeUnit === 'years' ? timeValue : timeValue)) || 1;
@@ -481,13 +487,13 @@ export default function InterestCalc({
                       setStartDate(e.target.value);
                       setIsSaved(false);
                     }}
-                    className="block w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500 text-gray-800 cursor-pointer"
+                    className="block w-full px-2.5 py-1.5 bg-app-bg border border-app-border rounded-lg text-xs font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500 text-app-text cursor-pointer"
                   />
                 </div>
 
                 {/* End Date */}
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-gray-500 flex items-center gap-1 select-none">
+                  <label className="text-[11px] font-bold text-app-text-secondary flex items-center gap-1 select-none">
                     <Calendar className="w-3.5 h-3.5 text-emerald-600" />
                     End Date
                   </label>
@@ -498,15 +504,15 @@ export default function InterestCalc({
                       setEndDate(e.target.value);
                       setIsSaved(false);
                     }}
-                    className="block w-full px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500 text-gray-800 cursor-pointer"
+                    className="block w-full px-2.5 py-1.5 bg-app-bg border border-app-border rounded-lg text-xs font-bold focus:outline-none focus:ring-1 focus:ring-indigo-500 text-app-text cursor-pointer"
                   />
                 </div>
               </div>
 
               {/* Scaling switcher while in date mode */}
-              <div className="flex items-center justify-between text-xs select-none bg-white p-2 rounded-xl border border-gray-150/40">
-                <span className="text-[10px] text-gray-400 font-bold block">Render duration in:</span>
-                <div className="flex bg-gray-100 p-0.5 rounded-lg text-xs font-semibold">
+              <div className="flex items-center justify-between text-xs select-none bg-app-card p-2 rounded-xl border border-app-border">
+                <span className="text-[10px] text-app-text-muted font-bold block">Render duration in:</span>
+                <div className="flex bg-app-bg p-0.5 rounded-lg text-xs font-semibold border border-app-border">
                   <button
                     type="button"
                     onClick={() => {
@@ -515,7 +521,7 @@ export default function InterestCalc({
                     }}
                     className={cn(
                       "px-2.5 py-1 rounded-md transition-all cursor-pointer text-[10px]",
-                      timeUnit === 'years' ? "bg-white text-slate-800 shadow-3xs font-extrabold" : "text-gray-400 hover:text-gray-850"
+                      timeUnit === 'years' ? "bg-app-card text-app-text shadow-3xs font-extrabold" : "text-app-text-muted hover:text-app-text"
                     )}
                   >
                     Years
@@ -528,7 +534,7 @@ export default function InterestCalc({
                     }}
                     className={cn(
                       "px-2.5 py-1 rounded-md transition-all cursor-pointer text-[10px]",
-                      timeUnit === 'months' ? "bg-white text-slate-800 shadow-3xs font-extrabold" : "text-gray-400 hover:text-gray-850"
+                      timeUnit === 'months' ? "bg-app-card text-app-text shadow-3xs font-extrabold" : "text-app-text-muted hover:text-app-text"
                     )}
                   >
                     Months
@@ -538,29 +544,29 @@ export default function InterestCalc({
 
               {/* Date diff statistics banner */}
               {diffResult && !diffResult.invalid && (
-                <div className="bg-indigo-50/70 p-2.5 rounded-xl border border-indigo-100/40 text-[11px] text-indigo-950 font-medium space-y-1">
-                  <p className="flex items-center gap-1 font-bold text-indigo-900">
+                <div className="bg-indigo-500/10 p-2.5 rounded-xl border border-indigo-500/20 text-[11px] text-app-text font-medium space-y-1">
+                  <p className="flex items-center gap-1 font-bold text-indigo-500 dark:text-indigo-400">
                     <span>✓</span> Period Computed Successfully:
                   </p>
-                  <p className="opacity-95 pl-3">
+                  <p className="opacity-95 pl-3 text-app-text-secondary">
                     <strong>{diffResult.years}</strong> Years,{" "}
                     <strong>{diffResult.months}</strong> Months, and{" "}
                     <strong>{diffResult.days}</strong> Days
                   </p>
-                  <p className="text-[10px] text-slate-500 pl-3 pt-0.5 border-t border-indigo-100/20">
-                    Equates to: <span className="bg-white px-1.5 py-0.5 rounded shadow-3xs font-extrabold text-indigo-700">{timeValue} {timeUnit}</span> for formulas
+                  <p className="text-[10px] text-app-text-muted pl-3 pt-1 border-t border-indigo-500/10">
+                    Equates to: <span className="bg-app-card px-1.5 py-0.5 rounded shadow-3xs font-extrabold text-indigo-500 dark:text-indigo-400">{timeValue} {timeUnit}</span> for formulas
                   </p>
                 </div>
               )}
 
               {diffResult && diffResult.invalid && (
-                <div className="bg-rose-50 text-rose-800 p-2.5 rounded-xl border border-rose-100/45 text-[10px] font-bold">
+                <div className="bg-rose-500/10 text-rose-500 p-2.5 rounded-xl border border-rose-500/20 text-[10px] font-bold">
                   ⚠️ Error: End Date cannot be before Start Date! Please adjust values.
                 </div>
               )}
 
               {(!startDate || !endDate) && (
-                <div className="text-slate-400 text-[10px] text-center p-3 border border-dashed border-gray-200 rounded-xl bg-white/50 select-none">
+                <div className="text-app-text-muted text-[10px] text-center p-3 border border-dashed border-app-border rounded-xl bg-app-bg select-none">
                   Select both Start and End Dates to compute duration automatically
                 </div>
               )}
@@ -569,12 +575,12 @@ export default function InterestCalc({
 
           {/* 4. Compound Frequency (Compound tab only) */}
           {calcMode === 'compound' && (
-            <div className="space-y-2 pt-2 border-t border-gray-100 select-none">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
-                <TrendingUp className="w-3.5 h-3.5 text-purple-600" />
+            <div className="space-y-2 pt-2 border-t border-app-border select-none">
+              <label className="text-xs font-bold text-app-text-secondary uppercase tracking-wide flex items-center gap-1.5">
+                <TrendingUp className="w-3.5 h-3.5 text-purple-500" />
                 Compounding Cycle
               </label>
-              <div className="grid grid-cols-5 gap-1 bg-gray-50 p-1 rounded-xl border border-gray-150/40">
+              <div className="grid grid-cols-5 gap-1 bg-app-bg p-1 rounded-xl border border-app-border">
                 {(['annually', 'semi-annually', 'quarterly', 'monthly', 'daily'] as Frequency[]).map((freq) => (
                   <button
                     key={freq}
@@ -587,7 +593,7 @@ export default function InterestCalc({
                       "px-1 py-1 text-[9px] font-bold text-center transition-all cursor-pointer capitalize rounded-md",
                       frequency === freq
                         ? "bg-purple-600 text-white shadow-3xs"
-                        : "text-gray-500 hover:text-gray-800"
+                        : "text-app-text-muted hover:text-app-text"
                     )}
                   >
                     {freq.replace('-', ' ')}
@@ -606,17 +612,17 @@ export default function InterestCalc({
 
           {/* SIMPLE INTEREST MODE UI */}
           {calcMode === 'simple' && (
-            <div className="bg-white p-5 rounded-3xl border border-emerald-500/15 shadow-3xs space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+            <div className="bg-app-card p-5 rounded-3xl border border-emerald-500/10 shadow-3xs space-y-4">
+              <div className="flex items-center justify-between border-b border-app-border pb-2">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                  <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Simple Return Outputs</span>
+                  <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Simple Return Outputs</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleSave}
                   disabled={isSaved || principal === 0}
-                  className="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-40 font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-3xs cursor-pointer select-none transition-all"
+                  className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 disabled:opacity-40 font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-3xs cursor-pointer select-none transition-all"
                 >
                   <Save className="w-3 h-3" />
                   Save Calculation
@@ -624,22 +630,22 @@ export default function InterestCalc({
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-emerald-50/20 p-3.5 rounded-2xl border border-emerald-100/35">
-                  <span className="text-[10px] font-bold text-gray-400 block uppercase">Simple Interest</span>
-                  <span className="text-lg font-black text-emerald-800">{formatCurrency(simpleInterest, currency)}</span>
+                <div className="bg-emerald-500/5 p-3.5 rounded-2xl border border-emerald-500/10">
+                  <span className="text-[10px] font-bold text-app-text-muted block uppercase">Simple Interest</span>
+                  <span className="text-lg font-black text-emerald-500">{formatCurrency(simpleInterest, currency)}</span>
                 </div>
-                <div className="bg-emerald-50/20 p-3.5 rounded-2xl border border-emerald-100/35">
-                  <span className="text-[10px] font-bold text-gray-400 block uppercase">Total Balance</span>
-                  <span className="text-lg font-black text-slate-800">{formatCurrency(simpleTotal, currency)}</span>
+                <div className="bg-emerald-500/5 p-3.5 rounded-2xl border border-emerald-500/10">
+                  <span className="text-[10px] font-bold text-app-text-muted block uppercase">Total Balance</span>
+                  <span className="text-lg font-black text-app-text">{formatCurrency(simpleTotal, currency)}</span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-gray-550 bg-gray-50/80 p-3 rounded-xl border border-gray-150/40 select-none">
+              <div className="flex items-center justify-between text-xs text-app-text-secondary bg-app-bg p-3 rounded-xl border border-app-border select-none">
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold">Estimated Return per Month:</span>
-                  <span className="text-slate-800 font-extrabold">{formatCurrency(simpleMonthlyIncome, currency)}</span>
+                  <span className="text-app-text font-extrabold">{formatCurrency(simpleMonthlyIncome, currency)}</span>
                 </div>
-                <span className="text-emerald-750 font-bold bg-emerald-50 px-2 py-0.5 rounded text-[10px]">
+                <span className="text-emerald-500 font-bold bg-emerald-500/10 px-2 py-0.5 rounded text-[10px]">
                   Linear Yield
                 </span>
               </div>
@@ -648,17 +654,17 @@ export default function InterestCalc({
 
           {/* COMPOUND INTEREST MODE UI */}
           {calcMode === 'compound' && (
-            <div className="bg-white p-5 rounded-3xl border border-purple-500/15 shadow-3xs space-y-4">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+            <div className="bg-app-card p-5 rounded-3xl border border-purple-500/10 shadow-3xs space-y-4">
+              <div className="flex items-center justify-between border-b border-app-border pb-2">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-                  <span className="text-xs font-bold text-purple-800 uppercase tracking-wider capitalize">Compound Return ({frequency})</span>
+                  <span className="text-xs font-bold text-purple-600 dark:text-purple-400 tracking-wider capitalize">Compound Return ({frequency})</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleSave}
                   disabled={isSaved || principal === 0}
-                  className="bg-purple-50 text-purple-700 hover:bg-purple-100 disabled:opacity-40 font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-3xs cursor-pointer select-none transition-all"
+                  className="bg-purple-500/10 hover:bg-purple-500/20 text-purple-500 disabled:opacity-40 font-bold text-[10px] px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-3xs cursor-pointer select-none transition-all"
                 >
                   <Save className="w-3 h-3" />
                   Save Calculation
@@ -666,138 +672,244 @@ export default function InterestCalc({
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-purple-50/20 p-3.5 rounded-2xl border border-purple-100/35">
-                  <span className="text-[10px] font-bold text-gray-400 block uppercase">Interest Accrued</span>
-                  <span className="text-lg font-black text-purple-800">{formatCurrency(compoundInterest, currency)}</span>
+                <div className="bg-purple-500/5 p-3.5 rounded-2xl border border-purple-500/10">
+                  <span className="text-[10px] font-bold text-app-text-muted block uppercase">Interest Accrued</span>
+                  <span className="text-lg font-black text-purple-500">{formatCurrency(compoundInterest, currency)}</span>
                 </div>
-                <div className="bg-purple-50/20 p-3.5 rounded-2xl border border-purple-100/35">
-                  <span className="text-[10px] font-bold text-gray-400 block uppercase">Future Maturity Value</span>
-                  <span className="text-lg font-black text-slate-800">{formatCurrency(compoundTotal, currency)}</span>
+                <div className="bg-purple-500/5 p-3.5 rounded-2xl border border-purple-500/10">
+                  <span className="text-[10px] font-bold text-app-text-muted block uppercase">Future Maturity Value</span>
+                  <span className="text-lg font-black text-app-text">{formatCurrency(compoundTotal, currency)}</span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-gray-550 bg-gray-50/80 p-3 rounded-xl border border-gray-150/40 select-none">
+              <div className="flex items-center justify-between text-xs text-app-text-secondary bg-app-bg p-3 rounded-xl border border-app-border select-none">
                 <div className="flex items-center gap-1.5">
                   <span className="font-bold">Average Yield per Month:</span>
-                  <span className="text-slate-800 font-extrabold">{formatCurrency(compoundMonthlyAverage, currency)}</span>
+                  <span className="text-app-text font-extrabold">{formatCurrency(compoundMonthlyAverage, currency)}</span>
                 </div>
-                <span className="text-purple-750 font-bold bg-purple-50 px-2 py-0.5 rounded text-[10px] uppercase">
+                <span className="text-purple-500 font-bold bg-purple-500/10 px-2 py-0.5 rounded text-[10px] uppercase">
                   Compounding Yield
                 </span>
               </div>
             </div>
           )}
 
-          {/* DYNAMIC SHADOWED GROWTH GRAPH */}
-          <div className="bg-white p-5 rounded-3xl border border-gray-150/45 shadow-3xs space-y-4">
-            <span className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1.5 select-none">
+          {/* PROJECTED BALANCE OVERVIEW (DONUT CHART) */}
+          <div className="bg-app-card p-5 rounded-3xl border border-app-border shadow-3xs space-y-4">
+            <span className="text-xs font-bold text-app-text-secondary uppercase tracking-wider flex items-center gap-1.5 select-none font-display">
               <Sparkles className="w-4 h-4 text-indigo-500" />
-              Projected Balance Curve over duration
+              Projected Balance Overview
             </span>
 
-            {/* GROWING SVG GRAPH */}
-            <div className="p-4 bg-gray-50/50 rounded-2xl border border-gray-100 flex flex-col items-center justify-center relative select-none">
+            {/* Main Interactive card visualization */}
+            <div className="p-5 bg-app-bg rounded-2xl border border-app-border shadow-xs flex flex-col sm:flex-row items-center justify-center gap-6">
               
-              <div className="w-full flex items-center justify-between text-[10px] font-bold text-gray-400 mb-2">
-                <span>Principal Base: {formatCurrency(principal, currency)}</span>
-                <span className={calcMode === 'simple' ? 'text-emerald-600' : 'text-purple-600'}>
-                  Final Value: {formatCurrency(calcMode === 'simple' ? simpleTotal : compoundTotal, currency)}
-                </span>
+              {/* Modern SVG Donut Ring with nested text */}
+              <div className="relative w-44 h-44 flex items-center justify-center shrink-0 select-none">
+                {/* SVG viewbox 176x176 fits perfectly with radius 70 & strokeWidth 18 */}
+                <svg viewBox="0 0 176 176" className="w-full h-full transform -rotate-90 overflow-visible">
+                  {/* Underlay / Background representing Principal Base portion */}
+                  <circle
+                    cx="88"
+                    cy="88"
+                    r="70"
+                    fill="transparent"
+                    stroke={activeSlice === 'principal' ? '#94A3B8' : 'var(--app-border)'}
+                    strokeWidth={activeSlice === 'principal' ? '22' : '18'}
+                    onMouseEnter={() => setActiveSlice('principal')}
+                    onMouseLeave={() => setActiveSlice(null)}
+                    onTouchStart={(e) => { e.preventDefault(); setActiveSlice('principal'); }}
+                    onTouchEnd={() => setActiveSlice(null)}
+                    className="cursor-pointer transition-all duration-300"
+                  />
+                  {/* Active segment representing accrued Interest Gain */}
+                  {(calcMode === 'simple' ? simpleTotal : compoundTotal) > 0 && (
+                    <circle
+                      cx="88"
+                      cy="88"
+                      r="70"
+                      fill="transparent"
+                      stroke={activeSlice === 'interest' ? '#15803d' : '#1BA672'}
+                      strokeWidth={activeSlice === 'interest' ? '22' : '18'}
+                      strokeDasharray={439.82}
+                      strokeDashoffset={
+                        439.82 - 
+                        (((calcMode === 'simple' ? simpleInterest : compoundInterest) / 
+                          (calcMode === 'simple' ? simpleTotal : compoundTotal)) * 100 / 100) * 439.82
+                      }
+                      strokeLinecap="round"
+                      onMouseEnter={() => setActiveSlice('interest')}
+                      onMouseLeave={() => setActiveSlice(null)}
+                      onTouchStart={(e) => { e.preventDefault(); setActiveSlice('interest'); }}
+                      onTouchEnd={() => setActiveSlice(null)}
+                      className="cursor-pointer transition-all"
+                      style={{ transition: 'stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s, stroke-width 0.2s' }}
+                    />
+                  )}
+                </svg>
+
+                {/* Inner center text labels - dynamic depending on hover */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-2 pointer-events-none">
+                  {activeSlice === null ? (
+                    <>
+                      <span className="text-[9px] font-black text-app-text-muted uppercase tracking-widest leading-none mb-1">
+                        Total Value
+                      </span>
+                      <span className="text-sm md:text-base font-black text-app-text tracking-tight leading-none truncate max-w-[130px]" title={formatCurrency(calcMode === 'simple' ? simpleTotal : compoundTotal, currency)}>
+                        {formatCurrency(calcMode === 'simple' ? simpleTotal : compoundTotal, currency)}
+                      </span>
+                      <span className="text-[8px] md:text-[9px] font-extrabold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full mt-1.5 border border-emerald-500/20">
+                        +{(((calcMode === 'simple' ? simpleInterest : compoundInterest) / Math.max(1, calcMode === 'simple' ? simpleTotal : compoundTotal)) * 100).toFixed(1)}% Gain
+                      </span>
+                    </>
+                  ) : activeSlice === 'principal' ? (
+                    <>
+                      <span className="text-[9px] font-black text-app-text-muted uppercase tracking-widest leading-none mb-1">
+                        Principal
+                      </span>
+                      <span className="text-sm md:text-base font-black text-app-text tracking-tight leading-none truncate max-w-[130px]">
+                        {formatCurrency(principal, currency)}
+                      </span>
+                      <span className="text-[8px] md:text-[9px] font-extrabold text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full mt-1.5 border border-blue-500/20">
+                        {principalPercent.toFixed(1)}% Share
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest leading-none mb-1">
+                        Interest
+                      </span>
+                      <span className="text-sm md:text-base font-black text-emerald-500 tracking-tight leading-none truncate max-w-[130px]">
+                        {formatCurrency(calcMode === 'simple' ? simpleInterest : compoundInterest, currency)}
+                      </span>
+                      <span className="text-[8px] md:text-[9px] font-extrabold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full mt-1.5 border border-emerald-500/20">
+                        {interestPercent.toFixed(1)}% Share
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {/* Elegant Interactive Hover Tooltip Box */}
+                {activeSlice && (
+                  <div 
+                    className={cn(
+                      "absolute -top-14 z-10 text-slate-100 text-[11px] px-3 py-2 rounded-xl shadow-lg border flex flex-col items-center pointer-events-none animate-in fade-in slide-in-from-bottom-2 duration-200 select-none min-w-[120px] text-center",
+                      activeSlice === 'principal'
+                        ? "bg-slate-900 border-slate-700/50"
+                        : "bg-emerald-950 border-emerald-800/50"
+                    )}
+                  >
+                    <span className={cn(
+                      "font-black uppercase text-[8px] tracking-wider mb-0.5",
+                      activeSlice === 'principal' ? "text-slate-400" : "text-emerald-300"
+                    )}>
+                      {activeSlice === 'principal' ? 'Principal Core' : 'Interest Accrued'}
+                    </span>
+                    <span className="font-extrabold font-mono text-xs">
+                      {formatCurrency(activeSlice === 'principal' ? principal : (calcMode === 'simple' ? simpleInterest : compoundInterest), currency)}
+                    </span>
+                    <span className="text-[9px] opacity-90 mt-0.5 font-bold">
+                      {activeSlice === 'principal' ? principalPercent.toFixed(1) : interestPercent.toFixed(1)}% slice
+                    </span>
+                    {/* Tooltip caret */}
+                    <div className={cn(
+                      "absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1 w-2 h-2 rotate-45 border-r border-b",
+                      activeSlice === 'principal'
+                        ? "bg-slate-900 border-slate-700/50"
+                        : "bg-emerald-950 border-emerald-800/50"
+                    )} />
+                  </div>
+                )}
               </div>
 
-              <svg 
-                viewBox={`0 0 ${svgWidth} ${svgHeight}`} 
-                className="w-full h-36 max-w-full overflow-visible font-bold"
-              >
-                {/* Grid guidelines */}
-                {[0, 1, 2].map((g) => {
-                  const yVal = paddingY + (graphHeight / 2) * g;
-                  return (
-                    <line 
-                      key={g}
-                      x1={paddingX} 
-                      y1={yVal} 
-                      x2={svgWidth - paddingX} 
-                      y2={yVal} 
-                      stroke="#e2e8f0" 
-                      strokeWidth="1" 
+              {/* Side Metric Cards & Gauge info */}
+              <div className="flex-1 w-full space-y-3.5">
+                <div className="grid grid-cols-1 select-none xs:grid-cols-2 gap-2.5">
+                  
+                  {/* Principal Base Widget */}
+                  <div 
+                    onMouseEnter={() => setActiveSlice('principal')}
+                    onMouseLeave={() => setActiveSlice(null)}
+                    onClick={() => setActiveSlice(activeSlice === 'principal' ? null : 'principal')}
+                    className={cn(
+                      "p-3 rounded-xl border flex flex-col cursor-pointer transition-all duration-200",
+                      activeSlice === 'principal'
+                        ? "bg-blue-500/10 border-blue-400/80 shadow-3xs scale-[1.02]"
+                        : "bg-app-card border-app-border shadow-3xs hover:border-app-text-secondary/30"
+                    )}
+                  >
+                    <span className="text-[10px] font-bold text-app-text-muted uppercase tracking-wider block mb-1">
+                      Principal Base
+                    </span>
+                    <span className="text-sm font-black text-app-text">
+                      {formatCurrency(principal, currency)}
+                    </span>
+                    <span className="text-[9px] text-app-text-muted font-bold mt-0.5">
+                      {principalPercent.toFixed(1)}% of total
+                    </span>
+                  </div>
+
+                  {/* Final Value Widget */}
+                  <div 
+                    onMouseEnter={() => setActiveSlice('interest')}
+                    onMouseLeave={() => setActiveSlice(null)}
+                    onClick={() => setActiveSlice(activeSlice === 'interest' ? null : 'interest')}
+                    className={cn(
+                      "p-3 rounded-xl border flex flex-col cursor-pointer transition-all duration-200",
+                      activeSlice === 'interest'
+                        ? "bg-emerald-500/10 border-emerald-400/80 shadow-3xs scale-[1.02]"
+                        : "bg-app-card border-app-border shadow-3xs hover:border-app-text-secondary/30"
+                    )}
+                  >
+                    <span className="text-[10px] font-bold text-[#1BA672] uppercase tracking-wider block mb-1">
+                      Final Value
+                    </span>
+                    <span className="text-sm font-black text-emerald-500">
+                      {formatCurrency(calcMode === 'simple' ? simpleTotal : compoundTotal, currency)}
+                    </span>
+                    <span className="text-[9px] text-emerald-500 font-bold mt-0.5">
+                      Interest: {formatCurrency(calcMode === 'simple' ? simpleInterest : compoundInterest, currency)}
+                    </span>
+                  </div>
+
+                </div>
+
+                {/* Progress bar info for Percentage Gain Gauge */}
+                <div className="space-y-1.5 bg-app-card p-3 rounded-xl border border-app-border shadow-3xs">
+                  <div className="flex items-center justify-between text-xs select-none">
+                    <span className="text-[9px] font-black uppercase text-app-text-muted tracking-wider">Interest Gain Ratio</span>
+                    <span className="text-[10px] font-black text-emerald-500">
+                      Interest Gain: {((calcMode === 'simple' ? simpleTotal : compoundTotal) > 0 
+                        ? ((calcMode === 'simple' ? simpleInterest : compoundInterest) / (calcMode === 'simple' ? simpleTotal : compoundTotal)) * 100 
+                        : 0).toFixed(1)}%
+                    </span>
+                  </div>
+                  
+                  {/* Custom progress segment tracking bar */}
+                  <div className="h-2 w-full bg-app-bg rounded-lg overflow-hidden flex border border-app-border">
+                    <div 
+                      className="bg-[#1BA672] h-full transition-all duration-600 ease-out rounded-lg"
+                      style={{ 
+                        width: `${((calcMode === 'simple' ? simpleTotal : compoundTotal) > 0 
+                          ? ((calcMode === 'simple' ? simpleInterest : compoundInterest) / (calcMode === 'simple' ? simpleTotal : compoundTotal)) * 100 
+                          : 0)}%` 
+                      }}
                     />
-                  );
-                })}
+                  </div>
 
-                {/* Fill shadow area */}
-                {points.length > 0 && (
-                  <path 
-                    d={fillPath} 
-                    fill={`url(#${calcMode === 'simple' ? 'emeraldGlow' : 'purpleGlow'})`} 
-                    opacity="0.12" 
-                  />
-                )}
+                  <p className="text-[9px] text-app-text-muted leading-relaxed font-semibold">
+                    The total accrued yield represents cumulative interest earnings accumulated over {timeValue} {timeUnit}.
+                  </p>
+                </div>
 
-                {/* Main line path */}
-                {points.length > 0 && (
-                  <path 
-                    d={linePath} 
-                    fill="none" 
-                    stroke={calcMode === 'simple' ? '#10b981' : '#8b5cf6'} 
-                    strokeWidth="3" 
-                    strokeLinecap="round" 
-                  />
-                )}
+              </div>
 
-                {/* Base Anchor Indicator */}
-                <circle 
-                  cx={paddingX} 
-                  cy={getCoordinatesY(principal)} 
-                  r="4" 
-                  fill="#4f46e5" 
-                />
-
-                {/* Return Cap Marker */}
-                <circle 
-                  cx={svgWidth - paddingX} 
-                  cy={getCoordinatesY(calcMode === 'simple' ? simpleTotal : compoundTotal)} 
-                  r="5" 
-                  fill={calcMode === 'simple' ? '#10b981' : '#8b5cf6'} 
-                />
-
-                {/* Dynamic Axis ticks labels */}
-                {points.length > 0 && Array.from(new Set([0, Math.floor(points.length / 2), points.length - 1])).map((idx) => {
-                  if (idx >= points.length) return null;
-                  const item = points[idx];
-                  if (!item) return null;
-                  return (
-                    <text
-                      key={idx}
-                      x={getCoordinatesX(idx)}
-                      y={svgHeight - 4}
-                      fill="#94a3b8"
-                      fontSize="9"
-                      fontWeight="bold"
-                      textAnchor="middle"
-                    >
-                      {item.label}
-                    </text>
-                  );
-                })}
-
-                <defs>
-                  <linearGradient id="emeraldGlow" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" />
-                    <stop offset="100%" stopColor="#fff" />
-                  </linearGradient>
-                  <linearGradient id="purpleGlow" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#8b5cf6" />
-                    <stop offset="100%" stopColor="#fff" />
-                  </linearGradient>
-                </defs>
-              </svg>
             </div>
           </div>
 
           {/* SAVING SUCCESS PROMPTER */}
           {isSaved && (
-            <div className="bg-emerald-600 text-white rounded-xl p-3.5 flex items-center justify-center gap-2 text-xs font-semibold select-none shadow-sm animate-bounce">
+            <div className="bg-emerald-600 text-white rounded-xl p-3.5 flex items-center justify-center gap-2 text-xs font-bold select-none shadow-sm animate-bounce">
               <CheckCircle className="w-5 h-5 shrink-0" />
               Interest Record successfully saved to Your History Log!
             </div>

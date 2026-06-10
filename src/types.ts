@@ -30,4 +30,8 @@ export interface UserPreferences {
   currency: string; // '$', '₹', '€', '£', etc.
   themeColor: string;
   weeklyGoal: number;
+  theme?: 'system' | 'light' | 'dark';
+  locationPermission?: boolean;
+  vegMode?: boolean;
+  hapticFeedback?: boolean;
 }

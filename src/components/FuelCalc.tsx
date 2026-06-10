@@ -76,13 +76,13 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-200">
       {/* Carbon footprint banner */}
-      <div className="bg-orange-50/70 border border-orange-100 rounded-2xl p-4 flex gap-3 text-orange-950 text-sm">
-        <Flame className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
+      <div className="bg-orange-500/5 dark:bg-orange-950/10 border border-orange-500/10 dark:border-orange-950/20 rounded-2xl p-4 flex gap-3 text-app-text text-sm">
+        <Flame className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
         <div>
-          <span className="font-semibold text-orange-900">Commute Carbon & Financial Insight:</span>
-          <p className="mt-0.5 text-xs text-orange-850 opacity-90">
+          <span className="font-semibold text-orange-500">Commute Carbon & Financial Insight:</span>
+          <p className="mt-0.5 text-xs text-app-text-secondary opacity-90 leading-relaxed">
             Fuel costs map directly to carbon emissions. By improving your vehicle's mileage (KMPL) by just 3 km/L, you can save significant fuel charges per year and reduce your carbon footprint by up to {(100 * 2.31).toFixed(0)} kg of CO2.
           </p>
         </div>
@@ -90,15 +90,15 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left Side: Parameters */}
-        <div className="space-y-5 bg-white p-6 rounded-2xl border border-gray-100">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h3 className="font-semibold text-gray-800 text-base flex items-center gap-2">
-              <Route className="w-5 h-5 text-orange-600" />
+        <div className="space-y-5 bg-app-card p-6 rounded-2xl border border-app-border shadow-xs">
+          <div className="flex items-center justify-between border-b border-app-border pb-3">
+            <h3 className="font-semibold text-app-text text-normal flex items-center gap-2">
+              <Route className="w-5 h-5 text-orange-500" />
               Indian Commute Parameters
             </h3>
             <button
               onClick={handleReset}
-              className="text-gray-400 hover:text-orange-600 text-xs flex items-center gap-1 cursor-pointer font-bold"
+              className="text-app-text-muted hover:text-orange-500 text-xs flex items-center gap-1 cursor-pointer font-bold transition-all"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               Reset Defaults
@@ -108,8 +108,8 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
           {/* Planned Distance */}
           <div className="space-y-2">
             <div className="flex justify-between items-center text-xs">
-              <label className="font-bold text-gray-500 uppercase tracking-wider">Travel Distance ({distanceUnit})</label>
-              <span className="font-bold text-gray-800 text-sm">{distance} {distanceUnit}</span>
+              <label className="font-bold text-app-text-secondary uppercase tracking-wider">Travel Distance ({distanceUnit})</label>
+              <span className="font-bold text-app-text text-sm">{distance} {distanceUnit}</span>
             </div>
             <div className="relative rounded-xl">
               <input
@@ -119,7 +119,7 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
                   setDistance(Math.max(0, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold"
+                className="block w-full px-3.5 py-2.5 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold text-app-text"
                 placeholder="0"
               />
             </div>
@@ -128,12 +128,12 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
           {/* Fuel Price (Rupees per Liter) */}
           <div className="space-y-2">
             <div className="flex justify-between items-center text-xs">
-              <label className="font-bold text-gray-500 uppercase tracking-wider">Fuel Price (per Liter)</label>
-              <span className="font-bold text-gray-800 text-sm">{formatCurrency(fuelPrice, currency)}/L</span>
+              <label className="font-bold text-app-text-secondary uppercase tracking-wider">Fuel Price (per Liter)</label>
+              <span className="font-bold text-app-text text-sm">{formatCurrency(fuelPrice, currency)}/L</span>
             </div>
             <div className="relative rounded-xl">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                <span className="text-gray-400 text-xs font-bold">{currency}</span>
+                <span className="text-app-text-muted text-xs font-bold">{currency}</span>
               </div>
               <input
                 type="number"
@@ -143,7 +143,7 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
                   setFuelPrice(Math.max(0, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full pl-8 pr-3 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold"
+                className="block w-full pl-8 pr-3 py-2.5 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold text-app-text"
                 placeholder="0.00"
               />
             </div>
@@ -152,8 +152,8 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
           {/* Fuel Efficiency / Vehicle Mileage (km/L) */}
           <div className="space-y-2">
             <div className="flex justify-between items-center text-xs">
-              <label className="font-bold text-gray-500 uppercase tracking-wider">Vehicle Mileage ({efficiencyLabel})</label>
-              <span className="font-bold text-gray-800 text-sm">{efficiency} km/L</span>
+              <label className="font-bold text-app-text-secondary uppercase tracking-wider">Vehicle Mileage ({efficiencyLabel})</label>
+              <span className="font-bold text-app-text text-sm">{efficiency} km/L</span>
             </div>
             <div className="relative rounded-xl">
               <input
@@ -164,33 +164,33 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
                   setEfficiency(Math.max(0.1, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold"
+                className="block w-full px-3.5 py-2.5 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm font-semibold text-app-text"
               />
             </div>
           </div>
 
           {/* Indian Typical Vehicle Presets */}
-          <div className="space-y-1.5 pt-1 border-t border-gray-50">
-            <span className="text-[10px] font-bold text-gray-450 uppercase tracking-widest block">Typical Indian Vehicles</span>
-            <div className="flex flex-wrap gap-2">
+          <div className="space-y-1.5 pt-2 border-t border-app-border">
+            <span className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest block">Typical Indian Vehicles</span>
+            <div className="flex flex-col gap-1.5 pt-0.5">
               <button
                 type="button"
                 onClick={() => handlePreset(100, 101.5, 55)}
-                className="px-2.5 py-1.5 rounded-lg border border-gray-200 hover:border-orange-200 hover:bg-orange-50/20 text-xs text-gray-600 hover:text-orange-700 transition-all font-medium cursor-pointer"
+                className="w-full text-left px-3 py-2 rounded-lg border border-app-border hover:border-orange-500/20 hover:bg-orange-500/5 text-xs text-app-text-secondary hover:text-orange-500 transition-all font-semibold cursor-pointer"
               >
                 🏍️ Commuter Bike / Scooty (55 km/L)
               </button>
               <button
                 type="button"
                 onClick={() => handlePreset(100, 101.5, 18)}
-                className="px-2.5 py-1.5 rounded-lg border border-gray-200 hover:border-orange-200 hover:bg-orange-50/20 text-xs text-gray-600 hover:text-orange-700 transition-all font-medium cursor-pointer"
+                className="w-full text-left px-3 py-2 rounded-lg border border-app-border hover:border-orange-500/20 hover:bg-orange-500/5 text-xs text-app-text-secondary hover:text-orange-500 transition-all font-semibold cursor-pointer"
               >
                 🚗 Hatchback / Sedan (18 km/L)
               </button>
               <button
                 type="button"
                 onClick={() => handlePreset(100, 101.5, 12)}
-                className="px-2.5 py-1.5 rounded-lg border border-gray-200 hover:border-orange-200 hover:bg-orange-50/20 text-xs text-gray-600 hover:text-orange-700 transition-all font-medium cursor-pointer"
+                className="w-full text-left px-3 py-2 rounded-lg border border-app-border hover:border-orange-500/20 hover:bg-orange-500/5 text-xs text-app-text-secondary hover:text-orange-500 transition-all font-semibold cursor-pointer"
               >
                 🚙 Family SUV / MPV (12 km/L)
               </button>
@@ -199,19 +199,19 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
         </div>
 
         {/* Right Side: Outputs */}
-        <div className="flex flex-col justify-between bg-white p-6 rounded-2xl border border-gray-100 space-y-6">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h3 className="font-semibold text-gray-800 text-lg flex items-center gap-2">
-              <Flame className="w-5 h-5 text-orange-600" />
+        <div className="flex flex-col justify-between bg-app-card p-6 rounded-2xl border border-app-border shadow-xs space-y-6">
+          <div className="flex items-center justify-between border-b border-app-border pb-3 select-none">
+            <h3 className="font-semibold text-app-text text-normal flex items-center gap-2">
+              <Flame className="w-5 h-5 text-orange-500" />
               Expenditure Estimates
             </h3>
             <button
               onClick={handleSave}
               className={cn(
-                "px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs",
+                "px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs",
                 isSaved
-                  ? "bg-orange-100 text-orange-850 border border-orange-200"
-                  : "bg-orange-500 text-white hover:bg-orange-600 active:scale-95"
+                  ? "bg-orange-500/10 text-orange-500 border border-orange-500/30"
+                  : "bg-orange-500 text-white dark:text-zinc-950 hover:bg-orange-600 active:scale-95"
               )}
             >
               <Save className="w-3.5 h-3.5" />
@@ -220,40 +220,40 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-gray-50/35 border border-gray-100 rounded-xl space-y-1">
-              <span className="text-[10px] uppercase font-bold text-gray-400">Total Fuel Needed</span>
-              <p className="text-lg font-bold text-gray-800 font-sans">{fuelNeeded.toFixed(2)} {volumeUnit}</p>
+            <div className="p-4 bg-app-bg border border-app-border rounded-xl space-y-1">
+              <span className="text-[10px] uppercase font-bold text-app-text-muted">Total Fuel Needed</span>
+              <p className="text-md font-extrabold text-app-text font-sans">{fuelNeeded.toFixed(2)} {volumeUnit}</p>
             </div>
-            <div className="p-4 bg-orange-50/20 border border-orange-50 rounded-xl space-y-1">
-              <span className="text-[10px] uppercase font-bold text-orange-600">Total Travel Cost</span>
-              <p className="text-lg font-bold text-orange-700 font-sans">{formatCurrency(totalCost, currency)}</p>
+            <div className="p-4 bg-orange-500/5 border border-orange-500/10 dark:border-orange-500/20 rounded-xl space-y-1">
+              <span className="text-[10px] uppercase font-bold text-orange-500">Total Travel Cost</span>
+              <p className="text-md font-extrabold text-orange-600 dark:text-orange-400 font-sans">{formatCurrency(totalCost, currency)}</p>
             </div>
-            <div className="p-4 bg-emerald-50/20 border border-emerald-50 rounded-xl space-y-1">
-              <span className="text-[10px] uppercase font-bold text-emerald-600">Running Cost ({distanceUnit})</span>
-              <p className="text-lg font-bold text-emerald-700 font-sans">{formatCurrency(costPerUnit, currency)}/km</p>
+            <div className="p-4 bg-emerald-500/5 border border-emerald-500/10 dark:border-emerald-500/20 rounded-xl space-y-1">
+              <span className="text-[10px] uppercase font-bold text-emerald-500">Running Cost ({distanceUnit})</span>
+              <p className="text-md font-extrabold text-emerald-600 dark:text-emerald-400 font-sans">{formatCurrency(costPerUnit, currency)}/km</p>
             </div>
-            <div className="p-4 bg-red-50/20 border border-red-50 rounded-xl space-y-1">
-              <span className="text-[10px] uppercase font-bold text-red-650 flex items-center gap-1">
+            <div className="p-4 bg-red-500/5 border border-red-500/10 dark:border-red-555/20 rounded-xl space-y-1">
+              <span className="text-[10px] uppercase font-bold text-red-500 flex items-center gap-1">
                 <ShieldAlert className="w-3.5 h-3.5" /> Carbon Weight
               </span>
-              <p className="text-lg font-bold text-red-700 font-sans">{co2Emissions.toFixed(1)} kg CO2</p>
+              <p className="text-md font-extrabold text-red-600 dark:text-red-400 font-sans">{co2Emissions.toFixed(1)} kg CO2</p>
             </div>
           </div>
 
           {/* Projected Commute bar charts */}
           <div className="space-y-4 pt-1">
-            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Projected Commute Budgets</h4>
+            <h4 className="text-xs font-bold text-app-text-muted uppercase tracking-wider select-none">Projected Commute Budgets</h4>
 
             <div className="space-y-2.5 text-xs font-semibold">
               {/* Daily */}
               <div className="space-y-1">
-                <div className="flex justify-between font-bold text-gray-600">
+                <div className="flex justify-between font-bold text-app-text-secondary select-none">
                   <span>Daily Commute (1 day)</span>
-                  <span className="font-extrabold text-gray-800">{formatCurrency(dailyCost, currency)}</span>
+                  <span className="font-extrabold text-app-text">{formatCurrency(dailyCost, currency)}</span>
                 </div>
-                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                <div className="w-full bg-app-bg h-2 rounded-full overflow-hidden select-none">
                   <div
-                    className="bg-orange-550 h-full rounded-full transition-all duration-300"
+                    className="bg-orange-500 h-full rounded-full transition-all duration-300"
                     style={{ width: `${Math.max(4, (dailyCost / annualCost) * 1000)}%` }}
                   ></div>
                 </div>
@@ -261,11 +261,11 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
 
               {/* Weekly */}
               <div className="space-y-1">
-                <div className="flex justify-between font-bold text-gray-600">
+                <div className="flex justify-between font-bold text-app-text-secondary select-none">
                   <span>Weekly Commute (5 days)</span>
-                  <span className="font-extrabold text-gray-800">{formatCurrency(weeklyCost, currency)}</span>
+                  <span className="font-extrabold text-app-text">{formatCurrency(weeklyCost, currency)}</span>
                 </div>
-                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                <div className="w-full bg-app-bg h-2 rounded-full overflow-hidden select-none">
                   <div
                     className="bg-amber-500 h-full rounded-full transition-all duration-300"
                     style={{ width: `${Math.max(4, (weeklyCost / annualCost) * 100)}%` }}
@@ -275,11 +275,11 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
 
               {/* Monthly */}
               <div className="space-y-1">
-                <div className="flex justify-between font-bold text-gray-600">
+                <div className="flex justify-between font-bold text-app-text-secondary select-none">
                   <span>Monthly Commute (22 days)</span>
-                  <span className="font-extrabold text-gray-800">{formatCurrency(monthlyCost, currency)}</span>
+                  <span className="font-extrabold text-app-text">{formatCurrency(monthlyCost, currency)}</span>
                 </div>
-                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                <div className="w-full bg-app-bg h-2 rounded-full overflow-hidden select-none">
                   <div
                     className="bg-yellow-500 h-full rounded-full transition-all duration-300"
                     style={{ width: `${Math.max(4, (monthlyCost / annualCost) * 100)}%` }}
@@ -289,13 +289,13 @@ export default function FuelCalc({ currency = '₹', onSaveHistory }: FuelCalcPr
 
               {/* Annual */}
               <div className="space-y-1">
-                <div className="flex justify-between font-bold text-indigo-900 border-t border-gray-150 pt-2 bg-indigo-50/10 px-2 rounded-lg py-1">
-                  <span className="flex items-center gap-1">Annual Commute Budget (260 Days)</span>
-                  <span className="text-sm font-extrabold">{formatCurrency(annualCost, currency)}</span>
+                <div className="flex justify-between font-bold text-app-text border-t border-app-border pt-3 bg-app-bg/40 px-2 rounded-lg py-1.5 select-none">
+                  <span className="flex items-center gap-1 font-semibold text-app-text-secondary">Annual Commute Budget (260 Days)</span>
+                  <span className="text-sm font-extrabold text-app-text">{formatCurrency(annualCost, currency)}</span>
                 </div>
-                <div className="w-full bg-gray-150 h-3 rounded-full overflow-hidden">
+                <div className="w-full bg-app-bg h-3 rounded-full overflow-hidden select-none border border-app-border/40">
                   <div
-                    className="bg-indigo-650 h-full rounded-full transition-all duration-300"
+                    className="bg-indigo-500 h-full rounded-full transition-all duration-300"
                     style={{ width: `${annualPercent}%` }}
                   ></div>
                 </div>

@@ -6,10 +6,42 @@
   --font-display: "Outfit", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Vibrant Palette theme colors */
-  --color-brand-primary: #3A5BFF;
-  --color-brand-secondary: #6C63FF;
-  --color-brand-accent: #3A5BFF;
-  --color-brand-bg: #F5F7FB;
+  /* Vibrant Palette theme colors mapped to custom CSS variables */
+  --color-brand-primary: var(--app-accent);
+  --color-brand-secondary: var(--app-accent-hover);
+  --color-brand-accent: var(--app-accent);
+  --color-brand-bg: var(--app-bg);
+
+  /* Dynamic Custom Theme Tokens */
+  --color-app-bg: var(--app-bg);
+  --color-app-card: var(--app-card);
+  --color-app-text: var(--app-text);
+  --color-app-text-secondary: var(--app-text-secondary);
+  --color-app-text-muted: var(--app-text-muted);
+  --color-app-accent: var(--app-accent);
+  --color-app-border: var(--app-border);
 }
+
+:root {
+  --app-bg: #F8FAFC;
+  --app-card: #FFFFFF;
+  --app-text: #0F172A;
+  --app-text-secondary: #475569;
+  --app-text-muted: #94A3B8;
+  --app-accent: #4F46E5;
+  --app-accent-hover: #4338CA;
+  --app-border: #E2E8F0;
+}
+
+.dark {
+  --app-bg: #0D0D0D;
+  --app-card: #1C1C1E;
+  --app-text: #FFFFFF;
+  --app-text-secondary: #D1D5DB;
+  --app-text-muted: #9CA3AF;
+  --app-accent: #FACC15;
+  --app-accent-hover: #EAB308;
+  --app-border: #2A2A2A;
+}
+
 

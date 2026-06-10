@@ -25,7 +25,11 @@ export default function HistoryTab({
   // Filter list
   const filteredHistory = history.filter((item) => {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || item.type === filterType;
+    const matchesType = filterType === 'all' 
+      ? true 
+      : filterType === 'precious-metals'
+        ? (item.type === 'gold' || item.type === 'silver')
+        : item.type === filterType;
     return matchesSearch && matchesType;
   });
 
@@ -47,42 +51,41 @@ export default function HistoryTab({
 
   const getBorderColor = (type: CalculatorType) => {
     switch (type) {
-      case 'simple': return 'border-emerald-100 hover:border-emerald-300';
-      case 'compound': return 'border-purple-100 hover:border-purple-300';
-      case 'fuel': return 'border-orange-100 hover:border-orange-300';
-      case 'gold': return 'border-amber-100 hover:border-amber-300';
-      case 'silver': return 'border-slate-100 hover:border-slate-350';
-      case 'estate': return 'border-indigo-100 hover:border-indigo-300';
-      default: return 'border-gray-100 hover:border-gray-300';
+      case 'simple': return 'border-emerald-100 dark:border-emerald-950/50 hover:border-emerald-300 dark:hover:border-emerald-800';
+      case 'compound': return 'border-purple-100 dark:border-purple-950/50 hover:border-purple-300 dark:hover:border-purple-800';
+      case 'fuel': return 'border-orange-100 dark:border-orange-950/50 hover:border-orange-300 dark:hover:border-orange-850';
+      case 'gold': return 'border-amber-100 dark:border-amber-950/50 hover:border-amber-300 dark:hover:border-amber-800';
+      case 'silver': return 'border-slate-100 dark:border-slate-800 hover:border-slate-350 dark:hover:border-slate-700';
+      case 'estate': return 'border-indigo-100 dark:border-indigo-950/50 hover:border-indigo-300 dark:hover:border-indigo-800';
+      default: return 'border-app-border hover:border-app-accent/40';
     }
   };
 
   return (
     <div className="space-y-5">
       {/* Search & Filter Header bar */}
-      <div className="flex flex-col sm:flex-row gap-3 bg-white p-4 rounded-2xl border border-gray-100">
+      <div className="flex flex-col sm:flex-row gap-3 bg-app-card p-4 rounded-2xl border border-app-border shadow-xs">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-3.5" />
+          <Search className="w-4 h-4 text-app-text-muted absolute left-3 top-3.5" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search calculations..."
-            className="w-full pl-9 pr-4 py-2 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-xs font-semibold"
+            className="w-full pl-9 pr-4 py-2 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-app-accent/20 focus:border-app-accent text-xs font-semibold text-app-text"
           />
         </div>
 
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          className="bg-gray-50/50 border border-gray-200 rounded-xl px-3.5 py-2 text-xs font-bold text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 cursor-pointer"
+          className="bg-app-bg border border-app-border rounded-xl px-3.5 py-2 text-xs font-bold text-app-text-secondary focus:outline-none focus:ring-2 focus:ring-app-accent/20 focus:border-app-accent cursor-pointer"
         >
           <option value="all">All Categories</option>
           <option value="simple">Simple Interest</option>
           <option value="compound">Compound Growth</option>
           <option value="fuel">Fuel Mileage</option>
-          <option value="gold">Gold Tracker</option>
-          <option value="silver">Silver Tracker</option>
+          <option value="precious-metals">Precious Metals</option>
           <option value="estate">Real Estate</option>
         </select>
 
@@ -93,7 +96,7 @@ export default function HistoryTab({
                 onClearAll();
               }
             }}
-            className="text-rose-500 hover:bg-rose-50 hover:text-rose-700 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border border-transparent hover:border-rose-100 cursor-pointer flex items-center justify-center gap-1"
+            className="text-rose-500 hover:bg-rose-500/10 hover:text-rose-600 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border border-app-border hover:border-rose-500/30 cursor-pointer flex items-center justify-center gap-1"
           >
             <Trash2 className="w-4 h-4" />
             Clear Log
@@ -103,13 +106,13 @@ export default function HistoryTab({
 
       {/* Empty State */}
       {filteredHistory.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center max-w-sm mx-auto space-y-4">
-          <div className="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center mx-auto text-slate-400 border border-gray-100">
+        <div className="bg-app-card rounded-2xl border border-app-border p-12 text-center max-w-sm mx-auto space-y-4">
+          <div className="w-16 h-16 rounded-full bg-app-bg flex items-center justify-center mx-auto text-app-text-muted border border-app-border">
             <BarChart3 className="w-8 h-8" />
           </div>
           <div className="space-y-1">
-            <h4 className="font-bold text-gray-800 text-md">No computations found</h4>
-            <p className="text-xs text-gray-400 leading-relaxed">
+            <h4 className="font-bold text-app-text text-md">No computations found</h4>
+            <p className="text-xs text-app-text-secondary leading-relaxed">
               When you perform calculations, click "Save Calculation" to record them dynamically here for future reference.
             </p>
           </div>
@@ -126,22 +129,22 @@ export default function HistoryTab({
               <div
                 key={item.id}
                 className={cn(
-                  "bg-white border rounded-2xl overflow-hidden transition-all duration-200 shadow-3xs",
+                  "bg-app-card border rounded-2xl overflow-hidden transition-all duration-200 shadow-3xs",
                   borderG
                 )}
               >
                 {/* Accordion clickable header */}
                 <div
                   onClick={() => toggleExpand(item.id)}
-                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50/20"
+                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-app-bg/30"
                 >
                   <div className="flex items-center gap-3">
-                    <span className={cn("px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider", textBg)}>
-                      {item.type}
+                    <span className={cn("px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider shadow-4xs shrink-0", textBg)}>
+                      {item.type === 'gold' || item.type === 'silver' ? 'precious metals' : item.type}
                     </span>
                     <div>
-                      <h4 className="text-sm font-extrabold text-gray-800">{item.title}</h4>
-                      <p className="text-[10px] text-gray-400 font-medium flex items-center gap-1 mt-0.5">
+                      <h4 className="text-sm font-extrabold text-app-text">{item.title}</h4>
+                      <p className="text-[10px] text-app-text-muted font-medium flex items-center gap-1 mt-0.5">
                         <Calendar className="w-3 h-3" />
                         {formatDate(item.date)}
                       </p>
@@ -152,7 +155,7 @@ export default function HistoryTab({
                     {/* Launch parameter back into workspace */}
                     <button
                       onClick={() => onRestore(item)}
-                      className="p-2 text-indigo-650 hover:bg-indigo-50 rounded-xl transition-all font-semibold text-xs flex items-center gap-1 cursor-pointer"
+                      className="p-2 text-app-accent hover:bg-app-accent/10 rounded-xl transition-all font-bold text-xs flex items-center gap-1 cursor-pointer"
                       title="Load this simulation into current workspace"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
@@ -162,14 +165,14 @@ export default function HistoryTab({
                     {/* Delete item */}
                     <button
                       onClick={() => onDeleteItem(item.id)}
-                      className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all cursor-pointer"
+                      className="p-2 text-app-text-muted hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer"
                       title="Delete entry"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
 
                     {/* Collapse icon */}
-                    <div className="p-1 text-gray-400">
+                    <div className="p-1 text-app-text-muted">
                       {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </div>
                   </div>
@@ -177,16 +180,16 @@ export default function HistoryTab({
 
                 {/* Extended Details Drawer */}
                 {isExpanded && (
-                  <div className="px-5 pb-5 pt-3 bg-slate-50/50 border-t border-gray-50 space-y-4 text-xs font-semibold">
+                  <div className="px-5 pb-5 pt-3 bg-app-bg/50 border-t border-app-border space-y-4 text-xs font-semibold">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* Param block */}
                       <div className="space-y-1.5">
-                        <h5 className="text-[10px] uppercase font-bold text-gray-450 tracking-wider">Input variables</h5>
-                        <ul className="space-y-1 divide-y divide-gray-100 text-gray-600 bg-white p-3 rounded-xl border border-gray-100">
+                        <h5 className="text-[10px] uppercase font-bold text-app-text-muted tracking-wider">Input variables</h5>
+                        <ul className="space-y-1 divide-y divide-app-border text-app-text-secondary bg-app-card p-3 rounded-xl border border-app-border">
                           {Object.entries(item.inputs).map(([key, val]) => (
                             <li key={key} className="flex justify-between py-1 first:pt-0 last:pb-0">
-                              <span className="capitalize font-medium text-gray-400">{key.replace(/([A-Z])/g, ' $1')}</span>
-                              <span className="font-extrabold text-gray-800">
+                              <span className="capitalize font-medium text-app-text-muted">{key.replace(/([A-Z])/g, ' $1')}</span>
+                              <span className="font-extrabold text-app-text">
                                 {typeof val === 'number'
                                   ? (key.toLowerCase().includes('price') || key.toLowerCase().includes('principal') || key.toLowerCase().includes('down')
                                       ? formatCurrency(val, currency)
@@ -200,12 +203,12 @@ export default function HistoryTab({
 
                       {/* Result block */}
                       <div className="space-y-1.5">
-                        <h5 className="text-[10px] uppercase font-bold text-emerald-600 tracking-wider">Computed outputs</h5>
-                        <ul className="space-y-1 divide-y divide-gray-100 text-gray-600 bg-emerald-50/20 p-3 rounded-xl border border-emerald-50">
+                        <h5 className="text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400 tracking-wider">Computed outputs</h5>
+                        <ul className="space-y-1 divide-y divide-emerald-100/30 dark:divide-emerald-950/35 text-app-text-secondary bg-emerald-500/5 dark:bg-emerald-950/10 p-3 rounded-xl border border-emerald-500/10 dark:border-emerald-950/20">
                           {Object.entries(item.outputs).map(([key, val]) => (
                             <li key={key} className="flex justify-between py-1 first:pt-0 last:pb-0">
-                              <span className="capitalize font-medium text-gray-500">{key.replace(/([A-Z])/g, ' $1')}</span>
-                              <span className="font-extrabold text-emerald-700 font-sans">
+                              <span className="capitalize font-medium text-emerald-500/80 dark:text-emerald-400/80">{key.replace(/([A-Z])/g, ' $1')}</span>
+                              <span className="font-extrabold text-emerald-600 dark:text-emerald-400 font-sans">
                                 {typeof val === 'number'
                                   ? formatCurrency(val, currency)
                                   : String(val)}

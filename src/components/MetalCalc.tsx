@@ -41,19 +41,19 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
   // Simulated Live Price feed interval matching Indian market shifts
   useEffect(() => {
     const timer = setInterval(() => {
-      const change = (Math.random() * 0.004 - 0.002); // max 0.2% change
-      const isUp = change > 0;
+      const goldChange = (Math.random() * 0.002 - 0.001); // max 0.1% change
+      const silverChange = (Math.random() * 0.003 - 0.0015); // max 0.15% change
+      const isUp = goldChange > 0;
       setTrend(isUp ? 'up' : 'down');
 
-      if (metalType === 'gold') {
-        const nextPrice = baseGoldPrice * (1 + change);
-        setBaseGoldPrice(parseFloat(nextPrice.toFixed(2)));
-        setPriceHistory((prev) => [...prev.slice(1), nextPrice]);
-      } else {
-        const nextPrice = baseSilverPrice * (1 + change);
-        setBaseSilverPrice(parseFloat(nextPrice.toFixed(2)));
-        setPriceHistory((prev) => [...prev.slice(1), nextPrice]);
-      }
+      const nextGold = baseGoldPrice * (1 + goldChange);
+      const nextSilver = baseSilverPrice * (1 + silverChange);
+
+      setBaseGoldPrice(parseFloat(nextGold.toFixed(2)));
+      setBaseSilverPrice(parseFloat(nextSilver.toFixed(2)));
+
+      const activeNext = metalType === 'gold' ? nextGold : nextSilver;
+      setPriceHistory((prev) => [...prev.slice(1), activeNext]);
     }, 5000);
 
     return () => clearInterval(timer);
@@ -142,16 +142,16 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
   }).join(' ');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in duration-200">
       {/* Selector and Live Feed Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-50 p-4 rounded-2xl border border-gray-100 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-app-bg p-4 rounded-2xl border border-app-border gap-4">
         {/* Metal toggle */}
-        <div className="flex bg-white p-1 rounded-xl shadow-xs border border-gray-100 font-semibold text-xs">
+        <div className="flex bg-app-card p-1 rounded-xl shadow-xs border border-app-border font-semibold text-xs">
           <button
             onClick={() => setMetalType('gold')}
             className={cn(
-              "px-4 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-1.5",
-              metalType === 'gold' ? "bg-amber-500 text-white shadow-xs" : "text-gray-500 hover:text-gray-800"
+              "px-4 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 font-bold",
+              metalType === 'gold' ? "bg-amber-500 text-zinc-950 shadow-xs" : "text-app-text-muted hover:text-app-text"
             )}
           >
             🟡 Gold Calculator
@@ -159,8 +159,8 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
           <button
             onClick={() => setMetalType('silver')}
             className={cn(
-              "px-4 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-1.5",
-              metalType === 'silver' ? "bg-slate-450 text-white shadow-xs" : "text-gray-500 hover:text-gray-800"
+              "px-4 py-2 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 font-bold",
+              metalType === 'silver' ? "bg-app-text-secondary text-app-card shadow-xs" : "text-app-text-muted hover:text-app-text"
             )}
           >
             ⚪ Silver Calculator
@@ -169,13 +169,13 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
 
         {/* Live Index Ticker */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 bg-white py-1.5 px-3 rounded-xl border border-gray-150 shadow-2xs">
+          <div className="flex items-center gap-1.5 bg-app-card py-1.5 px-3 rounded-xl border border-app-border shadow-2xs">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
             </span>
-            <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">LIVE MCX RATE:</span>
-            <span className="text-xs font-black font-mono text-gray-800">
+            <span className="text-[10px] uppercase font-bold text-app-text-muted tracking-wider">LIVE MCX RATE:</span>
+            <span className="text-xs font-black font-mono text-app-text">
               {formatCurrency(activeBasePrice, currency)}/g
             </span>
           </div>
@@ -194,17 +194,162 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
         </div>
       </div>
 
+      {/* Interactive Live Indian Rate Matrix */}
+      <div className="bg-app-card p-5 rounded-3xl border border-app-border shadow-3xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-app-border pb-3">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-amber-500" />
+            <div>
+              <h4 className="font-extrabold text-app-text text-sm font-display tracking-tight uppercase">
+                Live Precious Metals Matrix (India Rates)
+              </h4>
+              <p className="text-[10px] text-app-text-muted font-bold uppercase tracking-wider">
+                Updated live in INR (₹) • GST 3% Applicable Extra
+              </p>
+            </div>
+          </div>
+          <span className="text-[9px] font-black uppercase text-app-accent bg-app-accent/10 px-2.5 py-1 rounded-full border border-app-accent/20 self-start sm:self-center">
+            MCX Reference Benchmarks
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* 1. 24K Gold */}
+          <div 
+            onClick={() => {
+              setMetalType('gold');
+              setPurity(0.999);
+            }}
+            className={cn(
+              "p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group select-none",
+              metalType === 'gold' && purity === 0.999
+                ? "bg-amber-500/5 border-amber-500/40 ring-2 ring-amber-500/10 shadow-3xs" 
+                : "bg-app-bg/50 border-app-border hover:bg-app-bg hover:border-app-text-secondary/30"
+            )}
+          >
+            <div className="absolute right-2 top-2">
+              <span className={cn(
+                "w-2 h-2 rounded-full block animate-pulse",
+                trend === 'up' ? "bg-emerald-500" : "bg-rose-500"
+              )}></span>
+            </div>
+            <p className="text-[9px] font-black text-app-text-muted uppercase tracking-wider">Gold 24K (99.9% Pure)</p>
+            <p className="text-lg font-black text-app-text font-mono mt-1">
+              {formatCurrency(baseGoldPrice, currency)}/g
+            </p>
+            <div className="flex justify-between items-center text-[10px] text-app-text-muted font-bold mt-1 pt-1 border-t border-app-border">
+              <span>Tola (11.66g)</span>
+              <span className="text-app-text-secondary">{formatCurrency(baseGoldPrice * 11.6638, currency)}</span>
+            </div>
+          </div>
+
+          {/* 2. 22K Gold */}
+          <div 
+            onClick={() => {
+              setMetalType('gold');
+              setPurity(0.916);
+            }}
+            className={cn(
+              "p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group select-none",
+              metalType === 'gold' && purity === 0.916
+                ? "bg-amber-500/5 border-amber-500/40 ring-2 ring-amber-500/10 shadow-3xs" 
+                : "bg-app-bg/50 border-app-border hover:bg-app-bg hover:border-app-text-secondary/30"
+            )}
+          >
+            <div className="absolute right-2 top-2">
+              <span className={cn(
+                "w-2 h-2 rounded-full block animate-pulse",
+                trend === 'up' ? "bg-emerald-500" : "bg-rose-500"
+              )}></span>
+            </div>
+            <p className="text-[9px] font-black text-amber-500 uppercase tracking-wider">Gold 22K (91.6% Jewel)</p>
+            <p className="text-lg font-black text-app-text font-mono mt-1">
+              {formatCurrency(baseGoldPrice * 0.916, currency)}/g
+            </p>
+            <div className="flex justify-between items-center text-[10px] text-app-text-muted font-bold mt-1 pt-1 border-t border-app-border">
+              <span>Tola (11.66g)</span>
+              <span className="text-app-text-secondary">{formatCurrency(baseGoldPrice * 0.916 * 11.6638, currency)}</span>
+            </div>
+          </div>
+
+          {/* 3. 18K Gold */}
+          <div 
+            onClick={() => {
+              setMetalType('gold');
+              setPurity(0.750);
+            }}
+            className={cn(
+              "p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group select-none",
+              metalType === 'gold' && purity === 0.750
+                ? "bg-amber-500/5 border-amber-500/40 ring-2 ring-amber-500/10 shadow-3xs" 
+                : "bg-app-bg/50 border-app-border hover:bg-app-bg hover:border-app-text-secondary/30"
+            )}
+          >
+            <p className="text-[9px] font-black text-app-text-muted uppercase tracking-wider">Gold 18K (75% Standard)</p>
+            <p className="text-lg font-black text-app-text font-mono mt-1">
+              {formatCurrency(baseGoldPrice * 0.750, currency)}/g
+            </p>
+            <div className="flex justify-between items-center text-[10px] text-app-text-muted font-bold mt-1 pt-1 border-t border-app-border">
+              <span>Tola (11.66g)</span>
+              <span className="text-app-text-secondary">{formatCurrency(baseGoldPrice * 0.750 * 11.6638, currency)}</span>
+            </div>
+          </div>
+
+          {/* 4. Fine Silver */}
+          <div 
+            onClick={() => {
+              setMetalType('silver');
+              setPurity(0.999);
+            }}
+            className={cn(
+              "p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden group select-none",
+              metalType === 'silver' && purity === 0.999
+                ? "bg-app-text-secondary/5 border-app-text-secondary/40 ring-2 ring-app-text-secondary/10 shadow-3xs" 
+                : "bg-app-bg/50 border-app-border hover:bg-app-bg hover:border-app-text-secondary/30"
+            )}
+          >
+            <div className="absolute right-2 top-2">
+              <span className={cn(
+                "w-2 h-2 rounded-full block animate-pulse",
+                trend === 'up' ? "bg-emerald-500" : "bg-rose-500"
+              )}></span>
+            </div>
+            <p className="text-[9px] font-black text-indigo-500 dark:text-indigo-400 space-x-1 uppercase tracking-wider">Fine Silver (99.9%)</p>
+            <p className="text-lg font-black text-app-text font-mono mt-1">
+              {formatCurrency(baseSilverPrice, currency)}/g
+            </p>
+            <div className="flex justify-between items-center text-[10px] text-app-text-muted font-bold mt-1 pt-1 border-t border-app-border">
+              <span>Bar (100g)</span>
+              <span className="text-app-text-secondary">{formatCurrency(baseSilverPrice * 100, currency)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Dynamic silver / premium details */}
+        <div className="flex flex-wrap items-center justify-between text-[11px] text-app-text-muted font-bold bg-app-bg/50 p-2.5 rounded-xl border border-app-border px-4 gap-3 select-none">
+          <div className="flex gap-1.5 items-center">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>Sterling Silver (92.5%): <strong className="text-app-text font-mono">{formatCurrency(baseSilverPrice * 0.925, currency)}/g</strong></span>
+          </div>
+          <div className="flex gap-1.5 items-center">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            <span>Gold 14K (58.5%): <strong className="text-app-text font-mono">{formatCurrency(baseGoldPrice * 0.585, currency)}/g</strong></span>
+          </div>
+          <span className="text-app-text-muted uppercase text-[9px] tracking-wider shrink-0">Click any card above to select and calculate instantly</span>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Parameters */}
-        <div className="space-y-5 bg-white p-6 rounded-2xl border border-gray-100">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h3 className="font-semibold text-gray-800 text-base flex items-center gap-2">
+        <div className="space-y-5 bg-app-card p-6 rounded-2xl border border-app-border">
+          <div className="flex items-center justify-between border-b border-app-border pb-3 select-none">
+            <h3 className="font-semibold text-app-text text-base flex items-center gap-2">
               <Scale className="w-5 h-5 text-amber-500" />
               Weight & Purity BIS Standards
             </h3>
             <button
               onClick={handleResetDefaults}
-              className="text-gray-400 hover:text-gray-600 text-xs flex items-center gap-1 cursor-pointer font-bold"
+              className="text-app-text-muted hover:text-app-text text-xs flex items-center gap-1 cursor-pointer font-bold"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               Reset Defaults
@@ -213,15 +358,15 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
 
           {/* Weight and Unit Selection */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center text-xs">
-              <label className="font-bold text-gray-500 uppercase tracking-wider">Metal Weight ({weightUnit})</label>
-              <div className="flex bg-gray-100 p-0.5 rounded-lg text-[10px] font-bold">
+            <div className="flex justify-between items-center text-xs select-none">
+              <label className="font-bold text-app-text-secondary uppercase tracking-wider">Metal Weight ({weightUnit})</label>
+              <div className="flex bg-app-bg p-0.5 rounded-lg text-[10px] font-bold border border-app-border">
                 <button
                   type="button"
                   onClick={() => { setWeightUnit('grams'); setWeight(10); setIsSaved(false); }}
                   className={cn(
                     "px-2 py-0.5 rounded transition-all cursor-pointer",
-                    weightUnit === 'grams' ? "bg-white text-gray-800 shadow-xs" : "text-gray-500 hover:text-gray-800"
+                    weightUnit === 'grams' ? "bg-app-card text-app-text shadow-3xs" : "text-app-text-muted hover:text-app-text"
                   )}
                 >
                   Grams
@@ -231,7 +376,7 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
                   onClick={() => { setWeightUnit('tola'); setWeight(1); setIsSaved(false); }}
                   className={cn(
                     "px-2 py-0.5 rounded transition-all cursor-pointer",
-                    weightUnit === 'tola' ? "bg-white text-gray-800 shadow-xs" : "text-gray-500 hover:text-gray-800"
+                    weightUnit === 'tola' ? "bg-app-card text-app-text shadow-3xs" : "text-app-text-muted hover:text-app-text"
                   )}
                 >
                   Tola (11.66g)
@@ -241,7 +386,7 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
                   onClick={() => { setWeightUnit('sovereign'); setWeight(1); setIsSaved(false); }}
                   className={cn(
                     "px-2 py-0.5 rounded transition-all cursor-pointer",
-                    weightUnit === 'sovereign' ? "bg-white text-gray-800 shadow-xs" : "text-gray-500 hover:text-gray-800"
+                    weightUnit === 'sovereign' ? "bg-app-card text-app-text shadow-3xs" : "text-app-text-muted hover:text-app-text"
                   )}
                 >
                   Pavan (8g)
@@ -256,7 +401,7 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
                   setWeight(Math.max(0, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold"
+                className="block w-full px-3.5 py-2.5 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold text-app-text"
                 placeholder="0.00"
               />
             </div>
@@ -264,8 +409,8 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
 
           {/* Purity selector based on metal type */}
           {metalType === 'gold' ? (
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">Gold Purity (Karats)</label>
+            <div className="space-y-2 select-none">
+              <label className="text-xs font-bold text-app-text-secondary uppercase tracking-wider block">Gold Purity (Karats)</label>
               <div className="grid grid-cols-4 gap-1.5">
                 {[
                   { label: '24K (99.9%)', ratio: 0.999 },
@@ -280,8 +425,8 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
                     className={cn(
                       "py-2.5 rounded-xl text-[10px] font-bold text-center border transition-all cursor-pointer",
                       purity === item.ratio
-                        ? "bg-amber-50 text-amber-800 border-amber-300 ring-2 ring-amber-500/10"
-                        : "border-gray-200 text-gray-600 hover:bg-gray-55"
+                        ? "bg-amber-500/10 text-amber-500 border-amber-500/40 ring-2 ring-amber-500/10"
+                        : "border-app-border text-app-text-secondary hover:bg-app-bg"
                     )}
                   >
                     {item.label}
@@ -290,8 +435,8 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">Silver Purity Standards</label>
+            <div className="space-y-2 select-none">
+              <label className="text-xs font-bold text-app-text-secondary uppercase tracking-wider block">Silver Purity Standards</label>
               <div className="grid grid-cols-3 gap-1.5">
                 {[
                   { label: '99.9% Pure', ratio: 0.999 },
@@ -305,8 +450,8 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
                     className={cn(
                       "py-2.5 rounded-xl text-[10px] font-bold text-center border transition-all cursor-pointer",
                       purity === item.ratio
-                        ? "bg-slate-100 text-slate-800 border-slate-300 ring-2 ring-slate-450/10"
-                        : "border-gray-200 text-gray-600 hover:bg-gray-55"
+                        ? "bg-app-text-secondary/15 text-app-text border-app-text-secondary/40 ring-2 ring-app-text-secondary/10"
+                        : "border-app-border text-app-text-secondary hover:bg-app-bg"
                     )}
                   >
                     {item.label}
@@ -318,8 +463,8 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
 
           {/* Making Charges / wastage */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center text-xs">
-              <label className="font-bold text-gray-500 uppercase tracking-wider">Making Charges / Wastage (%)</label>
+            <div className="flex justify-between items-center text-xs select-none">
+              <label className="font-bold text-app-text-secondary uppercase tracking-wider">Making Charges / Wastage (%)</label>
             </div>
             <div className="relative rounded-xl">
               <input
@@ -332,19 +477,19 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
                   setMakingCharges(Math.max(0, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold"
+                className="block w-full px-3.5 py-2.5 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold text-app-text"
                 placeholder="0.00"
               />
               <div className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none">
-                <span className="text-gray-400 text-xs font-bold">%</span>
+                <span className="text-app-text-muted text-xs font-bold">%</span>
               </div>
             </div>
           </div>
 
           {/* GST Rate (Default is 3% for precious metals in India) */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center text-xs">
-              <label className="font-bold text-gray-500 uppercase tracking-wider">GST rate on Precious Metals (%)</label>
+            <div className="flex justify-between items-center text-xs select-none">
+              <label className="font-bold text-app-text-secondary uppercase tracking-wider">GST rate on Precious Metals (%)</label>
             </div>
             <div className="relative rounded-xl">
               <input
@@ -357,32 +502,32 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
                   setTaxRate(Math.max(0, parseFloat(e.target.value) || 0));
                   setIsSaved(false);
                 }}
-                className="block w-full px-3.5 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold"
+                className="block w-full px-3.5 py-2.5 bg-app-bg border border-app-border rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-sm font-semibold text-app-text"
                 placeholder="0.00"
               />
               <div className="absolute inset-y-0 right-3.5 flex items-center pointer-events-none">
-                <span className="text-gray-400 text-xs font-bold">%</span>
+                <span className="text-app-text-muted text-xs font-bold">%</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Outputs and Breakdown */}
-        <div className="flex flex-col justify-between bg-white p-6 rounded-2xl border border-gray-100 space-y-6">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-            <h3 className="font-semibold text-gray-800 text-lg flex items-center gap-2">
+        <div className="flex flex-col justify-between bg-app-card p-6 rounded-2xl border border-app-border space-y-6">
+          <div className="flex items-center justify-between border-b border-app-border pb-3 select-none">
+            <h3 className="font-semibold text-app-text text-lg flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-amber-500" />
               Valuation Breakdown
             </h3>
             <button
               onClick={handleSave}
               className={cn(
-                "px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs",
+                "px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-xs",
                 isSaved
-                  ? "bg-amber-100 text-amber-800 border border-amber-200"
+                  ? "bg-amber-500/10 text-amber-500 border border-amber-500/30"
                   : metalType === 'gold'
-                    ? "bg-amber-500 text-white hover:bg-amber-600 active:scale-95"
-                    : "bg-slate-600 text-white hover:bg-slate-700 active:scale-95"
+                    ? "bg-amber-500 text-zinc-950 hover:bg-amber-600 active:scale-95"
+                    : "bg-app-text-secondary text-app-card hover:opacity-90 active:scale-95"
               )}
             >
               <Save className="w-3.5 h-3.5" />
@@ -390,51 +535,51 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
             </button>
           </div>
 
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-50/10 to-amber-50/30 border border-amber-50/50 space-y-2">
-            <span className="text-[11px] uppercase font-bold tracking-widest text-amber-700">Estimated Indian Cost</span>
-            <p className="text-3xl font-black text-gray-900 font-sans">{formatCurrency(finalEstimate, currency)}</p>
-            <p className="text-xs text-gray-400">
-              Computed on MCX price of <span className="font-semibold text-gray-600">{formatCurrency(rawGramValue, currency)}/gram</span> ({purity * 100}% purity)
+          <div className="p-5 rounded-2xl bg-amber-500/5 dark:bg-amber-500/10 border border-amber-500/10 dark:border-amber-500/20 space-y-2">
+            <span className="text-[11px] uppercase font-bold tracking-widest text-amber-600 dark:text-amber-400">Estimated Indian Cost</span>
+            <p className="text-3xl font-black text-app-text font-sans">{formatCurrency(finalEstimate, currency)}</p>
+            <p className="text-xs text-app-text-muted">
+              Computed on MCX price of <span className="font-semibold text-app-text">{formatCurrency(rawGramValue, currency)}/gram</span> ({purity * 100}% purity)
             </p>
           </div>
 
-          <div className="space-y-3.5 divide-y divide-gray-50 text-xs text-gray-650">
+          <div className="space-y-3.5 divide-y divide-app-border text-xs text-app-text-secondary">
             <div className="flex justify-between items-center pb-2.5">
               <span>Raw Metal Value ({weight * multiplier} grams)</span>
-              <span className="font-bold text-gray-800">{formatCurrency(rawTotalValue, currency)}</span>
+              <span className="font-bold text-app-text">{formatCurrency(rawTotalValue, currency)}</span>
             </div>
             <div className="flex justify-between items-center pt-2.5 pb-2.5">
               <span>Making Charges / wastage ({makingCharges}%)</span>
-              <span className="font-bold text-gray-800">{formatCurrency(makingChargesValue, currency)}</span>
+              <span className="font-bold text-app-text">{formatCurrency(makingChargesValue, currency)}</span>
             </div>
             <div className="flex justify-between items-center pt-2.5 pb-2.5">
               <span>Indian GST ({taxRate}%)</span>
-              <span className="font-bold text-gray-800">{formatCurrency(taxValue, currency)}</span>
+              <span className="font-bold text-app-text">{formatCurrency(taxValue, currency)}</span>
             </div>
           </div>
 
           {/* Traditional Presets Info */}
-          <div className="space-y-1.5 pt-1 border-t border-gray-50 text-[10px] font-bold text-gray-450 uppercase">
+          <div className="space-y-1.5 pt-2 border-t border-app-border text-[10px] font-bold text-app-text-muted uppercase select-none">
             <span>Quick Weight Benchmarks</span>
             <div className="flex flex-wrap gap-2 text-xs font-semibold normal-case">
               <button
                 type="button"
                 onClick={() => handlePreset('gold', 1, 'tola', 0.916)}
-                className="px-2 py-1 rounded bg-slate-50 border border-gray-150 text-gray-600 hover:text-amber-700 hover:border-amber-200 cursor-pointer"
+                className="px-2 py-1 rounded bg-app-bg border border-app-border text-app-text-secondary hover:text-amber-500 hover:border-amber-500/30 cursor-pointer"
               >
                 1 Tola Gold (22K)
               </button>
               <button
                 type="button"
                 onClick={() => handlePreset('gold', 1, 'sovereign', 0.916)}
-                className="px-2 py-1 rounded bg-slate-50 border border-gray-150 text-gray-600 hover:text-amber-700 hover:border-amber-200 cursor-pointer"
+                className="px-2 py-1 rounded bg-app-bg border border-app-border text-app-text-secondary hover:text-amber-500 hover:border-amber-500/30 cursor-pointer"
               >
                 1 Sovereign Gold (22K)
               </button>
               <button
                 type="button"
                 onClick={() => handlePreset('silver', 100, 'grams', 0.999)}
-                className="px-2 py-1 rounded bg-slate-50 border border-gray-150 text-gray-600 hover:text-slate-800 hover:border-slate-350 cursor-pointer"
+                className="px-2 py-1 rounded bg-app-bg border border-app-border text-app-text-secondary hover:text-app-text hover:border-app-text-secondary/40 cursor-pointer"
               >
                 100g Bar Silver (Fine)
               </button>
@@ -442,8 +587,8 @@ export default function MetalCalc({ initialType, currency = '₹', onSaveHistory
           </div>
 
           {/* Quick Informational Tip */}
-          <div className="text-[11px] bg-slate-50 p-3 rounded-xl text-gray-500 flex gap-2 border border-gray-150">
-            <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+          <div className="text-[11px] bg-app-bg p-3 rounded-xl text-app-text-secondary flex gap-2 border border-app-border leading-relaxed">
+            <Info className="w-4 h-4 text-app-text-muted shrink-0 mt-0.5" />
             <p>
               Precious metal pricing fluctuates on the MCX (Multi Commodity Exchange of India). Making charges are taxable under modern Indian GST laws.
             </p>
